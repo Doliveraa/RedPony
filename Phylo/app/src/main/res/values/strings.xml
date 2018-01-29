@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Phylo</string>
+
+    <!-- Strings related to Login -->
+    <string name="login">Login</string>
+
+    <!-- Strings related to Credentials/API/Keys -->
+    <string name="title_activity_maps">Map</string>
 </resources>
