@@ -1,13 +1,13 @@
 # Astral Interface
-[addUserType(name, data)](#addUserType)
-[addUser(type, username, password, data): bool](#addUser)
-[getUser(username): dict](#getUser)
-[authUser(username, password): dict](#authUser)
-[addFileType(name, data)](#getUser)
-[addFile(type, name, location, expiration, data, username): bool](#addFile)
-[getFiles(username, location): list](#getFiles)
+[addUserType(name, data)](#addUserType)  
+[addUser(type, username, password, data): bool](#addUser)  
+[getUser(username): dict](#getUser)  
+[authUser(username, password): dict](#authUser)  
+[addFileType(name, data)](#getUser)  
+[addFile(type, name, location, expiration, data, username): bool](#addFile)  
+[getFiles(username, location): list](#getFiles)  
 
-#### addUserType
+### addUserType
 * **parameters**
   * name (string): name of user type
   * data (dict): dictionary of user data where keys are names of fields (e.g. age, sex) and values are an array: [dtype (string: int, float, string, bool), required (bool) , default]
@@ -15,13 +15,13 @@
 * **Example**
 ```javascript
 addUserType(name='student',  
-			{'name': [dtype='string', required=True],  
-			 'id': [dtype='int', required=True],  
-			 'gpa': [dtype='float', required=False, default=4.0]  
-			})  
+	{'name': [dtype='string', required=True],  
+	 'id': [dtype='int', required=True],  
+	 'gpa': [dtype='float', required=False, default=4.0]  
+	})  
 ```
 
-#### addUser
+### addUser
 * **parameters**
   * type (string): type of user to add
   * username (string): username (must be unique)
@@ -33,12 +33,12 @@ addUserType(name='student',
 * **Example**
 ```javascript  
 addUser(type='student', username='jaredraycoleman', password='1234',  
-		{'name': 'Jared',  
-		 'id': 011779753  
-		})   
+	{'name': 'Jared',  
+	 'id': 011779753  
+	})   
 ```  
 
-#### getUser
+### getUser
 * **parameters**
   * username (string): username
 * **returns**: dict of *public* user attributes
@@ -47,7 +47,7 @@ addUser(type='student', username='jaredraycoleman', password='1234',
 user = getUser('jaredraycoleman')  
 ```
 
-#### authUser
+### authUser
 * **parameters**
   * username (string): username (must be unique)
   * password (string): password (hash is stored)
@@ -57,7 +57,7 @@ user = getUser('jaredraycoleman')
 user = authUser('jaredraycoleman', '1234')  
 ```
 
-#### addFileType
+### addFileType
 * parameters
   * name (string): name of file type
   * data (dict): dictionary of file data where keys are names of fields (e.g. age, sex) and values are an array: [dtype (string: int, float, string, bool), required (bool) , default]
@@ -67,7 +67,7 @@ user = authUser('jaredraycoleman', '1234')
 addFileType(name='photo', {'path': [dtype='string', required=True]})  
 ```
 
-#### addFile
+### addFile
 * **parameters**
   * type (string): type of user to add
   * name (string): name of file
@@ -82,10 +82,10 @@ addFileType(name='photo', {'path': [dtype='string', required=True]})
 ```javascript  
 addFile(type='photo', name='toast', location='33.7760589 -118.2000163',
         expiration='02/30/2018, 'username='jaredraycoleman', 
-		{'path': 'imgs/toast.jpg'})   
+	{'path': 'imgs/toast.jpg'})   
 ```  
 
-#### getFiles 
+### getFiles 
 * **parameters**
   * username (string): username (for permissions)
   * location (string): user location for file query
