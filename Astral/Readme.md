@@ -1,11 +1,11 @@
 # Astral Interface
-[addUserType(name, data)](#addUserType)  
-[addUser(type, username, password, data): bool](#addUser)  
-[getUser(username): dict](#getUser)  
-[authUser(username, password): dict](#authUser)  
-[addFileType(name, data)](#getUser)  
-[addFile(type, name, location, expiration, data, username): bool](#addFile)  
-[getFiles(username, location): list](#getFiles)  
+[addUserType(name, data)](#addusertype)  
+[addUser(type, username, password, data): bool](#adduser)  
+[getUser(username): dict](#getuser)  
+[authUser(username, password): dict](#authuser)  
+[addFileType(name, data)](#getuser)  
+[addFile(type, name, location, expiration, data, username): bool](#addfile)  
+[getFiles(username, location): list](#getfiles)  
 
 ### addUserType
 * **parameters**
