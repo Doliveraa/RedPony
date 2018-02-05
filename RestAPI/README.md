@@ -16,6 +16,7 @@
  There will be two layers of authentication
  1. Each mobile application will be given a ```homeid``` which restricts their access to only make requests involving their own data.
  2. Each user will be given a ```userid``` this restricts their access within their respective homes 
+ 
  All requests must include a ```homeid``` and ```userid``` to enable access to any route, in the following format:
  ```https://[domain_name]/[homeid]/[userid]/ ...```
  
