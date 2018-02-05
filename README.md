@@ -18,5 +18,13 @@
  2. Each user will be given a ```userid``` this restricts their access within their respective homes 
  
  All requests must include a ```homeid``` and ```userid``` to enable access to any route, in the following format:
- ```https://[domain_name]/[homeid]/[userid]/ ...```
+ ```https://api.domain.com/[homeid]/[userid]/ ...```
  
+ ## Create a user
+ * Route: __POST__ https://api.domain.com/[homeid]/users
+ * Purpose: Create a new user
+ * Required parameters
+   * In the URL
+     * '[homeid]'
+   * In the request body
+     * 'email'
