@@ -21,5 +21,5 @@ var ast = require("astralframework");
 ```
 
 ## Documentation
-visit https://astralframework.com/docs for documentation
+visit http://astralframework.com/docs for documentation
 
