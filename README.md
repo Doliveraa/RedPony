@@ -11,13 +11,13 @@ Astral is a framework that allows developers to create file-sharing and social a
 ## Installation and Use
 To install Astral, run the following command in your terminal/command line:
 ```javascript
-npm install astral-framework
+npm install astralframework
 ```
 
 ## Use
 To use the framework in your application, use the following require statement:
 ```javascript
-var ast = require("astral-framework");
+var ast = require("astralframework");
 ```
 
 ## Documentation
