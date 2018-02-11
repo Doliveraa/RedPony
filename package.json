@@ -1,0 +1,19 @@
+{
+  "name": "astral-framework",
+  "version": "1.0.0",
+  "description": "framework for managing files with time and locations restrictions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaredraycoleman/astral-framework.git"
+  },
+  "author": "Jared Coleman <jaredraycoleman@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaredraycoleman/astral-framework/issues"
+  },
+  "homepage": "https://github.com/jaredraycoleman/astral-framework#readme"
+}
