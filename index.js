@@ -1,7 +1,7 @@
 const MONGOOSE = require('mongoose');
 const EXPRESS = require('express');
 const DB_CONFIG = require('./config/mongo');
-const ROUTER = reauire('./app/router');
+const ROUTES = require('./app/router');
 
 const app = EXPRESS();
 const port = 8080;
