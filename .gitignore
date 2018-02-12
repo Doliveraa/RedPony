@@ -39,6 +39,7 @@ UserInterfaceState.xcuserstate
 
 #node 
 node_modules/
+package-lock.json
 
 #atom
 *.tern-project
