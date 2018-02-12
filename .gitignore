@@ -34,3 +34,11 @@ $RECYCLE.BIN/
 Thumbs.db
 UserInterfaceState.xcuserstate
 
+#visual studio
+.vs/
+
+#node 
+node_modules/
+
+#atom
+*.tern-project
