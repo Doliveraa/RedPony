@@ -1,6 +1,7 @@
 
 class Astral {
-    constructor() {
+    constructor(key) {
+		this.key = key;
         console.log('Astral constructor');
     }
 
@@ -17,11 +18,11 @@ class Astral {
     }
 }
 
-/* Connects to astral API 
- * 
- * @param key connection key
- * @returns conn Astral connection to backend
+/** 
+ * Connects to astral API 
+ * @param {string} key connection key
+ * @returns {Astral} Astral connection to backend
  */
-exports.connect = function() {
-    return new Astral();
+exports.connect = function(key) {
+    return new Astral(key);
 }
