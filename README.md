@@ -2,7 +2,7 @@
 ## Table of Contents
 1. [Summary](#summary)  
 1. [Installation](#installation)
-1. [Use](#usage)
+1. [Usage](#usage)
 1. [Documentation](#documentation)
 
 ## Summary
