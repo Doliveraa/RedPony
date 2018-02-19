@@ -1,0 +1,22 @@
+
+module.exports.Astral = class 
+exports.addFileType(schema) {
+
+}
+
+exports.addFile(file) {
+
+}
+
+exports.getFiles(location, owner=null, maximum=null) {
+
+}
+
+/* Connects to astral API 
+ * 
+ * @param key connection key
+ * @returns conn Astral connection to backend
+ */
+exports.connect = function() {
+    //TODO
+}
