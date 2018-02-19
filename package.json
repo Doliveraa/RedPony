@@ -1,6 +1,6 @@
 {
   "name": "astralframework",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "framework for managing files with time and locations restrictions",
   "main": "index.js",
   "scripts": {
