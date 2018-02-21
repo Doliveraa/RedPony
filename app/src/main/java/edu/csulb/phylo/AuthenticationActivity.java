@@ -8,7 +8,13 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobile.auth.core.DefaultSignInResultHandler;
+import com.amazonaws.mobile.auth.core.IdentityManager;
+import com.amazonaws.mobile.auth.core.IdentityProvider;
+import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.regions.Regions;
 
 /**
  * Created by Danie on 1/24/2018.
@@ -16,7 +22,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 
 public class AuthenticationActivity extends Activity {
     //Constants
-    private static final String TAG = "AuthenticationActivity";
+    private static final String TAG = AuthenticationActivity.class.getSimpleName();
     public static final String START_LOGIN_ACTION ="SLA";
     //Fragments
     private LoginFragment loginFragment = new LoginFragment();
@@ -42,13 +48,35 @@ public class AuthenticationActivity extends Activity {
         //Activity was started for user login flow
         if(action.equals(START_LOGIN_ACTION)) {
             ClientConfiguration clientConfiguration = new ClientConfiguration();
+            final String IDENTITY_POOL_ID = getResources().getString(R.string.cognito_identity_id);
+            CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
+                    this,
+                    IDENTITY_POOL_ID,
+                    Regions.US_WEST_2
+                    );
+            final IdentityManager identityManager = new IdentityManager(
+                    this,
+                    cognitoCachingCredentialsProvider,
+                    clientConfiguration
+            );
+            IdentityManager.setDefaultIdentityManager(identityManager);
+            IdentityManager.getDefaultIdentityManager().login(
+                    this,
+                    new DefaultSignInResultHandler() {
+                        @Override
+                        public void onSuccess(Activity callingActivity, IdentityProvider provider) {
+                            Log.d(TAG, "DefaultSignInResultHandler -> onSuccess: User logged in as: " +
+                            IdentityManager.getDefaultIdentityManager().getCachedUserID());
+                            //Send the user to the main activity
+                        }
 
-            //Read from text file and create variables with needed information
-            //TODO: Create variables here -------------------------
-            String clientID = null;
+                        @Override
+                        public boolean onCancel(Activity callingActivity) {
+                            return false;
+                        }
+                    }
+            );
 
-            //-----------------------------------------------------
-            //Create a CognitoUserPool object to refer to your user pool
 
             return;
         }

@@ -7,6 +7,12 @@
     <!-- Strings related to Credentials/API/Keys -->
     <string name="title_activity_maps">Map</string>
 
+    <!-- Amazon Cognito Strings -->
+    <string name="application_client_id">2i70spao0n9g96l0p9nnvr7vai</string>
+    <string name="application_client_secret">if5m46528rujdga5dekvkv49e4tmcc8pleuvrjpds1mrijql5tv</string>
+    <string name="cognito_pool_id">us-west-2_BP5U5Kzft</string>
+    <string name="cognito_identity_id">us-west-2:c3a2e69e-5cf1-4e08-a26e-5e985e4373f6</string>
+    <string name="cognito_pool_arn">arn:aws:cognito-idp:us-west-2:589913346854:userpool/us-west-2_BP5U5Kzft</string>
     <!-- Facebook Strings -->
     <string name="facebook_app_id">1956864414640879</string>
     <string name="fb_login_protocol_scheme">fb1956864414640879</string>
