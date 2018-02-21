@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+
 /**
  * Created by Danie on 1/24/2018.
  */
@@ -14,7 +17,7 @@ import android.util.Log;
 public class AuthenticationActivity extends Activity {
     //Constants
     private static final String TAG = "AuthenticationActivity";
-    public static final String USER_LOGIN_ACTION = "ula";
+    public static final String START_LOGIN_ACTION ="SLA";
     //Fragments
     private LoginFragment loginFragment = new LoginFragment();
 
@@ -22,23 +25,36 @@ public class AuthenticationActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_authentication);
 
         //Check why this activity was started
-        activityStartReason(getIntent().getAction());
-
+        beginActivityFlow(getIntent().getAction());
     }
 
-    private void activityStartReason(String action) {
+    /**
+     * Gets the reason why the activity was started and begins the respective activity flow
+     *
+     * @param action Determines the flow of the activity
+     *
+     */
+    private void beginActivityFlow(String action) {
         Log.d(TAG, "activityStartReason : " + action);
 
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        //If no action is specified, login screen is the default
-        if(action == Intent.ACTION_MAIN || action.equals(USER_LOGIN_ACTION)) {
-            //Begin Transaction
-            fragmentTransaction.add(R.id.user_authentication_container, loginFragment);
+        //Activity was started for user login flow
+        if(action.equals(START_LOGIN_ACTION)) {
+            ClientConfiguration clientConfiguration = new ClientConfiguration();
+
+            //Read from text file and create variables with needed information
+            //TODO: Create variables here -------------------------
+            String clientID = null;
+
+            //-----------------------------------------------------
+            //Create a CognitoUserPool object to refer to your user pool
+
+            return;
         }
 
-        fragmentTransaction.commit();
+        switch(action) {
+
+        }
     }
 }

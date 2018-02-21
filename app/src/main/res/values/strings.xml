@@ -6,4 +6,8 @@
 
     <!-- Strings related to Credentials/API/Keys -->
     <string name="title_activity_maps">Map</string>
+
+    <!-- Facebook Strings -->
+    <string name="facebook_app_id">1956864414640879</string>
+    <string name="fb_login_protocol_scheme">fb1956864414640879</string>
 </resources>
