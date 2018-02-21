@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Phylo.iml" filepath="$PROJECT_DIR$/Phylo.iml" />
+      <module fileurl="file://C:\Users\vietl\OneDrive\Desktop\Red Pony\phylo\Phylo.iml" filepath="C:\Users\vietl\OneDrive\Desktop\Red Pony\phylo\Phylo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\vietl\OneDrive\Desktop\Red Pony\phylo\app\app.iml" filepath="C:\Users\vietl\OneDrive\Desktop\Red Pony\phylo\app\app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/phylo.iml" filepath="$PROJECT_DIR$/phylo.iml" />
     </modules>
   </component>
 </project>
