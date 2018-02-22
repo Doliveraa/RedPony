@@ -57,3 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
+#visual studio
+.vs/
+#atom
+*.tern-project
