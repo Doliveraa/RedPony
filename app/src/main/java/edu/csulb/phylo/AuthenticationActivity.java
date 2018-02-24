@@ -12,6 +12,8 @@ import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobile.auth.core.DefaultSignInResultHandler;
 import com.amazonaws.mobile.auth.core.IdentityManager;
 import com.amazonaws.mobile.auth.core.IdentityProvider;
+import com.amazonaws.mobile.auth.ui.AuthUIConfiguration;
+import com.amazonaws.mobile.auth.ui.SignInActivity;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.regions.Regions;
@@ -66,18 +68,26 @@ public class AuthenticationActivity extends Activity {
                         @Override
                         public void onSuccess(Activity callingActivity, IdentityProvider provider) {
                             Log.d(TAG, "DefaultSignInResultHandler -> onSuccess: User logged in as: " +
-                            IdentityManager.getDefaultIdentityManager().getCachedUserID());
+                                    IdentityManager.getDefaultIdentityManager().getCachedUserID());
                             //Send the user to the main activity
+                            Intent startMainActivityIntent = new Intent(AuthenticationActivity.this, MainActivityContainer.class);
+                            startMainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(startMainActivityIntent);
+                            finish();
                         }
 
                         @Override
                         public boolean onCancel(Activity callingActivity) {
+                            Log.d(TAG, "DefaultSignInResultHandler -> onCancel: User has canceled");
                             return false;
                         }
                     }
             );
 
-
+            AuthUIConfiguration uiConfig = new AuthUIConfiguration.Builder()
+                    .userPools(true)
+                    .build();
+            SignInActivity.startSignInActivity(this, uiConfig);
             return;
         }
 
