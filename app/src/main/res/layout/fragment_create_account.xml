@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/EditTextTheme"
+    android:background="@color/create_account_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp">
+
+            <EditText
+                android:id="@+id/first_name_edit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="7"
+                android:hint="@string/first_name"
+                android:inputType="textPersonName|textNoSuggestions" />
+
+            <EditText
+                android:id="@+id/last_name_edit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="8"
+                android:hint="@string/last_name"
+                android:inputType="textPersonName|textNoSuggestions" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/email_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress|textNoSuggestions" />
+
+        <EditText
+            android:id="@+id/password_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:hint="@string/password"
+            android:inputType="textPassword|textNoSuggestions" />
+
+        <TextView
+            android:id="@+id/invalid_password_guide_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@android:drawable/editbox_background"
+            android:backgroundTint="@android:color/transparent"
+            android:clickable="false"
+            android:text="@string/incorrect_password_format"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/confirm_password_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:hint="@string/confirm_password"
+            android:inputType="textPassword|textNoSuggestions" />
+
+        <Button
+            android:id="@+id/create_account_button"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/create_account"
+            android:background="@android:color/transparent"
+            android:textColor="@color/gray"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp">
+        <ProgressBar
+            android:id="@+id/create_account_progress_bar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:indeterminate="true"
+            android:indeterminateDrawable="@drawable/progress"
+            android:visibility="gone" />
+    </RelativeLayout>
+</FrameLayout>

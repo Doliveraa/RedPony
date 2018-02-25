@@ -8,4 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="LoginTheme" parent="android:Theme.Holo.Light.NoActionBar">
+        <item name="android:editTextBackground">@null</item>
+    </style>
+
+    <style name="EditTextTheme" parent="android:Theme.Holo.Light.NoActionBar">
+        <item name="android:editTextBackground">@android:drawable/editbox_background</item>
+        <item name="android:textSize">20sp</item>
+    </style>
 </resources>
