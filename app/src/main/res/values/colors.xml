@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#11719e</color>
+    <color name="colorPrimaryDark">#616a6b</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="create_account_background">#e0e0e0</color>
+    <color name="gray">#8e8e8e</color>
+    <color name="black">#000</color>
 </resources>

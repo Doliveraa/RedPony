@@ -36,6 +36,10 @@
             android:theme="@style/Theme.AppCompat.NoActionBar">
 
         </activity>
+        <activity android:name=".MainActivityContainer"
+            android:screenOrientation="portrait">
+
+        </activity>
 
         <meta-data android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>

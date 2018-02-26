@@ -3,17 +3,41 @@
 
     <!-- Strings related to Login -->
     <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_new_account">Create Account</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="or_sign_in_with">Or Sign in With</string>
+
+    <!-- Strings related to Create Account -->
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="create_account">Create account</string>
+    <string name="invalid_confirm_password">Passwords do not equal.</string>
+    <string name="email_already_exists">Email already exists.</string>
+    <string name="incorrect_email_format">This email is not valid</string>
+    <string name="incorrect_password_format">Password minimum 8 characters (a&#8211;z, A&#8211;Z, 0&#8211;9)</string>
+
+    <!-- String related to Code Verification -->
+    <string name="verify_code_hint">Received Code</string>
+    <string name="verify_code_text">Please enter the code that you have received</string>
+
 
     <!-- Strings related to Credentials/API/Keys -->
     <string name="title_activity_maps">Map</string>
 
     <!-- Amazon Cognito Strings -->
-    <string name="application_client_id">2i70spao0n9g96l0p9nnvr7vai</string>
-    <string name="application_client_secret">if5m46528rujdga5dekvkv49e4tmcc8pleuvrjpds1mrijql5tv</string>
-    <string name="cognito_pool_id">us-west-2_BP5U5Kzft</string>
+    <string name="application_client_id">3ccjmr6r112jnlnsmneo15bi3r</string>
+    <string name="application_client_secret">19578hkj8b192k9ap2kopq24175ps6i3e460p61nhb52dfsjadvd</string>
+    <string name="cognito_pool_id">us-west-2_uQNGu6gEa</string>
     <string name="cognito_identity_id">us-west-2:c3a2e69e-5cf1-4e08-a26e-5e985e4373f6</string>
-    <string name="cognito_pool_arn">arn:aws:cognito-idp:us-west-2:589913346854:userpool/us-west-2_BP5U5Kzft</string>
+    <string name="cognito_pool_arn">arn:aws:cognito-idp:us-west-2:589913346854:userpool/us-west-2_uQNGu6gEa</string>
     <!-- Facebook Strings -->
     <string name="facebook_app_id">1956864414640879</string>
     <string name="fb_login_protocol_scheme">fb1956864414640879</string>
+
+    <!-- General Strings -->
+    <string name="confirm_text">Confirm</string>
 </resources>

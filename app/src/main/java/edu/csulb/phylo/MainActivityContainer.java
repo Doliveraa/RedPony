@@ -26,12 +26,12 @@ public class MainActivityContainer extends AppCompatActivity{
                     switch (item.getItemId()) {
                         case R.id.change_views:
                             //go to change_view fragment
-                            selectedFragment = HomeFragment.newInstance();
+                            selectedFragment = ChangeFragment.newInstance();
                             break;
 
                         case R.id.upload_files:
                             //go to upload_files fragment
-                            selectedFragment = HomeFragment.newInstance();
+                            selectedFragment = UploadFragment.newInstance();
                             break;
 
                         case R.id.home_lobby:
@@ -40,12 +40,12 @@ public class MainActivityContainer extends AppCompatActivity{
 
                         case R.id.website_user:
                             //go to website user
-                            selectedFragment = HomeFragment.newInstance();
+                            selectedFragment = WebsiteFragment.newInstance();
                             break;
 
                         case R.id.user_account:
                             //go to user account
-                            selectedFragment = HomeFragment.newInstance();
+                            selectedFragment = UserFragment.newInstance();
                             break;
 
                     }
