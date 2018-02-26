@@ -41,6 +41,7 @@ function isLocation (lat, lon) {
 			&& lat <= 90 && lon >= -180 && lon <= 180);
 }
 
+//dtypes mapped to checking functions
 const dtypes = {
 	'string': isString,
 	'bool': isBoolean,
@@ -67,6 +68,12 @@ class Astral {
         console.log('Adding file type');
     }
     
+    /**
+     * Confirms File Type
+     * @param {string} type type of file
+     * @param {Object} data file data
+     * @returns {boolean} true if file matches type, false if not
+     */ 
     confirmType(type, data) {
 		//get type schema from database, if it doesn't exist return false
 		
@@ -74,8 +81,15 @@ class Astral {
 		var schema = {
 			'name': 'image',
 			'data': {
-				'path': {'isRequired':true, 'dtype':'string'},
-				'caption': {'isRequired':false, 'default':'N/A', 'dtype':'string'}
+				'path': {
+					'isRequired':true, 
+					'dtype':'string'
+				},
+				'caption': {
+					'isRequired':false, 
+					'default':'N/A', 
+					'dtype':'string'
+				}
 			}
 		}
 		
@@ -99,9 +113,13 @@ class Astral {
 		for (var key in data) {
 			if (schema.data[key].dtype in dtypes) {
 				var check = dtypes[schema.data[key].dtype]
-				if (!check(data[key])) return false;
+				if (!check(data[key])) {
+					return false;
+				}
 			} else {
-				if (!this.confirmType(data[key].dtype, data[key])) return false;
+				if (!this.confirmType(data[key].dtype, data[key])) {
+					return false;
+				}
 			}
 		}
 		
@@ -110,7 +128,12 @@ class Astral {
 
 	/**
 	 * Adds a file
-	 * @param {File} f file
+	 * @param {string} name file name
+	 * @param {string} type file type
+	 * @param {number} lat latitude (file location)
+	 * @param {number} lon longitude (file location)
+	 * @param {string} expiration file expiration date/time
+	 * @param {Object} file data
 	 */
     addFile(name, type, lat, lon, expiration, data) {
 		expiration = moment(expiration);
@@ -138,6 +161,7 @@ class Astral {
 	 * @param {number} [50] maximum number of files to get
 	 */
     getFiles(location, owner=null, maximum=50) {
+		//TODO: get files
         console.log('getting files at %s', location);
     }
 }
