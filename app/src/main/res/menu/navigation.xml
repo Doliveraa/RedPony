@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/change_views"
+        android:title="Switch"/>
+
+    <item
+        android:id="@+id/upload_files"
+        android:title="Upload"/>
+
+    <item
+        android:id="@+id/home_lobby"
+        android:title="Home"/>
+
+    <item
+        android:id="@+id/website_user"
+        android:title="Website"/>
+
+    <item
+        android:id="@+id/user_account"
+        android:title="Profile"/>
+
+</menu>
