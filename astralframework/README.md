@@ -37,7 +37,106 @@ visit <http://astralframework.com/docs> for html documentation
 
 ##### Table of Contents
 
+-   [isString](#isstring)
+-   [isBoolean](#isboolean)
+-   [isNumber](#isnumber)
+-   [isLocation](#islocation)
+-   [addFileType](#addfiletype)
+-   [confirmType](#confirmtype)
+-   [addFile](#addfile)
+-   [getFiles](#getfiles)
 -   [connect](#connect)
+
+#### isString
+
+Checks if value is a string
+
+**Parameters**
+
+-   `value` **[undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)** value to check
+-   `true` **bool** if value is a string, false if not
+
+#### isBoolean
+
+Checks if value is a boolean
+
+**Parameters**
+
+-   `value` **[undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)** value to check
+-   `true` **bool** if value is a boolean, false if not
+
+#### isNumber
+
+Checks if value is a number
+
+**Parameters**
+
+-   `value` **[undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)** value to check
+-   `true` **bool** if value is a number, false if not
+
+#### isLocation
+
+Checks if value is a valid location
+
+**Parameters**
+
+-   `lat` **[undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)** latitude
+-   `lon` **[undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)** longitude
+-   `true` **bool** if value is a valid location, false if not
+
+#### 
+
+Astral class
+
+**Parameters**
+
+-   `key` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** application key
+
+#### addFileType
+
+Adds a file type
+
+**Parameters**
+
+-   `f`  
+-   `ft` **FileType** file type
+
+#### confirmType
+
+Confirms File Type
+
+**Parameters**
+
+-   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** type of file
+-   `data` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)** file data
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true if file matches type, false if not
+
+#### addFile
+
+Adds a file
+
+**Parameters**
+
+-   `name` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** file name
+-   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** file type
+-   `lat` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** latitude (file location)
+-   `lon` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** longitude (file location)
+-   `expiration` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** file expiration date/time
+-   `data`  
+-   `file` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)** data
+
+#### getFiles
+
+Get files, given restrictions
+
+**Parameters**
+
+-   `location` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** location restriction
+-   `owner`   (optional, default `null`)
+-   `maximum`   (optional, default `50`)
+-   `null` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** owner userid of file owner
+-   `50` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** maximum number of files to get
 
 #### connect
 
