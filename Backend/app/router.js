@@ -1,13 +1,16 @@
 const USER = require('./schemas/user');
 const FILE = require('./schemas/file');
-let router;
+const MIDDLEWARE = require('./middleware');
 
+let router;
 const routing = function routing(express_router) {
     router = express_router;
 
     router.route('/').get(function (req, res) {
         res.json({ message: 'welcome to the rest api' });
     });
+
+
 
     //get a user using userid and homeid
     router.route('/:homeid/users/:userid').get(function (req, res) {
@@ -17,17 +20,13 @@ const routing = function routing(express_router) {
     });
 
     //create a user
-    router.route('/:homeid/users').post(function (req, res) {
-        var user = new USER();
-        user.userid = req.body.userid;
-        user.homeid = req.params.homeid;
-
-        user.save(function (error) {
-            if (err)
-                res.send(error);
-
-            res.json({ message: 'User created' });
-        });
+    router.route('/users/:homeid').post(function (req, res) {
+      console.log('Router: create user ');
+      console.log(req.params.homeid);
+      console.log(req.body.userid);
+      MIDDLEWARE.createUser(req, res)
+        .then(result => res.json(result))
+        .catch(error => {console.log(error); res.json(error)});
     });
 
     //create a file
