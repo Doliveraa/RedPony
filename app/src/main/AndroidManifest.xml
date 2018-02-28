@@ -37,7 +37,8 @@
 
         </activity>
         <activity android:name=".MainActivityContainer"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
 
         </activity>
 

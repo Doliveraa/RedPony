@@ -60,6 +60,7 @@ public class MainActivityContainer extends AppCompatActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //set content view
+        setContentView(R.layout.main_activity_container);
         //create bottom navigation bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.home_lobby);
