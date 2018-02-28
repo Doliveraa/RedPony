@@ -21,6 +21,7 @@ import com.google.android.gms.common.SignInButton;
 public class LoginFragment extends Fragment
     implements View.OnClickListener{
     //Views
+    private Button debuggerButton;
     private Button normalLoginButton;
     private SignInButton googleLoginButton;
     private ImageButton facebookLoginButton;
@@ -46,6 +47,7 @@ public class LoginFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
 
         //Initialize all of the views
+        debuggerButton = getActivity().findViewById(R.id.button_debugger);
         normalLoginButton = getActivity().findViewById(R.id.button_normal_login);
         facebookLoginButton = getActivity().findViewById(R.id.facebook_login_button);
         googleLoginButton = getActivity().findViewById(R.id.google_login_button);
@@ -71,6 +73,10 @@ public class LoginFragment extends Fragment
             break;
             case R.id.forgot_password_text: {
                 onChangeFragmentListener.buttonClicked(AuthenticationActivity.AuthFragmentType.FORGOT_PASSWORD);
+            }
+            break;
+            case R.id.button_debugger: {
+                onChangeFragmentListener.buttonClicked(AuthenticationActivity.AuthFragmentType.MOVE_TO_ACTIVITY);
             }
             break;
         }

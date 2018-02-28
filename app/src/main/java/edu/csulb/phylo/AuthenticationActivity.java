@@ -2,6 +2,7 @@ package edu.csulb.phylo;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -35,7 +36,8 @@ public class AuthenticationActivity extends Activity
         LOGIN,
         FORGOT_PASSWORD,
         CREATE_ACCOUNT,
-        VERIFY_CODE
+        VERIFY_CODE,
+        MOVE_TO_ACTIVITY
     }
     //Fragments
     private LoginFragment loginFragment;
@@ -144,6 +146,11 @@ public class AuthenticationActivity extends Activity
                 fragmentTransaction.replace(R.id.user_authentication_container, verifyCodeFragment);
             }
             break;
+            case MOVE_TO_ACTIVITY: {
+                Intent intent = new Intent(this, MainActivityContainer.class);
+                startActivity(intent);
+                finish();
+            }
         }
         if(setTransition) {
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
