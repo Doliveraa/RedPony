@@ -109,6 +109,12 @@ public class VerifyCodeFragment extends Fragment
         this.cognitoUser = cognitoUser;
     }
 
+    /**
+     * Displays a pop up message to the activity
+     *
+     * @param message
+     *
+     */
     private void printToast(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
