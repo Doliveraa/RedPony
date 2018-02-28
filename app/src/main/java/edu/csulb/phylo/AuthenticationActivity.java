@@ -119,6 +119,12 @@ public class AuthenticationActivity extends Activity
                 beginFragment(AuthFragmentType.CREATE_ACCOUNT, true, true);
             }
             break;
+            case MOVE_TO_ACTIVITY: {
+                Intent intent = new Intent(this, MainActivityContainer.class);
+                startActivity(intent);
+                finish();
+            }
+            break;
         }
     }
 
@@ -146,11 +152,6 @@ public class AuthenticationActivity extends Activity
                 fragmentTransaction.replace(R.id.user_authentication_container, verifyCodeFragment);
             }
             break;
-            case MOVE_TO_ACTIVITY: {
-                Intent intent = new Intent(this, MainActivityContainer.class);
-                startActivity(intent);
-                finish();
-            }
         }
         if(setTransition) {
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
