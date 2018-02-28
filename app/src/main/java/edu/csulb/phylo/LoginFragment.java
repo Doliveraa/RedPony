@@ -62,6 +62,7 @@ public class LoginFragment extends Fragment
         googleLoginButton.setOnClickListener(this);
         createAccountText.setOnClickListener(this);
         forgotPasswordText.setOnClickListener(this);
+        debuggerButton.setOnClickListener(this);
     }
 
     @Override
