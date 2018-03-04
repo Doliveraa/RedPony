@@ -22,8 +22,9 @@ const routing = function routing(express_router) {
     //create a user
     router.route('/users/:homeid').post(function (req, res) {
       console.log('Router: create user ');
-      console.log(req.params.homeid);
-      console.log(req.body.userid);
+      console.log(req.body);
+      //console.log(req.params.homeid);
+      //console.log(req.body.userid);
       MIDDLEWARE.createUser(req, res)
         .then(result => res.json(result))
         .catch(error => {console.log(error); res.json(error)});

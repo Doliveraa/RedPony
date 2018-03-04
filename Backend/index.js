@@ -12,6 +12,7 @@ app.use(BODY_PARSER.urlencoded({
   limit: '10000kb',
   extended: true,
 }));
+app.use(BODY_PARSER.json());
 
 const ROUTER = ROUTES(EXPRESS.Router());
 app.use('/',ROUTER);

@@ -7,6 +7,7 @@ const createUser = function createUser(_request, _response){
     console.log('Middleware: createUser');
     const errorMsg = [];
 
+	console.log(_request.body);
     if ( !HELPER.valid(_request.params.homeid)) {errorMsg.push('missing homeid')}
     if ( !HELPER.valid(_request.body.userid)) {errorMsg.push('missing userid')}
 
