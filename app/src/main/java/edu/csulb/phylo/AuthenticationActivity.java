@@ -24,21 +24,23 @@ import com.amazonaws.regions.Regions;
  */
 
 public class AuthenticationActivity extends Activity
-    implements LoginFragment.OnChangeFragmentListener{
+        implements LoginFragment.OnChangeFragmentListener {
     //Constants
     private static final String TAG = AuthenticationActivity.class.getSimpleName();
-    public static final String START_LOGIN_ACTION ="SLA";
+    public static final String START_LOGIN_ACTION = "SLA";
     //Variables
     private CognitoUserPool cognitoUserPool;
     private CognitoUser cognitoUser;
+
     //Enumerator
-    public enum AuthFragmentType{
+    public enum AuthFragmentType {
         LOGIN,
         FORGOT_PASSWORD,
         CREATE_ACCOUNT,
         VERIFY_CODE,
         MOVE_TO_ACTIVITY
     }
+
     //Fragments
     private LoginFragment loginFragment;
     private CreateAccountFragment createAccountFragment;
@@ -74,6 +76,7 @@ public class AuthenticationActivity extends Activity
             public void onAccountCreated(CognitoUser receivedCognitoUser) {
                 cognitoUser = receivedCognitoUser;
             }
+
             @Override
             public void onCreateAccountFinished() {
                 beginFragment(AuthFragmentType.VERIFY_CODE, true, true);
@@ -87,18 +90,35 @@ public class AuthenticationActivity extends Activity
     }
 
     /**
+     * Activity has received a result back
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //If LoginFragment is currently executing the Login Flow, send the activity result
+        //back to the LoginFragment
+        if (loginFragment.isSigningIn()) {
+            loginFragment.onActivityResult(requestCode, resultCode, data);
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    /**
      * Gets the reason why the activity was started and begins the respective activity flow
      *
      * @param action Determines the flow of the activity
-     *
      */
     private void beginActivityFlow(String action) {
         Log.d(TAG, "activityStartReason : " + action);
 
-        switch(action) {
+        switch (action) {
             case START_LOGIN_ACTION: {
                 Log.d(TAG, "beginActivityFlow: Start login fragment");
-                beginFragment(AuthFragmentType.LOGIN, false, false );
+                beginFragment(AuthFragmentType.LOGIN, false, false);
             }
             break;
         }
@@ -109,11 +129,10 @@ public class AuthenticationActivity extends Activity
      * switch fragments
      *
      * @param fragmentType The type of fragment that needs to be opened
-     *
      */
     @Override
     public void buttonClicked(AuthFragmentType fragmentType) {
-        switch(fragmentType) {
+        switch (fragmentType) {
             case CREATE_ACCOUNT: {
                 Log.d(TAG, "buttonClicked: Start create account fragment");
                 beginFragment(AuthFragmentType.CREATE_ACCOUNT, true, true);
@@ -131,19 +150,18 @@ public class AuthenticationActivity extends Activity
     /**
      * Helper method that replaces the current fragment with one that is specified
      *
-     * @param fragmentType The fragment that should now appear
-     * @param setTransition If the fragment should be transitioned in to the viewer
+     * @param fragmentType   The fragment that should now appear
+     * @param setTransition  If the fragment should be transitioned in to the viewer
      * @param addToBackStack If the fragment should be added to the activity's back-stack
-     *
      */
-    private void beginFragment(AuthFragmentType fragmentType, boolean setTransition ,boolean addToBackStack) {
+    private void beginFragment(AuthFragmentType fragmentType, boolean setTransition, boolean addToBackStack) {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        switch(fragmentType) {
+        switch (fragmentType) {
             case LOGIN: {
                 fragmentTransaction.replace(R.id.user_authentication_container, loginFragment);
             }
             break;
-            case CREATE_ACCOUNT:{
+            case CREATE_ACCOUNT: {
                 fragmentTransaction.replace(R.id.user_authentication_container, createAccountFragment);
             }
             break;
@@ -153,7 +171,7 @@ public class AuthenticationActivity extends Activity
             }
             break;
         }
-        if(setTransition) {
+        if (setTransition) {
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         }
         if (addToBackStack) {
