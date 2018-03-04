@@ -1,3 +1,4 @@
+var http = require('http');
 var moment = require('moment');
 moment().format();
 
@@ -139,7 +140,7 @@ class Astral {
 		expiration = moment(expiration);
 		if (isString(name) && isString(type) && isLocation(lon, lat) 
 			&& expiration.isValid() && this.confirmType(type, data)) {
-				var file = {
+			var file = {
 				'name': name,
 				'type': type,
 				'location': {'lon': lon, 'lat': lat},
@@ -164,6 +165,39 @@ class Astral {
 		//TODO: get files
         console.log('getting files at %s', location);
     }
+    
+    _send(method, path, body) {
+		var options = {
+			hostname: 'localhost',
+			port: 8080,
+			path: path,
+			method: method,
+			headers: {
+				'homeid': 1978,
+				'Content-Type': 'application/json'
+			}
+		};
+		
+		var req = http.request(options, function (res) {
+			console.log("Sending request");
+		});
+		
+		req.on('error', function(e) {
+			console.log("Request error: " + e.message);
+		});
+		
+		req.write(JSON.stringify(body));
+		req.end();
+	}
+    
+    addUser(userid, password) {
+		var body = {
+			userid: userid,
+			password: password
+		};
+		
+		this._send('POST', '/users/:homeid', body);
+	}
 }
 
 /** 
