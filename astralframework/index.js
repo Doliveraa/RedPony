@@ -166,6 +166,12 @@ class Astral {
         console.log('getting files at %s', location);
     }
     
+    /**
+     * Sends a request to Astral Backend
+     * @param method {string} http method (GET, POST, PUT, etc.)
+     * @param path {string} astral backend route
+     * @param body {Object} body of request (JSON)
+     */
     _send(method, path, body) {
 		var options = {
 			hostname: 'localhost',
@@ -190,6 +196,11 @@ class Astral {
 		req.end();
 	}
     
+    /**
+     * Adds a user
+     * @param {string} user userid
+     * @param {string} user password
+     */
     addUser(userid, password) {
 		var body = {
 			userid: userid,
