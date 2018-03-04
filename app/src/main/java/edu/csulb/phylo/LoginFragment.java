@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -16,6 +18,30 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AnonymousAWSCredentials;
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.exceptions.CognitoInternalErrorException;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoAccessToken;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoIdToken;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoRefreshToken;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.util.CognitoSecretHash;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.util.CognitoServiceConstants;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cognitoidentityprovider.AmazonCognitoIdentityProvider;
+import com.amazonaws.services.cognitoidentityprovider.AmazonCognitoIdentityProviderClient;
+import com.amazonaws.services.cognitoidentityprovider.model.AuthFlowType;
+import com.amazonaws.services.cognitoidentityprovider.model.AuthenticationResultType;
+import com.amazonaws.services.cognitoidentityprovider.model.InitiateAuthRequest;
+import com.amazonaws.services.cognitoidentityprovider.model.InitiateAuthResult;
+import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
+import com.amazonaws.services.cognitoidentityprovider.model.RespondToAuthChallengeRequest;
+import com.amazonaws.services.cognitoidentityprovider.model.RespondToAuthChallengeResult;
+import com.amazonaws.util.Base64;
+import com.amazonaws.util.StringUtils;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -23,6 +49,7 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -33,7 +60,18 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.Task;
 
+import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by Danie on 1/24/2018.
@@ -47,6 +85,7 @@ public class LoginFragment extends Fragment
     //Login Variables
     private GoogleSignInClient googleSignInClient;
     private CallbackManager callbackManager;
+    private CognitoUserPool cognitoUserPool;
     private boolean isSigningIn;
     //Views
     private Button debuggerButton;
@@ -59,15 +98,180 @@ public class LoginFragment extends Fragment
     private TextView forgotPasswordText;
     //Other Variables
     private AlertDialog alertDialog;
-
+    //Enumerators
+    private enum AuthType{
+        GOOGLE,
+        FACEBOOK,
+        NORMAL
+    }
     //Interface
     public interface OnChangeFragmentListener {
         void buttonClicked(AuthenticationActivity.AuthFragmentType fragmentType);
     }
-
     private OnChangeFragmentListener onChangeFragmentListener;
 
+    private class CognitoHelper extends AsyncTask<String, Void, Void> {
+        private AuthHelper authHelper = new AuthHelper(cognitoUserPool.getUserPoolId());
+        private final int SRP_RADIX = 16;
+        private String usernameInternal;
+        private String secretHash;
+        private AlertDialog alertDialog;
+        private boolean loginSuccess;
 
+        @Override
+        protected Void doInBackground(String... strings) {
+            String userEmail = strings[0];
+            String userPassword = strings[1];
+
+            Log.d(TAG, "CognitoHelper: doInBackground");
+            Log.d(TAG, "CognitoHelper: email: " + userEmail);
+            Log.d(TAG, "CognitoHelper: password" + userPassword);
+
+            //Creates a authentication request to start authentication with user SRP verification
+            final InitiateAuthRequest initiateAuthRequest = new InitiateAuthRequest();
+            initiateAuthRequest.setAuthFlow(AuthFlowType.USER_SRP_AUTH);
+            initiateAuthRequest.setClientId(cognitoUserPool.getClientId());
+            initiateAuthRequest.addAuthParametersEntry(CognitoServiceConstants.AUTH_PARAM_SECRET_HASH,
+                    CognitoSecretHash.getSecretHash(
+                            userEmail,
+                            getString(R.string.application_client_id),
+                            getString(R.string.application_client_secret)
+                    ));
+            initiateAuthRequest.addAuthParametersEntry(CognitoServiceConstants.AUTH_PARAM_SRP_A,
+                    authHelper.getA().toString(SRP_RADIX));
+            initiateAuthRequest.addAuthParametersEntry(CognitoServiceConstants.AUTH_PARAM_USERNAME,
+                    userEmail);
+
+            //Build Client
+            ClientConfiguration clientConfiguration = new ClientConfiguration();
+            AmazonCognitoIdentityProvider cipClient = new AmazonCognitoIdentityProviderClient(
+                    new AnonymousAWSCredentials(),
+                    clientConfiguration
+            );
+            cipClient.setRegion(Region.getRegion(Regions.US_EAST_1));
+
+            //Start the user authentication with user password verification
+            final InitiateAuthResult initiateAuthResult = cipClient.initiateAuth(initiateAuthRequest);
+            if (CognitoServiceConstants.CHLG_TYPE_USER_PASSWORD_VERIFIER.equals(
+                    initiateAuthResult.getChallengeName())) {
+                final String userIdForSRP = initiateAuthResult.getChallengeParameters()
+                        .get(CognitoServiceConstants.CHLG_PARAM_USER_ID_FOR_SRP);
+                usernameInternal = initiateAuthResult.getChallengeParameters()
+                        .get(CognitoServiceConstants.CHLG_PARAM_USERNAME);
+                secretHash = CognitoSecretHash.getSecretHash(
+                        usernameInternal,
+                        getString(R.string.application_client_id),
+                        getString(R.string.application_client_secret)
+                );
+                final BigInteger srpB = new BigInteger(initiateAuthResult.getChallengeParameters()
+                        .get(CognitoServiceConstants.CHLG_PARAM_SRP_B), 16);
+                if (srpB.mod(authHelper.N).equals(BigInteger.ZERO)) {
+                    throw new CognitoInternalErrorException("SRP error, B cannot be zero");
+                }
+                final BigInteger salt = new BigInteger(initiateAuthResult.getChallengeParameters()
+                        .get(CognitoServiceConstants.CHLG_PARAM_SALT), 16);
+                final byte[] key = authHelper.getPasswordAuthenticationKey(userIdForSRP,
+                        userPassword, srpB, salt);
+
+                final Date timestamp = new Date();
+                byte[] hmac;
+                String dateString;
+                try {
+                    final Mac mac = Mac.getInstance("HmacSHA256");
+                    final SecretKey keySpec = new SecretKeySpec(key, "HmacSHA256");
+                    mac.init(keySpec);
+                    mac.update(cognitoUserPool.getUserPoolId().split("_", 2)[1].getBytes(StringUtils.UTF8));
+                    mac.update(userIdForSRP.getBytes(StringUtils.UTF8));
+                    final byte[] secretBlock = Base64.decode(initiateAuthResult.getChallengeParameters()
+                            .get(CognitoServiceConstants.CHLG_PARAM_SECRET_BLOCK));
+                    mac.update(secretBlock);
+                    final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+                            "EEE MMM d HH:mm:ss z yyyy", Locale.US
+                    );
+                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    dateString = simpleDateFormat.format(timestamp);
+                    final byte[] dateBytes = dateString.getBytes(StringUtils.UTF8);
+
+                    hmac = mac.doFinal(dateBytes);
+                } catch (final Exception exception) {
+                    throw new CognitoInternalErrorException("SRP error", exception);
+                }
+
+                try {
+                    final Map<String, String> srpAuthResponses = new HashMap<>();
+                    srpAuthResponses.put(CognitoServiceConstants.CHLG_RESP_PASSWORD_CLAIM_SECRET_BLOCK,
+                            initiateAuthResult.getChallengeParameters().get(CognitoServiceConstants.CHLG_PARAM_SECRET_BLOCK));
+                    srpAuthResponses.put(CognitoServiceConstants.CHLG_RESP_PASSWORD_CLAIM_SIGNATURE,
+                            new String(Base64.encode(hmac), StringUtils.UTF8));
+                    srpAuthResponses.put(CognitoServiceConstants.CHLG_RESP_TIMESTAMP, dateString);
+                    srpAuthResponses.put(CognitoServiceConstants.CHLG_RESP_USERNAME, usernameInternal);
+                    srpAuthResponses.put(CognitoServiceConstants.CHLG_RESP_SECRET_HASH, secretHash);
+
+                    final RespondToAuthChallengeRequest authChallengeRequest = new RespondToAuthChallengeRequest();
+                    authChallengeRequest.setChallengeName(initiateAuthResult.getChallengeName());
+                    authChallengeRequest.setClientId(getString(R.string.application_client_id));
+                    authChallengeRequest.setSession(initiateAuthResult.getSession());
+                    authChallengeRequest.setChallengeResponses(srpAuthResponses);
+                    final RespondToAuthChallengeResult challenge = cipClient.respondToAuthChallenge(authChallengeRequest);
+
+                    AuthenticationResultType authenticationResultType = challenge.getAuthenticationResult();
+                    CognitoIdToken cognitoIdToken = new CognitoIdToken(authenticationResultType.getIdToken());
+                    CognitoAccessToken cognitoAccessToken = new CognitoAccessToken(authenticationResultType.getAccessToken());
+                    CognitoRefreshToken cognitoRefreshToken = new CognitoRefreshToken(authenticationResultType.getRefreshToken());
+                    CognitoUserSession cognitoUserSession = new CognitoUserSession(cognitoIdToken, cognitoAccessToken, cognitoRefreshToken);
+
+                    String idToken = cognitoUserSession.getIdToken().getJWTToken();
+
+                    startMainActivity();
+                    Log.d(TAG, "onPostExecute : Login Successful");
+                } catch (NotAuthorizedException notAuthorizedException) {
+                    Log.w(TAG, "Wrong password or username");
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+
+        @Override
+        protected void onCancelled(Void aVoid) {
+            super.onCancelled(aVoid);
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.d(TAG, "onPostExecute");
+            alertDialog.dismiss();
+
+            if (!loginSuccess) {
+                Log.d(TAG, "onPostExecute: Login Failure");
+                AlertDialog errorDialog = createErrorDialog("Email and Password combination not found");
+                errorDialog.show();
+            } else {
+                Log.d(TAG, "onPostExecute: Login Success");
+
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            loginSuccess = false;
+
+            alertDialog = createLoginDialog();
+            alertDialog.show();
+        }
+    }
     /**
      * Inflates the specified layout
      *
@@ -125,7 +329,7 @@ public class LoginFragment extends Fragment
             public void onSuccess(LoginResult loginResult) {
                 AccessToken accessToken = loginResult.getAccessToken();
                 Log.d(TAG, "FacebookCallback-> onSuccess: successfully logged in with " + accessToken.getUserId());
-                handleLoginToken(accessToken.getToken());
+                startMainActivity();
             }
 
             @Override
@@ -234,12 +438,8 @@ public class LoginFragment extends Fragment
     private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.d(TAG, "Signed in with " + account.getEmail());
-            handleLoginToken(account.getIdToken());
-            //Send the user to the main activity
-            Intent intent = new Intent(getActivity(), MainActivityContainer.class);
-            startActivity(intent);
-            getActivity().finish();
+            Log.d(TAG, "Signed in with " + account.getId());
+            startMainActivity();
         }catch (ApiException exception) {
             Log.w(TAG, "handleSignInResult: failed code=" + exception.getStatusCode());
             alertDialog = createErrorDialog("Google sign in error");
@@ -268,12 +468,40 @@ public class LoginFragment extends Fragment
     }
 
     /**
-     * Handles the access token after the user has logged in
+     * Creates a login dialog displaying that the application is currently logging the user in
      *
-     * @param token The token received back from the log in provider
+     * @return The created login alert dialog object
      */
-    private void handleLoginToken(String token) {
+    private AlertDialog createLoginDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setTitle("PetSit SignIn");
+        //Animate this later on
+        alertDialogBuilder.setMessage("Logging User In...");
+        alertDialogBuilder.setCancelable(false);
+        return alertDialogBuilder.create();
+    }
 
+
+    /**
+     * Starts the main activity
+     */
+    private void startMainActivity() {
+        //Dismiss the alert dialog if it is currently showing
+        if(alertDialog.isShowing()) {
+            alertDialog.dismiss();
+        }
+        Intent startMainActivityIntent = new Intent(getActivity(), MainActivityContainer.class);
+        startActivity(startMainActivityIntent);
+        getActivity().finish();
+    }
+
+    /**
+     * Sets the value to this cognito user pool
+     *
+     * @param cognitoUserPool The initialized cognito user pool to work with this activity
+     */
+    public void setCognitoUserPool(CognitoUserPool cognitoUserPool) {
+        this.cognitoUserPool = cognitoUserPool;
     }
 
 }

@@ -64,6 +64,7 @@ public class AuthenticationActivity extends Activity
         //Initialize Login Fragment
         loginFragment = new LoginFragment();
         loginFragment.setOnChangeFragmentListener(this);
+        loginFragment.setCognitoUserPool(cognitoUserPool);
 
         //Initialize Verify Code Fragment
         verifyCodeFragment = new VerifyCodeFragment();
