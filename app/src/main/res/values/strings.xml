@@ -41,4 +41,7 @@
     <string name="google_web_client_id">1058877043367-2trb7ecou4t7g9nbguop95479k3tk31t.apps.googleusercontent.com</string>
     <!-- General Strings -->
     <string name="confirm_text">Confirm</string>
+    <string name="a_tok">a_tok</string>
+    <string name="r_tok">r_tok</string>
+    <string name="i_tok">i_tok</string>
 </resources>

@@ -2,8 +2,10 @@ package edu.csulb.phylo;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Process;
@@ -88,7 +90,6 @@ public class LoginFragment extends Fragment
     private CognitoUserPool cognitoUserPool;
     private boolean isSigningIn;
     //Views
-    private Button debuggerButton;
     private Button normalLoginButton;
     private SignInButton googleLoginButton;
     private ImageButton facebookLoginButton;
@@ -98,18 +99,15 @@ public class LoginFragment extends Fragment
     private TextView forgotPasswordText;
     //Other Variables
     private AlertDialog alertDialog;
-    //Enumerators
-    private enum AuthType{
-        GOOGLE,
-        FACEBOOK,
-        NORMAL
-    }
     //Interface
     public interface OnChangeFragmentListener {
         void buttonClicked(AuthenticationActivity.AuthFragmentType fragmentType);
     }
     private OnChangeFragmentListener onChangeFragmentListener;
 
+    /**
+     * Used to communicate with the Cognito User Pool login for normal logins
+     */
     private class CognitoHelper extends AsyncTask<String, Void, Void> {
         private AuthHelper authHelper = new AuthHelper(cognitoUserPool.getUserPoolId());
         private final int SRP_RADIX = 16;
@@ -125,7 +123,7 @@ public class LoginFragment extends Fragment
 
             Log.d(TAG, "CognitoHelper: doInBackground");
             Log.d(TAG, "CognitoHelper: email: " + userEmail);
-            Log.d(TAG, "CognitoHelper: password" + userPassword);
+            Log.d(TAG, "CognitoHelper: password: " + userPassword);
 
             //Creates a authentication request to start authentication with user SRP verification
             final InitiateAuthRequest initiateAuthRequest = new InitiateAuthRequest();
@@ -148,7 +146,7 @@ public class LoginFragment extends Fragment
                     new AnonymousAWSCredentials(),
                     clientConfiguration
             );
-            cipClient.setRegion(Region.getRegion(Regions.US_EAST_1));
+            cipClient.setRegion(Region.getRegion(Regions.US_WEST_2));
 
             //Start the user authentication with user password verification
             final InitiateAuthResult initiateAuthResult = cipClient.initiateAuth(initiateAuthRequest);
@@ -220,8 +218,12 @@ public class LoginFragment extends Fragment
                     CognitoRefreshToken cognitoRefreshToken = new CognitoRefreshToken(authenticationResultType.getRefreshToken());
                     CognitoUserSession cognitoUserSession = new CognitoUserSession(cognitoIdToken, cognitoAccessToken, cognitoRefreshToken);
 
-                    String idToken = cognitoUserSession.getIdToken().getJWTToken();
-
+//                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+//                    SharedPreferences.Editor editor = sharedPreferences.edit();
+//                    editor.putString(getString(R.string.a_tok), cognitoAccessToken.getJWTToken());
+                    System.out.println(cognitoAccessToken.getJWTToken());
+                    System.out.println(cognitoIdToken.getJWTToken());
+                    System.out.println(cognitoRefreshToken.getToken());
                     startMainActivity();
                     Log.d(TAG, "onPostExecute : Login Successful");
                 } catch (NotAuthorizedException notAuthorizedException) {
@@ -267,7 +269,6 @@ public class LoginFragment extends Fragment
             super.onPreExecute();
 
             loginSuccess = false;
-
             alertDialog = createLoginDialog();
             alertDialog.show();
         }
@@ -299,7 +300,6 @@ public class LoginFragment extends Fragment
         isSigningIn = false;
 
         //Initialize all of the views
-        debuggerButton = getActivity().findViewById(R.id.button_debugger);
         normalLoginButton = getActivity().findViewById(R.id.button_normal_login);
         facebookLoginButton = getActivity().findViewById(R.id.facebook_login_button);
         googleLoginButton = getActivity().findViewById(R.id.google_login_button);
@@ -314,7 +314,6 @@ public class LoginFragment extends Fragment
         googleLoginButton.setOnClickListener(this);
         createAccountText.setOnClickListener(this);
         forgotPasswordText.setOnClickListener(this);
-        debuggerButton.setOnClickListener(this);
 
         //Initialize Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
@@ -389,11 +388,6 @@ public class LoginFragment extends Fragment
                 onChangeFragmentListener.buttonClicked(AuthenticationActivity.AuthFragmentType.FORGOT_PASSWORD);
             }
             break;
-            case R.id.button_debugger: {
-                Log.d(TAG, "onClick: debugger button clicked.");
-                onChangeFragmentListener.buttonClicked(AuthenticationActivity.AuthFragmentType.MOVE_TO_ACTIVITY);
-            }
-            break;
             case R.id.google_login_button: {
                 Log.d(TAG, "onClick: google login button clicked.");
                 isSigningIn = true;
@@ -406,6 +400,12 @@ public class LoginFragment extends Fragment
                 isSigningIn = true;
                 LoginManager.getInstance().logInWithReadPermissions(getActivity(),
                         Arrays.asList("public_profile", "email"));
+            }
+            break;
+            case R.id.button_normal_login: {
+                Log.d(TAG, "onClick: normal login button clicked.");
+                isSigningIn = true;
+                startNormalLogin();
             }
             break;
         }
@@ -481,13 +481,26 @@ public class LoginFragment extends Fragment
         return alertDialogBuilder.create();
     }
 
+    /**
+     * Begins the normal login flow
+     */
+    private void startNormalLogin() {
+        String userEmail = emailEditText.getText().toString();
+        String userPassword = passwordEditText.getText().toString();
+        if(userEmail.isEmpty() || userPassword.isEmpty()) {
+            alertDialog = createErrorDialog("Email and password fields cannot be empty");
+            return;
+        }
+        CognitoHelper cognitoHelper = new CognitoHelper();
+        cognitoHelper.execute(userEmail, userPassword);
+    }
 
     /**
      * Starts the main activity
      */
     private void startMainActivity() {
         //Dismiss the alert dialog if it is currently showing
-        if(alertDialog.isShowing()) {
+        if(alertDialog!= null && alertDialog.isShowing()) {
             alertDialog.dismiss();
         }
         Intent startMainActivityIntent = new Intent(getActivity(), MainActivityContainer.class);

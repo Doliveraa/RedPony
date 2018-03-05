@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/EditTextTheme"
-    android:background="@color/create_account_background">
+    android:background="@drawable/login_activity_gradient_background">
 
     <EditText
         android:id="@+id/edit_text_verify_code"
