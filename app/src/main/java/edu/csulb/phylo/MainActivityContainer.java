@@ -63,6 +63,7 @@ public class MainActivityContainer extends AppCompatActivity{
         setContentView(R.layout.main_activity_container);
         //create bottom navigation bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        BottomNavigationBarShiftHelp.disableShiftMode(bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.home_lobby);
         bottomNavigationView.setOnNavigationItemSelectedListener(NavItemListen);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
