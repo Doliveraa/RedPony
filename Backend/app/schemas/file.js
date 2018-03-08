@@ -4,27 +4,32 @@ const FileSchema = MONGOOSE.Schema({
   homeid: {
     required: true,
     type: String,
-    unique: true,
   },
   userid: {
     required: true,
     type: String,
-    unique: true,
   },
   name: {
     type: String,
     required: true,
   },
   location: {
-    type: String,
-    required: true,
+    type: Object,
+    x: {
+      type: String,
+      required: true,
+    },
+    y: {
+      type: String,
+      required: true,
+    }
   },
-  experation: {
+  expirationDate: {
     type: Date,
+    required: true,
   },
   data: {
-    type: String,
-    required: true,
+    type: Object,
   },
 });
 

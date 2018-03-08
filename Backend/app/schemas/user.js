@@ -1,20 +1,19 @@
 const MONGOOSE = require('mongoose');
 
-MONGOOSE.Promise = require('bluebird');
+//MONGOOSE.Promise = require('bluebird');
 
 const UserSchema = MONGOOSE.Schema({
   homeid: {
     required: true,
     type: String,
-    unique: true,
     trim: true,
   },
   userid: {
     required: true,
     type: String,
-    unique: true,
     trim: true,
   },
+  data: Object,
 
 });
 
