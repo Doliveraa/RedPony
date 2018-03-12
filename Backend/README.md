@@ -11,6 +11,7 @@
    * [Create a user](#post-user)
    * [Retrieve a user's info](#get-user)
    * [Create a file](#post-file)
+   * [Update a file](#update-file)
    * [Retrieve a users created files](#get-created-files)
    * [Retrieve files at a users location](#get-nearby-files)
 
@@ -104,6 +105,21 @@
       * Non-empty string containing alphanumeric characters
     * `[userid]`
       * Non-empty string containing alphanumeric characters, dashes, or underscores
+
+<a name="update-file"></a>
+### Update a users file
+* Route: __PUT__ https://api.domain.com/files?userid&homeid&fileid
+* Purpose: Update a users file using fileid, homeid and userid, body takes params to update
+* Required parameters
+  * URL
+    * `[homeid]`
+      * Non-empty string containing alphanumeric characters
+    * `[userid]`
+      * Non-empty string containing alphanumeric characters, dashes, or underscores
+    * `[fileid]`
+      * Non-empty string containing alphanumeric characters, dashes, or underscores 
+  * In the request body
+      * 'multiple fields depending on what the user is updating'
 
 <a name="get-nearby-files"></a>
 ### Retrieve files at a users location
