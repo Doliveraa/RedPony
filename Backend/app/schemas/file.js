@@ -15,11 +15,11 @@ const FileSchema = MONGOOSE.Schema({
   },
   location: {
     type: Object,
-    x: {
+    Longitude: {
       type: String,
       required: true,
     },
-    y: {
+    Latitude: {
       type: String,
       required: true,
     }

@@ -4,6 +4,7 @@ const FILE = require('./schemas/file');
 const UUID = require('uuid/v1');
 const MIDDLEWARE = require('./middleware');
 
+// noinspection JSAnnotator
 let router;
 const routing = function routing(express_router) {
     router = express_router;
@@ -136,6 +137,8 @@ const routing = function routing(express_router) {
         }
       });
     });
+
+
 
     //get files near a users location
     router.route('/files/nearby/:userid').get(function (req, res) {
