@@ -152,7 +152,6 @@ router.put('/users', function(req, res, next) {
     findUser(req.get('appKey'), req.get('token'), {}, function(err, user) {
         if (err) return next(err);
 
-        if (req.body.email) user.email = req.body.email;
         if (req.body.username) user.username = req.body.username;
         if (req.body.password) user.password = req.body.password;
         if (req.body.email) user.email = req.body.email;
