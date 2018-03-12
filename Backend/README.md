@@ -7,6 +7,7 @@
 3. [Users of the Rest Api](#api-users)
 4. [Authentication](#auth)
 5. [Routes](#routes)
+   * [Create a homebase](#post-homebase)
    * [Create a user](#post-user)
    * [Retrieve a user's info](#get-user)
    * [Create a file](#post-file)
@@ -41,54 +42,61 @@
 <a name="routes"></a>
  # Routes 
  
+  <a name="post-homebase"></a>
+ ## Create a homebase
+ * Route: __POST__ https://api.domain.com/homebase
+ * Purpose: Create a new homebase
+ * Required parameters
+   * Request body
+     * `appname`
+       * Non-empty string containing alphanumeric characters
+ 
  <a name="post-user"></a>
  ## Create a user
- * Route: __POST__ https://api.domain.com/[homeid]/users
+ * Route: __POST__ https://api.domain.com/users
  * Purpose: Create a new user
  * Required parameters
-   * URL
-     * `[homeid]`
-       * Non-empty string containing alphanumeric characters
    * Request body
+     * `homeid`
+       * Non-empty string containing alphanumeric characters
      * `userid`
        * Non-empty string containing alphanumeric characters, dashes and underscores
-     * `password`
-       * Non-empty string containing alphanumeric characters and special characters
  
 <a name="get-user"></a>
 ### Retrieve a user's info
-* Route: __GET__ https://api.domain.com/[homeid]/users/[userid]
+* Route: __GET__ https://api.domain.com/users?userid&homeid
 * Purpose: Get information about a user: userid,  etc
 * Required parameters
   * URL
     * `[homeid]`
       * Non-empty string containing alphanumeric characters
-    * `[username]`
+    * `[userid]`
       * Non-empty string containing alphanumeric characters, dashes, or underscore
 
 <a name="post-file"></a>
 ### Create a file
-* Route: __POST__ https://api.domain.com/[homeid]/users/[userid]/files
+* Route: __POST__ https://api.domain.com/files
 * Purpose: Create a file 
 * Required parameters
-  * URL
-    * `[homeid]`
-      * Non-empty string containing alphanumeric characters
-    * `[userid]`
-      * Non-empty string containing alphanumeric characters, dashes, or underscores
   * In the request body
+    * `homeid`
+      * Non-empty string containing alphanumeric characters
+    * `userid`
+      * Non-empty string containing alphanumeric characters, dashes, or underscores
     * `name`
       * Non-empty string containing alphanumeric characters, dashes, underscores, or whitespace    
     * `location`
-      * Non-empty string containing alphanumeric characters, dashes, underscores, or whitespace
+      * A json object consisting of fields: Longitude and Latitude
+      * For both fields: Non-empty string containing alphanumeric characters, dashes, underscores, or whitespace
     * `experation`
       * Non-negative integer representing a UNIX timestamp in __seconds__
       * Lowest value possible is 0 (January 1st, 1970, 12:00 AM UTC) 
     * `data`
+      * An optional json object field
  
 <a name="get-created-files"></a>
 ### Retrieve a users created files
-* Route: __GET__ https://api.domain.com/[homeid]/users/[userid]/files
+* Route: __GET__ https://api.domain.com/files?userid&homeid
 * Purpose: Retrieve all files created by a user 
 * Required parameters
   * URL
