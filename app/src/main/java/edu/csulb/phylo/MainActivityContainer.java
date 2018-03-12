@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -17,6 +18,7 @@ public class MainActivityContainer extends AppCompatActivity{
 
     //Variables
     //Cognito User
+    private static final String TAG = "MainActivityContainer";
     //Bottom Navigation View
     private BottomNavigationView.OnNavigationItemSelectedListener NavItemListen =
             new BottomNavigationView.OnNavigationItemSelectedListener(){
@@ -58,12 +60,15 @@ public class MainActivityContainer extends AppCompatActivity{
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         //set content view
         setContentView(R.layout.main_activity_container);
+        Log.d(TAG, "onCreate: set Content View");
         //create bottom navigation bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         BottomNavigationBarShiftHelp.disableShiftMode(bottomNavigationView);
+        Log.d(TAG, "onCreate: disable Shift mode");
         bottomNavigationView.setSelectedItemId(R.id.home_lobby);
         bottomNavigationView.setOnNavigationItemSelectedListener(NavItemListen);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

@@ -44,4 +44,8 @@
     <string name="a_tok">a_tok</string>
     <string name="r_tok">r_tok</string>
     <string name="i_tok">i_tok</string>
+
+    <!-- Strings related to Upload Fragment -->
+    <string name="comment">Comment</string>
+    <string name="file_name">File Name</string>
 </resources>

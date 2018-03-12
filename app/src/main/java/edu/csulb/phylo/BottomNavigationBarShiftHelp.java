@@ -13,6 +13,10 @@ import java.lang.reflect.Field;
 
 @SuppressLint("RestrictedApi")
 class BottomNavigationBarShiftHelp {
+    /**
+     * Helper class to stop the shift in the bottom navigation bar
+     * @param view the navigation bar view
+     */
     static void disableShiftMode(BottomNavigationView view) {
         BottomNavigationMenuView menuView = (BottomNavigationMenuView) view.getChildAt(0);
         try {
