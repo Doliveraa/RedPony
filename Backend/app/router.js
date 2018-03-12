@@ -58,6 +58,40 @@ const routing = function routing(express_router) {
       });
     });
 
+    //get a users info using homeid and userid
+    router.route('/users').get(function (req, res) {
+      console.log('Router: create user ');
+
+      HOMEBASE.findOne({ homeid: req.query.homeid },function (err, homebase) {
+        if(err) {
+          res.send(err);
+        }
+        //if homebase not found send error
+        if(!homebase) {
+          console.log('error: homeid invalid');
+          res.json({ error: 'homeid invalid' });
+        }
+        //if homebase exists create user and return success message
+        else {
+          console.log('getting user');
+          USER.findOne({ userid: req.query.userid, homeid: req.query.homeid  }, 'userid homeid data', function (err, user) {
+            if (err){
+              res.send(err);
+            }
+
+            //if user not found
+            if(!user) {
+              console.log('user not found');
+              res.json({ message: 'user does not exist in this homebase' });
+            }
+            else{
+              res.json(user);
+            }
+          });
+        }
+      });
+    });
+
     // create homebase
     router.route('/homebase').post(function (req, res) {
       console.log('Router: create homebase');
@@ -107,6 +141,7 @@ const routing = function routing(express_router) {
           file.name = req.body.name;
           file.location = req.body.location;
           file.expirationDate = new Date(req.body.expirationDate);
+          file.fileid = UUID();
 
           file.save(function (err) {
             if (err)
@@ -116,7 +151,6 @@ const routing = function routing(express_router) {
           })
         }
       });
-
     });
 
     //get a users created files using homeid and userid
@@ -138,7 +172,22 @@ const routing = function routing(express_router) {
       });
     });
 
-
+    //update a users file
+    router.route('/files').put(function (req, res) {
+      console.log('Router: updating user file');
+      var update = {};
+      for (var field in req.body) {
+        update[field] = req.body[field];
+      }
+      FILE.findOneAndUpdate({ userid: req.query.userid, homeid: req.query.homeid, req.query.fileid  }, {$set: update } function (err) {
+        if (err){
+          res.send(err);
+        }
+        else {
+          res.json({ message: 'file updated' });
+        }
+      });
+    });
 
     //get files near a users location
     router.route('/files/nearby/:userid').get(function (req, res) {
