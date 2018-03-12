@@ -107,7 +107,7 @@
 
 <a name="get-nearby-files"></a>
 ### Retrieve files at a users location
-* Route: __GET__ https://api.domain.com/[homeid]/users/[userid]/files/nearby
+* Route: __GET__ TO-DO
 * Purpose: Retrieve all files at users location
 * Required parameters
   * URL
