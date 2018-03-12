@@ -9,6 +9,10 @@ const FileSchema = MONGOOSE.Schema({
     required: true,
     type: String,
   },
+  fileid: {
+    required: true,
+    type: String,
+  },
   name: {
     type: String,
     required: true,
