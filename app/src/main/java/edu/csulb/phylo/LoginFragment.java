@@ -112,12 +112,10 @@ public class LoginFragment extends Fragment
     private TextView forgotPasswordText;
     //Other Variables
     private AlertDialog alertDialog;
-
     //Interface
     public interface OnChangeFragmentListener {
         void buttonClicked(AuthenticationActivity.AuthFragmentType fragmentType);
     }
-
     private OnChangeFragmentListener onChangeFragmentListener;
     //Listeners
     AuthenticationHandler authHandler = new AuthenticationHandler() {
@@ -409,7 +407,7 @@ public class LoginFragment extends Fragment
      * Begins the normal login flow
      */
     private void startNormalLogin() {
-        String userEmail = emailEditText.getText().toString();
+        String userEmail = emailEditText.getText().toString().toLowerCase();
         String userPassword = passwordEditText.getText().toString();
         if (userEmail.isEmpty() || userPassword.isEmpty()) {
             alertDialog = createErrorDialog("Email and password fields cannot be empty");
