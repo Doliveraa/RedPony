@@ -45,7 +45,24 @@
     <string name="r_tok">r_tok</string>
     <string name="i_tok">i_tok</string>
 
+    <!-- Strings related to User Fragment -->
+    <string name="email_address_user">Email Address</string>
+    <string name="password_user">Password</string>
+    <string name="user_files">My Files</string>
+    <string name="download_files">Downloaded Files</string>
+    <string name="settings_user">Settings</string>
+
     <!-- Strings related to Upload Fragment -->
     <string name="comment">Comment</string>
     <string name="file_name">File Name</string>
+    <string name="select_file">Select File</string>
+    <string name="upload_file">Upload</string>
+
+    <!-- Strings related to Bottom Navigation Bar - Menu -->
+    <string name="map_menu">Map</string>
+    <string name="upload_menu">Upload</string>
+    <string name="home_menu">Home</string>
+    <string name="pinned_menu">Pinned</string>
+    <string name="profile_menu">Profile</string>
+
 </resources>

@@ -14,7 +14,7 @@
         android:layout_gravity="center"
         android:layout_marginStart="50dp"
         android:layout_marginTop="82dp"
-        android:text="Email Address: "
+        android:text="@string/email_address_user"
         android:textColor="@color/white"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,37 +25,37 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="75dp"
-        android:text="My Files"
+        android:layout_marginStart="148dp"
+        android:layout_marginTop="76dp"
+        android:text="@string/user_files"
         android:textColor="@color/black"
         android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="@+id/downloaded_files"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/user_name_text_view" />
 
     <Button
         android:id="@+id/downloaded_files"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="130dp"
-        android:text="Downloaded Files"
+        android:layout_marginStart="108dp"
+        android:layout_marginTop="48dp"
+        android:text="@string/download_files"
         android:textColor="@color/black"
         android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="@id/settings"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/user_files" />
 
     <Button
         android:id="@+id/settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="70dp"
-        android:text="Settings"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="72dp"
+        android:gravity="center"
+        android:text="@string/settings_user"
         android:textColor="@color/black"
         android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/downloaded_files" />
 
 </android.support.constraint.ConstraintLayout>
