@@ -29,13 +29,7 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         //Initialize CognitoUserPool object
-        cognitoUserPool = new CognitoUserPool(
-                this,
-                getResources().getString(R.string.cognito_pool_id),
-                getResources().getString(R.string.application_client_id),
-                getResources().getString(R.string.application_client_secret),
-                Regions.US_WEST_2
-        );
+        cognitoUserPool = AuthHelper.getCognitoUserPool(this);
 
         //Check if the user has already signed in before
         if (userIsSignedIn()) {
@@ -46,8 +40,8 @@ public class SplashActivity extends Activity {
         } else {
             //Send intent to start the login activity
             Log.d(TAG, "onCreate: User is not signed in, moving to authentication activity");
-            Intent loginIntent = new Intent(this, AuthenticationActivity.class);
-            loginIntent.setAction(AuthenticationActivity.START_LOGIN_ACTION);
+            Intent loginIntent = new Intent(this, AuthenticationContainer.class);
+            loginIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
             startActivity(loginIntent);
         }
     }
@@ -62,7 +56,7 @@ public class SplashActivity extends Activity {
             GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
             Log.d(TAG, "userIsSignedIn: Google sign in: " + googleSignInAccount.getEmail());
             return true;
-        } else if (cognitoUserPool.getCurrentUser() != null) {
+        } else if (cognitoUserPool.getCurrentUser().getUserId() != null) {
             CognitoUser cognitoUser = cognitoUserPool.getCurrentUser();
             Log.d(TAG, "userIsSignedIn: Normal sign in: " + cognitoUser.getUserId());
             return true;

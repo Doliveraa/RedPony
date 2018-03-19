@@ -342,6 +342,10 @@ public class CreateAccountFragment extends Fragment
 
                 //Everything is ok, begin creating the user account
                 createUserAccount(firstName, lastName, emailAddress, password);
+
+                //Cache the user information
+                AuthHelper.cacheUserInformation(getActivity(), firstName + " " + lastName, emailAddress);
+
                 //Make the progress bar appear to show that the application is still working
                 //but is in the process of completing a task
                 progressBar.setVisibility(View.VISIBLE);

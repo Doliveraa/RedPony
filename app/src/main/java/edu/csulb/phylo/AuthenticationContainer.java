@@ -3,18 +3,10 @@ package edu.csulb.phylo;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.amazonaws.mobile.auth.facebook.FacebookButton;
-import com.amazonaws.mobile.auth.google.GoogleButton;
-import com.amazonaws.mobile.auth.ui.AuthUIConfiguration;
-import com.amazonaws.mobile.auth.ui.SignInUI;
-import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.mobile.client.AWSStartupHandler;
-import com.amazonaws.mobile.client.AWSStartupResult;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.regions.Regions;
@@ -23,10 +15,10 @@ import com.amazonaws.regions.Regions;
  * Created by Danie on 1/24/2018.
  */
 
-public class AuthenticationActivity extends Activity
+public class AuthenticationContainer extends Activity
         implements LoginFragment.OnChangeFragmentListener {
     //Constants
-    private static final String TAG = AuthenticationActivity.class.getSimpleName();
+    private static final String TAG = AuthenticationContainer.class.getSimpleName();
     public static final String START_LOGIN_ACTION = "SLA";
     //Variables
     private CognitoUserPool cognitoUserPool;
@@ -38,7 +30,6 @@ public class AuthenticationActivity extends Activity
         FORGOT_PASSWORD,
         CREATE_ACCOUNT,
         VERIFY_CODE,
-        MOVE_TO_ACTIVITY
     }
 
     //Fragments
@@ -53,13 +44,7 @@ public class AuthenticationActivity extends Activity
         setContentView(R.layout.activity_authentication);
 
         //Initialize variables
-        cognitoUserPool = new CognitoUserPool(
-                this,
-                getResources().getString(R.string.cognito_pool_id),
-                getResources().getString(R.string.application_client_id),
-                getResources().getString(R.string.application_client_secret),
-                Regions.US_WEST_2
-        );
+        cognitoUserPool = AuthHelper.getCognitoUserPool(this);
 
         //Initialize Login Fragment
         loginFragment = new LoginFragment();
@@ -174,4 +159,5 @@ public class AuthenticationActivity extends Activity
         }
         fragmentTransaction.commit();
     }
+
 }

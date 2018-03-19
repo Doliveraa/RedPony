@@ -1,14 +1,22 @@
 package edu.csulb.phylo;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.exceptions.CognitoInternalErrorException;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.util.Hkdf;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.util.StringUtils;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Map;
 
 /**
  * Created by Daniel on 1/15/2018.
@@ -16,118 +24,92 @@ import java.security.SecureRandom;
 
 public class AuthHelper {
 
-    private BigInteger a;
-    private BigInteger A;
-    private String poolName;
+    //Authentication Constants
+    public final static String COGNITO_INFO = "cognito info";
+    public final static String COGNITO_EMAIL = "cognito email";
+    public final static String COGNITO_USER_NAME = "cognito user name";
+    public final static String GOOGLE_PROVIDER  = "google";
+    public final static String FACEBOOK_PROVIDER = "facebook";
+    public final static String COGNITO_PROVIDER = "cognito";
+    //Private Authentication Constants
+    private final static String LAST_USER_CACHE = "CognitoIdentityProviderCache";
 
-    public AuthHelper(String userPoolName) {
-        do {
-            a = new BigInteger(EPHEMERAL_KEY_LENGTH, SECURE_RANDOM).mod(N);
-            A = GG.modPow(a, N);
-        } while (A.mod(N).equals(BigInteger.ZERO));
-
-        if (userPoolName.contains("_")) {
-            poolName = userPoolName.split("_", 2)[1];
-        } else {
-            poolName = userPoolName;
-        }
+    /**
+     * User should not be able to generate this class
+     */
+    private AuthHelper() {
+        throw new RuntimeException("AuthHelper should not be generated");
     }
 
-    public BigInteger geta() {
-        return a;
+    public static CognitoUserPool getCognitoUserPool(Context context) {
+        CognitoUserPool cognitoUserPool = new CognitoUserPool(
+                context,
+                context.getResources().getString(R.string.cognito_pool_id),
+                context.getResources().getString(R.string.application_client_id),
+                context.getResources().getString(R.string.application_client_secret),
+                Regions.US_WEST_2
+        );
+
+        return cognitoUserPool;
     }
 
-    public BigInteger getA() {
-        return A;
+    /**
+     * Chaches the user information if given a CognitoUserDetails object
+     *
+     * @param context The activity in which this method was called
+     *
+     * @param cognitoUserDetails The object that encapsulates the user's information
+     */
+    public static void cacheUserInformation(Context context, CognitoUserDetails cognitoUserDetails) {
+        CognitoUserAttributes cognitoUserAttributes = cognitoUserDetails.getAttributes();
+        Map<String, String> userInfo = cognitoUserAttributes.getAttributes();
+        //Store the user details inside of Shared Preferences
+        cacheUserInformation(context, userInfo.get("name"), userInfo.get("email"));
     }
 
-    private static final String HEX_N = "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1"
-            + "29024E088A67CC74020BBEA63B139B22514A08798E3404DD"
-            + "EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245"
-            + "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED"
-            + "EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3D"
-            + "C2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F"
-            + "83655D23DCA3AD961C62F356208552BB9ED529077096966D"
-            + "670C354E4ABC9804F1746C08CA18217C32905E462E36CE3B"
-            + "E39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9"
-            + "DE2BCBF6955817183995497CEA956AE515D2261898FA0510"
-            + "15728E5A8AAAC42DAD33170D04507A33A85521ABDF1CBA64"
-            + "ECFB850458DBEF0A8AEA71575D060C7DB3970F85A6E1E4C7"
-            + "ABF5AE8CDB0933D71E8C94E04A25619DCEE3D2261AD2EE6B"
-            + "F12FFA06D98A0864D87602733EC86A64521F2B18177B200C"
-            + "BBE117577A615D6C770988C0BAD946E208E24FA074E5AB31"
-            + "43DB5BFCE0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF";
-    public static final BigInteger N = new BigInteger(HEX_N, 16);
-    private static final BigInteger GG = BigInteger.valueOf(2);
-    private static final BigInteger KK;
-
-    private static final int EPHEMERAL_KEY_LENGTH = 1024;
-    private static final int DERIVED_KEY_SIZE = 16;
-    private static final String DERIVED_KEY_INFO = "Caldera Derived Key";
-
-    private static final ThreadLocal<MessageDigest> THREAD_MESSAGE_DIGEST = new ThreadLocal<MessageDigest>() {
-        @Override
-        protected MessageDigest initialValue() {
-            try {
-                return MessageDigest.getInstance("SHA-256");
-            } catch (final NoSuchAlgorithmException e) {
-                throw new CognitoInternalErrorException("Exception in authentication", e);
-            }
-        }
-    };
-
-    private static final SecureRandom SECURE_RANDOM;
-
-    static {
-        try {
-            SECURE_RANDOM = SecureRandom.getInstance("SHA1PRNG");
-
-            final MessageDigest messageDigest = THREAD_MESSAGE_DIGEST.get();
-            messageDigest.reset();
-            messageDigest.update(N.toByteArray());
-            final byte[] digest = messageDigest.digest(GG.toByteArray());
-            KK = new BigInteger(1, digest);
-        } catch (final NoSuchAlgorithmException e) {
-            throw new CognitoInternalErrorException(e.getMessage(), e);
-        }
+    /**
+     * A more general method that caches the user information based on the values that you give
+     *
+     * @param context The activity in which this activity was called
+     * @param name The name of the user
+     * @param email The email of the user
+     */
+    public static void cacheUserInformation(Context context, String name, String email) {
+        //Initialize the SharedPreferences object and choose the folder
+        SharedPreferences sharedPreferences = context.getSharedPreferences(AuthHelper.COGNITO_INFO, Context.MODE_PRIVATE);
+        SharedPreferences.Editor spEditor = sharedPreferences.edit();
+        //Store the information
+        spEditor.putString(AuthHelper.COGNITO_EMAIL, email);
+        spEditor.putString(AuthHelper.COGNITO_USER_NAME, name);
+        //Commit the changes
+        spEditor.commit();
     }
 
-    public byte[] getPasswordAuthenticationKey(String userId,
-                                               String userPassword,
-                                               BigInteger B,
-                                               BigInteger salt) {
-        // Authenticate the password
-        // u = H(A, B)
-        final MessageDigest messageDigest = THREAD_MESSAGE_DIGEST.get();
-        messageDigest.reset();
-        messageDigest.update(A.toByteArray());
-        final BigInteger u = new BigInteger(1, messageDigest.digest(B.toByteArray()));
-        if (u.equals(BigInteger.ZERO)) {
-            throw new CognitoInternalErrorException("Hash of A and B cannot be zero");
-        }
+    public static void cacheCurrentSignedInUser(Context context, String userID) {
+        //Open shared preferences folder where the last signed in user is stored
+        final SharedPreferences csiCachedTokens = context
+                .getSharedPreferences(LAST_USER_CACHE, Context.MODE_PRIVATE);
+        //Set the client id variable
+        final String clientId = context.getString(R.string.application_client_id);
+        //Create the key to input the last signed in user
+        final String csiLastUserKey = "CognitoIdentityProvider." + clientId + ".LastAuthUser";
 
-        // x = H(salt | H(poolName | userId | ":" | password))
-        messageDigest.reset();
-        messageDigest.update(poolName.getBytes(StringUtils.UTF8));
-        messageDigest.update(userId.getBytes(StringUtils.UTF8));
-        messageDigest.update(":".getBytes(StringUtils.UTF8));
-        final byte[] userIdHash = messageDigest.digest(userPassword.getBytes(StringUtils.UTF8));
+        SharedPreferences.Editor editor = csiCachedTokens.edit();
+        editor.putString(csiLastUserKey, userID);
+        editor.apply();
+    }
 
-        messageDigest.reset();
-        messageDigest.update(salt.toByteArray());
-        final BigInteger x = new BigInteger(1, messageDigest.digest(userIdHash));
-        final BigInteger s = (B.subtract(KK.multiply(GG.modPow(x, N)))
-                .modPow(a.add(u.multiply(x)), N)).mod(N);
-
-        Hkdf hkdf = null;
-        try {
-            hkdf = Hkdf.getInstance("HmacSHA256");
-        } catch (final NoSuchAlgorithmException e) {
-            throw new CognitoInternalErrorException(e.getMessage(), e);
-        }
-        hkdf.init(s.toByteArray(), u.toByteArray());
-        final byte[] key = hkdf.deriveKey(DERIVED_KEY_INFO, DERIVED_KEY_SIZE);
-        return key;
+    /**
+     * Set the current sign in provider in the shared preferences folder
+     *
+     * @param context The activity in which this method was called
+     * @param provider The sign in provider used for the user authentication
+     */
+    public static void setCurrentSignInProvider(Context context, String provider){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(User.USER_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor spEditor = sharedPreferences.edit();
+        spEditor.putString(User.USER_SIGN_IN_PROVIDER, provider);
+        spEditor.commit();
     }
 }
 

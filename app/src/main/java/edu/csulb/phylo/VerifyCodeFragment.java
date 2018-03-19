@@ -88,6 +88,10 @@ public class VerifyCodeFragment extends Fragment
                     public void onSuccess() {
                         //Verification successful
                         Log.d(TAG, "onClick-> onSuccess: Confirmation successful, sending user to main activity");
+
+                        //Set that the user has authenticated with Cognito
+                        AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
+                        AuthHelper.cacheCurrentSignedInUser(getActivity(), cognitoUser.getUserId());
                         Intent intent = new Intent(getActivity(), MainActivityContainer.class);
                         startActivity(intent);
                         getActivity().finish();
@@ -109,12 +113,6 @@ public class VerifyCodeFragment extends Fragment
         this.cognitoUser = cognitoUser;
     }
 
-    /**
-     * Displays a pop up message to the activity
-     *
-     * @param message
-     *
-     */
     private void printToast(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }

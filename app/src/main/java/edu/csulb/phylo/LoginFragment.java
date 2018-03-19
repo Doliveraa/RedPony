@@ -103,18 +103,13 @@ public class LoginFragment extends Fragment
     private CognitoUser cognitoUser;
     private boolean isSigningIn;
     //Views
-    private Button normalLoginButton;
-    private SignInButton googleLoginButton;
-    private ImageButton facebookLoginButton;
     private EditText emailEditText;
     private EditText passwordEditText;
-    private TextView createAccountText;
-    private TextView forgotPasswordText;
     //Other Variables
     private AlertDialog alertDialog;
     //Interface
     public interface OnChangeFragmentListener {
-        void buttonClicked(AuthenticationActivity.AuthFragmentType fragmentType);
+        void buttonClicked(AuthenticationContainer.AuthFragmentType fragmentType);
     }
     private OnChangeFragmentListener onChangeFragmentListener;
     //Listeners
@@ -122,51 +117,71 @@ public class LoginFragment extends Fragment
         @Override
         public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {
             Log.d(TAG, "AuthenticationHandler->onSuccess: Logged in with :" + cognitoUser.getUserId());
-            //Dismiss the alert dialog
-            alertDialog.dismiss();
 
-            //Start the main activity
-            startMainActivity();
+            //Retrieve user information and store it inside of SharedPreferences
+            cognitoUser.getDetailsInBackground(new GetDetailsHandler() {
+                @Override
+                public void onSuccess(CognitoUserDetails cognitoUserDetails) {
+                    Log.d(TAG, "getDetailsInBackground-> onSuccess: Retrieving Cognito information");
+
+                    //Cache the user's information to be used for a quicker reference later
+                    AuthHelper.cacheUserInformation(getActivity(), cognitoUserDetails);
+
+                    //Dismiss the alert dialog
+                    alertDialog.dismiss();
+                    //Add that the current sign in provider is Cognito
+                    AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
+
+                    //Start the main activity
+                    startMainActivity();
+                }
+
+                @Override
+                public void onFailure(Exception exception) {
+                    Log.w(TAG, "getDetailsInBackground-> onFailure: Unable to retrieve user information");
+                    exception.printStackTrace();
+                }
+            });
         }
 
         @Override
         public void getAuthenticationDetails(AuthenticationContinuation authenticationContinuation, String userId) {
-            Log.d(TAG, "CognitoHelper->doInBackground->getAuthenticationDetails");
+            Log.d(TAG, "AuthenticationHandler->getAuthenticationDetails");
         }
 
         @Override
         public void getMFACode(MultiFactorAuthenticationContinuation continuation) {
-            Log.d(TAG, "CognitoHelper->doInBackground->getMFACode");
+            Log.d(TAG, "AuthenticationHandler->getMFACode");
         }
 
         @Override
         public void authenticationChallenge(ChallengeContinuation continuation) {
-            Log.d(TAG, "CognitoHelper->doInBackground->authenticationChallenge");
+            Log.d(TAG, "AuthenticationHandler->authenticationChallenge");
         }
 
         @Override
         public void onFailure(Exception exception) {
-            Log.w(TAG, "CognitoHelper->doInBackground->onFailure");
+            Log.w(TAG, "AuthenticationHandler->onFailure");
             exception.printStackTrace();
 
+            //Dismiss the current alert dialog to show a new one
+            alertDialog.dismiss();
             //Create error dialog for the error case
-            AlertDialog errorDialog = createErrorDialog("Email and Password combination not found");
-            errorDialog.show();
+            alertDialog = createErrorDialog("Email and Password combination not found");
+            alertDialog.show();
         }
     };
 
     /**
      * Used to communicate with the Cognito User Pool login for normal logins
      */
-    private class CognitoHelper extends AsyncTask<String, Void, Void> {
+    private class CognitoAuthHelper extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String... strings) {
             String userEmail = strings[0];
             String userPassword = strings[1];
 
-            Log.d(TAG, "CognitoHelper: doInBackground");
-            Log.d(TAG, "CognitoHelper: email: " + userEmail);
-            Log.d(TAG, "CognitoHelper: password: " + userPassword);
+            Log.d(TAG, "AuthHelper: doInBackground");
 
             //Initiate AuthenticationDetails object to be used with the Authentication Flow
             //In this case, SRP Auth
@@ -219,17 +234,13 @@ public class LoginFragment extends Fragment
         isSigningIn = false;
 
         //Initialize all of the views
-        normalLoginButton = getActivity().findViewById(R.id.button_normal_login);
-        facebookLoginButton = getActivity().findViewById(R.id.facebook_login_button);
-        googleLoginButton = getActivity().findViewById(R.id.google_login_button);
+        Button normalLoginButton = getActivity().findViewById(R.id.button_normal_login);
+        ImageButton facebookLoginButton = getActivity().findViewById(R.id.facebook_login_button);
+        SignInButton googleLoginButton = getActivity().findViewById(R.id.google_login_button);
         emailEditText = getActivity().findViewById(R.id.email_edit_text);
         passwordEditText = getActivity().findViewById(R.id.password_edit_text);
-        createAccountText = getActivity().findViewById(R.id.create_account_text);
-        forgotPasswordText = getActivity().findViewById(R.id.forgot_password_text);
-
-        //Debug values
-        emailEditText.setText("danielkimstudent@hotmail.com");
-        passwordEditText.setText("Isobarkim1");
+        TextView createAccountText = getActivity().findViewById(R.id.create_account_text);
+        TextView forgotPasswordText = getActivity().findViewById(R.id.forgot_password_text);
 
         //Set listeners for buttons
         normalLoginButton.setOnClickListener(this);
@@ -251,6 +262,7 @@ public class LoginFragment extends Fragment
             public void onSuccess(LoginResult loginResult) {
                 AccessToken accessToken = loginResult.getAccessToken();
                 Log.d(TAG, "FacebookCallback-> onSuccess: successfully logged in with " + accessToken.getUserId());
+                AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.FACEBOOK_PROVIDER);
                 startMainActivity();
             }
 
@@ -303,12 +315,12 @@ public class LoginFragment extends Fragment
         switch (view.getId()) {
             case R.id.create_account_text: {
                 Log.d(TAG, "onClick: create account text clicked.");
-                onChangeFragmentListener.buttonClicked(AuthenticationActivity.AuthFragmentType.CREATE_ACCOUNT);
+                onChangeFragmentListener.buttonClicked(AuthenticationContainer.AuthFragmentType.CREATE_ACCOUNT);
             }
             break;
             case R.id.forgot_password_text: {
                 Log.d(TAG, "onClick: forgot password text clicked.");
-                onChangeFragmentListener.buttonClicked(AuthenticationActivity.AuthFragmentType.FORGOT_PASSWORD);
+                onChangeFragmentListener.buttonClicked(AuthenticationContainer.AuthFragmentType.FORGOT_PASSWORD);
             }
             break;
             case R.id.google_login_button: {
@@ -362,6 +374,7 @@ public class LoginFragment extends Fragment
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Log.d(TAG, "Signed in with " + account.getId());
+            AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.GOOGLE_PROVIDER);
             startMainActivity();
         } catch (ApiException exception) {
             Log.w(TAG, "handleSignInResult: failed code=" + exception.getStatusCode());
@@ -413,7 +426,7 @@ public class LoginFragment extends Fragment
             alertDialog = createErrorDialog("Email and password fields cannot be empty");
             return;
         }
-        CognitoHelper cognitoHelper = new CognitoHelper();
+        CognitoAuthHelper cognitoHelper = new CognitoAuthHelper();
         cognitoHelper.execute(userEmail, userPassword);
     }
 
@@ -438,5 +451,6 @@ public class LoginFragment extends Fragment
     public void setCognitoUserPool(CognitoUserPool cognitoUserPool) {
         this.cognitoUserPool = cognitoUserPool;
     }
+
 
 }
