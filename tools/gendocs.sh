@@ -1,2 +1,2 @@
-documentation build ../astralframework/index.js -f html -o ./html
-documentation readme ../astralframework/index.js --readme-file=./astralframework/README.md --section=API
+documentation build ../astral/index.js -f html -o ../html
+documentation readme ../astral/index.js --readme-file=../astral/README.md --section=API
