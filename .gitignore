@@ -1,6 +1,9 @@
 #html documentation
 html/
 
+#config file with secret
+**/config.json
+
 # Logs
 logs
 *.log
