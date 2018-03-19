@@ -1,35 +1,19 @@
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const fs = require('fs');
-const config = JSON.parse(fs.readFileSync('config.json'));
+const MONGOOSE = require('mongoose');
+const EXPRESS = require('express');
+const DB_CONFIG = require('./config/mongo');
+const ROUTES = require('./app/router');
+const BODY_PARSER = require('body-parser');
+const FS = require('fs');
+const CONFIG = JSON.parse(FS.readFileSync('config/config.json'));
 
-mongoose.connect('mongodb://localhost/astral');
-const db = mongoose.connection;
+const app = EXPRESS();
+app.use(BODY_PARSER.urlencoded({ extended: true }));
+app.use(BODY_PARSER.json());
 
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-    console.log('Connected to Database');
-});
+const ROUTER = ROUTES(EXPRESS.Router());
+app.use('/',ROUTER);
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.listen(CONFIG.port);
+console.log('Running on port: '+ CONFIG.port);
 
-const routes = require('./routes/router');
-app.use('/', routes);
-
-app.use(function(req, res, next) {
-    let err = new Error('File Not Found');
-    err.status = 404;
-    next(err);
-});
-
-app.use(function(err, req, res, next) {
-    res.status(err.status ||  500);
-    res.status(200).send(err.message);
-});
-
-app.listen(config.port, function() {
-    console.log(`app started on port ${config.port}`);
-});
+MONGOOSE.connect(DB_CONFIG.path);
