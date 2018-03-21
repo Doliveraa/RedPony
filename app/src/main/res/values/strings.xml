@@ -51,6 +51,8 @@
     <string name="user_files">My Files</string>
     <string name="download_files">Downloaded Files</string>
     <string name="settings_user">Settings</string>
+    <string name="log_out_user">Log Out</string>
+    <string name="change_password_user">Change Password</string>
 
     <!-- Strings related to Upload Fragment -->
     <string name="comment">Comment</string>

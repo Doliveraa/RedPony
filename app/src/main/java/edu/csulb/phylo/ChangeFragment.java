@@ -26,7 +26,7 @@ public class ChangeFragment extends Fragment{
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         Intent startMapsIntent = new Intent(getActivity(), MapsActivity.class);
         startActivity(startMapsIntent);
         super.onActivityCreated(savedInstanceState);
@@ -34,7 +34,7 @@ public class ChangeFragment extends Fragment{
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_change, container, false);
     }
 }

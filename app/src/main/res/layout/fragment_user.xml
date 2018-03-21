@@ -21,24 +21,38 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/change_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="108dp"
+        android:layout_marginTop="76dp"
+        android:text="@string/change_password_user"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/user_name_text_view" />
+
+
+    <Button
         android:id="@+id/user_files"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="148dp"
-        android:layout_marginTop="76dp"
+        android:layout_marginTop="48dp"
         android:text="@string/user_files"
         android:textColor="@color/black"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/user_name_text_view" />
+        app:layout_constraintTop_toTopOf="@+id/change_password" />
 
     <Button
         android:id="@+id/downloaded_files"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="108dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="68dp"
         android:text="@string/download_files"
         android:textColor="@color/black"
         android:textSize="15sp"
@@ -57,5 +71,19 @@
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/downloaded_files" />
+
+    <Button
+        android:id="@+id/logout_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="124dp"
+        android:gravity="center"
+        android:text="@string/log_out_user"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/downloaded_files" />
+
 
 </android.support.constraint.ConstraintLayout>
