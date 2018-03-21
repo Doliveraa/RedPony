@@ -37,7 +37,7 @@ const routing = function routing(express_router) {
     });
 
     router.route('/files').put(function (req, res) {
-        MIDDLEWARE.updateFiles(req, res);
+        MIDDLEWARE.updateFile(req, res);
     });
 
     return router;

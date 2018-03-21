@@ -240,10 +240,45 @@ const getFiles = function(req, res) {
     }
 };
 
+const updateFile = function(req, res) {
+    if (req.get("appKey") && req.get("token")) {
+        findUser(req.get("appKey"), req.get("token"), {}, function(err, user) {
+            if (!req.body._id) {
+                res.status = 401;
+                return res.json({message: "No file id provided"});
+            }
+            File.findById(req.body._id, function(err, file) {
+                if (err || !file) {
+                    res.status = 401;
+                    return res.json({message: "Error retreiving files"});
+                }
+
+                if (req.body.name) file.name = req.body.name;
+                if (req.body.longitude) file.location[0] = Number(req.body.longitude);
+                if (req.body.latitude) file.location[1] = Number(req.body.latitude);
+                if (req.body.expirationDate) file.expirationDate = req.body.expirationDate;
+                if (req.body.data) file.data = req.body.data;
+
+                file.save(function(err) {
+                   if (err) {
+                       res.status = 401;
+                       return res.json({message: "Unable to update file"});
+                   }
+                   return res.status(200).send('File updated successfully');
+                });
+            })
+        })
+    } else {
+        res.status = 401;
+        return res.json({message: "No appKey or token provided"});
+    }
+}
+
 module.exports = {
   createUser,
   getUser,
   updateUser,
   createFile,
-  getFiles
+  getFiles,
+  updateFile
 };
