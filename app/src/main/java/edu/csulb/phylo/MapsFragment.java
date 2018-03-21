@@ -3,7 +3,6 @@ package edu.csulb.phylo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,9 +13,9 @@ import android.view.ViewGroup;
  * Created by vietl on 2/25/2018.
  */
 
-public class ChangeFragment extends Fragment{
-    public static ChangeFragment newInstance(){
-        ChangeFragment fragment = new ChangeFragment();
+public class MapsFragment extends Fragment{
+    public static MapsFragment newInstance(){
+        MapsFragment fragment = new MapsFragment();
         return fragment;
     }
 

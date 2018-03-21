@@ -13,9 +13,9 @@ import android.view.ViewGroup;
  * Created by vietl on 2/25/2018.
  */
 
-public class WebsiteFragment extends Fragment{
-    public static WebsiteFragment newInstance(){
-        WebsiteFragment fragment = new WebsiteFragment();
+public class PinnedFragment extends Fragment{
+    public static PinnedFragment newInstance(){
+        PinnedFragment fragment = new PinnedFragment();
         return fragment;
     }
 

@@ -4,31 +4,39 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.MenuItem;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
 /**
  * Created by vietl on 2/21/2018.
  */
 
 public class MainActivityContainer extends AppCompatActivity{
+    //Fragments
+    HomeFragment homeFragment;
+    MapsFragment mapsFragment;
+    UploadFragment uploadFragment;
+    UserFragment userFragment;
+    PinnedFragment pinnedFragment;
 
     //Variables
-    //Cognito User
+    private User user;
+    //Activity Constants
     private static final String TAG = "MainActivityContainer";
-    //Bottom Navigation View
+
+    /**
+     *
+     */
     private BottomNavigationView.OnNavigationItemSelectedListener NavItemListen =
             new BottomNavigationView.OnNavigationItemSelectedListener(){
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment selectedFragment = null;
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    int fragmentToStart;
                     switch (item.getItemId()) {
                         case R.id.change_views:
-                            //go to change_view fragment
-                            selectedFragment = ChangeFragment.newInstance();
+                            fragmentToStart = "";
                             break;
 
                         case R.id.upload_files:
@@ -42,7 +50,7 @@ public class MainActivityContainer extends AppCompatActivity{
 
                         case R.id.website_user:
                             //go to website user
-                            selectedFragment = WebsiteFragment.newInstance();
+                            selectedFragment = PinnedFragment.newInstance();
                             break;
 
                         case R.id.user_account:
@@ -60,19 +68,32 @@ public class MainActivityContainer extends AppCompatActivity{
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        //set content view
         setContentView(R.layout.main_activity_container);
-        Log.d(TAG, "onCreate: set Content View");
+
         //create bottom navigation bar
+        createBottomNavigationView();
+
+        //Instantiate fragments
+        homeFragment = HomeFragment.newInstance();
+        mapsFragment = MapsFragment.newInstance();
+        pinnedFragment = PinnedFragment.newInstance();
+        uploadFragment = UploadFragment.newInstance();
+        userFragment = UserFragment.newInstance();
+    }
+
+    /**
+     * Creates the bottom navigation for the activity container
+     */
+    public void createBottomNavigationView() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        //TODO: What does this do?
         BottomNavigationBarShiftHelp.disableShiftMode(bottomNavigationView);
-        Log.d(TAG, "onCreate: disable Shift mode");
         bottomNavigationView.setSelectedItemId(R.id.home_lobby);
         bottomNavigationView.setOnNavigationItemSelectedListener(NavItemListen);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.container, HomeFragment.newInstance());
+        //Commit changes transaction
         transaction.commit();
     }
 }
