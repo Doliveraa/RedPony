@@ -22,6 +22,7 @@ public class MainActivityContainer extends AppCompatActivity{
 
     //Variables
     private User user;
+
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -59,9 +60,9 @@ public class MainActivityContainer extends AppCompatActivity{
                             break;
 
                     }
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     //transaction.replace(R.id.container, selectedFragment);
-                    transaction.commit();
+                    fragmentTransaction.commit();
                     return true;
                 }
             };
@@ -71,7 +72,7 @@ public class MainActivityContainer extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_container);
 
-        //Initialize user
+        //Instantiate user
         user = User.getInstance(this);
 
         //create bottom navigation bar
