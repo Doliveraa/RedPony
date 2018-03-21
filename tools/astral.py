@@ -6,21 +6,21 @@ import sys
 config = json.load(open('config.json'))
 client = MongoClient('localhost', 27017)
 db = client.astral
-        
+
 def encode(ID):
     return jwt.encode({"id": str(ID)}, config["secret"], algorithm='HS256')
-        
+
 def get_app_token(name):
     apps = db.apps
     try: appid = apps.find_one({"name": name})["_id"]
     except: return None
     return encode(appid)
-    
+
 def add_app(name):
     apps = db.apps
     if apps.find_one({"name": name}):
         return get_app_token(name)
-        
+
     app = {"name": name}
     try: appid = apps.insert_one(app).inserted_id
     except: return None
@@ -31,7 +31,7 @@ def main():
         print("Usage: python astral.py <command>")
         print("   eg: python astral.py help")
         return
-     
+
     if sys.argv[1] == "help":
         print("--valid commands--")
         print("add <app name>")
@@ -48,4 +48,3 @@ def main():
             print("token:",get_app_token(sys.argv[2]).decode('utf-8'))
 
 if __name__ == '__main__': main()
-        
