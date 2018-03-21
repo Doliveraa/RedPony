@@ -33,34 +33,34 @@ public class MainActivityContainer extends AppCompatActivity{
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                    int fragmentToStart;
                     switch (item.getItemId()) {
                         case R.id.change_views:
-                            fragmentToStart = "";
+                            fragmentTransaction.replace(R.id.main_activity_container, mapsFragment);
                             break;
 
                         case R.id.upload_files:
                             //go to upload_files fragment
-                            selectedFragment = UploadFragment.newInstance();
+                            fragmentTransaction.replace(R.id.main_activity_container, uploadFragment);
                             break;
 
                         case R.id.home_lobby:
-                            selectedFragment = HomeFragment.newInstance();
+                            fragmentTransaction.replace(R.id.main_activity_container, homeFragment);
                             break;
 
                         case R.id.website_user:
                             //go to website user
-                            selectedFragment = PinnedFragment.newInstance();
+                            fragmentTransaction.replace(R.id.main_activity_container, pinnedFragment);
                             break;
 
                         case R.id.user_account:
                             //go to user account
-                            selectedFragment = UserFragment.newInstance();
+                            userFragment.setCurrentUser(user);
+                            fragmentTransaction.replace(R.id.main_activity_container, userFragment);
                             break;
 
                     }
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.container, selectedFragment);
+                    //transaction.replace(R.id.container, selectedFragment);
                     transaction.commit();
                     return true;
                 }
@@ -70,6 +70,9 @@ public class MainActivityContainer extends AppCompatActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_container);
+
+        //Initialize user
+        user = User.getInstance(this);
 
         //create bottom navigation bar
         createBottomNavigationView();
