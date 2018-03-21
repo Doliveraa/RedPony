@@ -91,7 +91,7 @@ public class VerifyCodeFragment extends Fragment
 
                         //Set that the user has authenticated with Cognito
                         AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
-                        AuthHelper.cacheCurrentSignedInUser(getActivity(), cognitoUser.getUserId());
+                        AuthHelper.cacheCurrentCognitoSignedInUser(getActivity(), cognitoUser.getUserId());
                         Intent intent = new Intent(getActivity(), MainActivityContainer.class);
                         startActivity(intent);
                         getActivity().finish();

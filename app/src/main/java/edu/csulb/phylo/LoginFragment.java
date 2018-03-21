@@ -250,10 +250,7 @@ public class LoginFragment extends Fragment
         forgotPasswordText.setOnClickListener(this);
 
         //Initialize Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
-                requestIdToken(getString(R.string.google_web_client_id))
-                .requestEmail().requestProfile().build();
-        googleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+        googleSignInClient = AuthHelper.getGoogleSignInClient(getActivity());
 
         //Initialize Facebook Sign In
         callbackManager = CallbackManager.Factory.create();

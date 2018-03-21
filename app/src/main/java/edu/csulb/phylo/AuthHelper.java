@@ -3,14 +3,22 @@ package edu.csulb.phylo;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.exceptions.CognitoInternalErrorException;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.util.Hkdf;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.util.StringUtils;
+import com.facebook.login.LoginManager;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.Task;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -32,6 +40,7 @@ public class AuthHelper {
     public final static String FACEBOOK_PROVIDER = "facebook";
     public final static String COGNITO_PROVIDER = "cognito";
     //Private Authentication Constants
+    private final static String TAG = AuthHelper.class.getSimpleName();
     private final static String LAST_USER_CACHE = "CognitoIdentityProviderCache";
 
     /**
@@ -54,7 +63,7 @@ public class AuthHelper {
     }
 
     /**
-     * Chaches the user information if given a CognitoUserDetails object
+     * Caches the user information if given a CognitoUserDetails object
      *
      * @param context The activity in which this method was called
      *
@@ -85,7 +94,14 @@ public class AuthHelper {
         spEditor.commit();
     }
 
-    public static void cacheCurrentSignedInUser(Context context, String userID) {
+    /**
+     * Caches the currently signed in Cognito user in shared preferences
+     *
+     * @param context The activity that has called this method
+     *
+     * @param userID The id of the user
+     */
+    public static void cacheCurrentCognitoSignedInUser(Context context, String userID) {
         //Open shared preferences folder where the last signed in user is stored
         final SharedPreferences csiCachedTokens = context
                 .getSharedPreferences(LAST_USER_CACHE, Context.MODE_PRIVATE);
@@ -110,6 +126,50 @@ public class AuthHelper {
         SharedPreferences.Editor spEditor = sharedPreferences.edit();
         spEditor.putString(User.USER_SIGN_IN_PROVIDER, provider);
         spEditor.commit();
+    }
+
+    /**
+     * Signs out the current user
+     *
+     * @param user The currently signed in user
+     */
+    public static void signOutUser(Context context, User user) {
+
+        String resultMessage;
+        switch(user.getSignInProvider()) {
+            case GOOGLE_PROVIDER: {
+                Log.d(TAG, "Attempting to sign out from Google");
+                GoogleSignInClient googleSignInClient = getGoogleSignInClient(context);
+                Task task = googleSignInClient.signOut();
+                resultMessage = task.getResult().toString();
+            }
+            break;
+            case FACEBOOK_PROVIDER: {
+                Log.d(TAG, "Attempting to sign out from Facebook");
+                LoginManager.getInstance().logOut();
+                resultMessage = "Successful Facebook Sign out";
+            }
+            break;
+            case COGNITO_PROVIDER: {
+                Log.d(TAG, "Attempting to sign out from Cognito");
+                CognitoUserPool cognitoUserPool = getCognitoUserPool(context);
+                CognitoUser cognitoUser = cognitoUserPool.getCurrentUser();
+                cognitoUser.signOut();
+                resultMessage = "Successful Cognito Sign out";
+            }
+            break;
+            default:
+                resultMessage = "Error, Did not enter case statements";
+        }
+        Log.d(TAG, "signOutUser: User Sign out Result: " + resultMessage);
+    }
+
+    public static GoogleSignInClient getGoogleSignInClient(Context context) {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
+                requestIdToken(context.getString(R.string.google_web_client_id))
+                .requestEmail().requestProfile().build();
+
+        return GoogleSignIn.getClient(context, gso);
     }
 }
 
