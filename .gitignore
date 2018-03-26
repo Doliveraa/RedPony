@@ -1,3 +1,7 @@
+#pip installs
+**/*.egg-info
+**/__pycache__
+
 #html documentation
 html/
 
