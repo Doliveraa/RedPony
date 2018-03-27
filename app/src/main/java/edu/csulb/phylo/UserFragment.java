@@ -20,14 +20,20 @@ public class UserFragment extends Fragment
     //Fragment Variables
     private User user;
 
+    /**
+     * Instantiates an instance of UserFragment
+     *
+     * @return A UserFragment object
+     */
     public static UserFragment newInstance(){
         UserFragment fragment = new UserFragment();
         return fragment;
     }
 
+    @Nullable
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return  inflater.inflate(R.layout.fragment_user, container, false);
     }
 
     @Override
@@ -41,13 +47,6 @@ public class UserFragment extends Fragment
         logoutButton.setOnClickListener(this);
     }
 
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return  inflater.inflate(R.layout.fragment_user, container, false);
-    }
-
     /**
      * Provides a way for screen items to react to user events
      *
@@ -57,12 +56,17 @@ public class UserFragment extends Fragment
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.logout_button: {
-
+                AuthHelper.signOutUser(getActivity(), user);
             }
             break;
         }
     }
 
+    /**
+     * Sets the current user object for this fragment
+     *
+     * @param currUser The current user on the application
+     */
     public void setCurrentUser(User currUser) {
         user = currUser;
     }

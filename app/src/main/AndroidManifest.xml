@@ -29,13 +29,6 @@
             android:name=".AuthenticationContainer"
             android:screenOrientation="portrait">
         </activity>
-        <activity
-            android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
-
-        </activity>
         <activity android:name=".MainActivityContainer"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Design.Light.NoActionBar">

@@ -141,7 +141,7 @@ public class AuthHelper {
                 Log.d(TAG, "Attempting to sign out from Google");
                 GoogleSignInClient googleSignInClient = getGoogleSignInClient(context);
                 Task task = googleSignInClient.signOut();
-                resultMessage = task.getResult().toString();
+                resultMessage = "Successful Signout";
             }
             break;
             case FACEBOOK_PROVIDER: {
