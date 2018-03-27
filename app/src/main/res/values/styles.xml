@@ -16,4 +16,8 @@
         <item name="android:editTextBackground">@android:drawable/editbox_background</item>
         <item name="android:textSize">20sp</item>
     </style>
+
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
 </resources>

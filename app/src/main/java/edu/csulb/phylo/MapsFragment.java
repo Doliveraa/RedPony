@@ -1,8 +1,7 @@
 package edu.csulb.phylo;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,8 +17,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -28,74 +28,97 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 
 public class MapsFragment extends Fragment
-        implements OnMapReadyCallback, UserLocationClient.InitialLocationReceived{
-    //Variables
+        implements OnMapReadyCallback, UserLocationClient.InitialLocationReceived, UserLocationClient.CurrLocationListener {
+    //Constants
+    private final String TAG = MapsFragment.class.getSimpleName();
+    private final int PERMISSION_REQUEST_CODE = 2035;
+    //View variables
+    private GoogleMap googleMap;
+    private MapView mapView;
+    private View fragmentView;
+    private ProgressBar progressBar;
+    //Other Variables
     private boolean hasLocationPermission;
     private UserLocationClient userLocationClient;
     private boolean isRetrievingUserPermission;
-    //Constants
-    private final String TAG = "MapsActivity";
-    private final int PERMISSION_REQUEST_CODE = 2035;
-    //Fragments
-    private GoogleMap mMap;
-    //Views
-    private ProgressBar progressBar;
+
+    private class ScreenAnimator extends AsyncTask<LatLng, Void, Void> {
+        @Override
+        protected Void doInBackground(LatLng... location) {
+            googleMap.addMarker(new MarkerOptions().position(location[0]));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], 10f));
+            return null;
+        }
+    }
 
     /**
      * Instantiates an instance of UserFragment
      *
      * @return A UserFragment object
      */
-    public static MapsFragment newInstance(){
+    public static MapsFragment newInstance() {
         MapsFragment fragment = new MapsFragment();
         return fragment;
     }
 
     @Nullable
     @Override
-    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        fragmentView = inflater.inflate(R.layout.fragment_maps, container, false);
+        return fragmentView;
     }
 
-
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getActivity().getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        //Initialize the map view item
+        mapView = fragmentView.findViewById(R.id.map);
+        if (mapView != null) {
+            mapView.onCreate(null);
+            mapView.onResume();
+            mapView.getMapAsync(this);
+        }
+
+        //Initialize Fragment Views
+        progressBar = fragmentView.findViewById(R.id.map_progress_bar);
+        //Begin the progress bar
+        progressBar.setVisibility(View.VISIBLE);
 
         //Initialize variables
         userLocationClient = new UserLocationClient(getActivity());
 
-        //Initialize Views
-        progressBar = getActivity().findViewById(R.id.map_progress_bar);
-
         //Initialize Listeners
         userLocationClient.setInitialLocationReceiveListener(this);
-
-        //Begin the progress bar
-        progressBar.setVisibility(View.VISIBLE);
+        userLocationClient.setCurrLocationListener(this);
 
         //Check if we currently have the user's permission to access their location
         hasLocationPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.LOCATION_PERMISSION);
     }
 
     /**
-     * Animates the camera to the user's current location
-     *
-     * @param userCurrentLocation The user's current latitude and longitude
+     * Begins tracking the user's location if they have permission
+     * If they don't have any permissions, this methods asks them for the permissions
      */
     @Override
-    public void onInitialLocationReceived(LatLng userCurrentLocation) {
-        Log.d(TAG, "onInitialLocationReceived : initial location has been received");
-        //Some checks to see if mMap is null or not to avoid crash
-        if(mMap != null) {
-            progressBar.setVisibility(View.GONE);
-            mMap.addMarker(new MarkerOptions().position(userCurrentLocation));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userCurrentLocation, 10f));
+    public void onStart() {
+        super.onStart();
+        //If we have the user's permission to receive their location, start the location tracking
+        if (hasLocationPermission) {
+            userLocationClient.startUserLocationTracking();
+        } else {
+            //We do not have permission to receive the user's location, ask for permission
+            requestPermission();
         }
+    }
+
+    /**
+     * Stops tracking the user's current location
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: Stopping user's location tracking");
+        userLocationClient.stopUserLocationTracking();
     }
 
     /**
@@ -105,6 +128,7 @@ public class MapsFragment extends Fragment
         if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "requestPermission : Requesting Fine Location permission");
+            isRetrievingUserPermission = true;
             ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSION_REQUEST_CODE);
         }
@@ -113,8 +137,8 @@ public class MapsFragment extends Fragment
     /**
      * Requests user permission to track their current location
      *
-     * @param requestCode The request code received back from asking permission
-     * @param permissions The permissions asked
+     * @param requestCode  The request code received back from asking permission
+     * @param permissions  The permissions asked
      * @param grantResults The granted results
      */
     @Override
@@ -125,8 +149,8 @@ public class MapsFragment extends Fragment
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Permission has been granted, we can now start tracking the user's location
                     Log.d(TAG, "onRequestPermissionResult : User has accepted location permissions");
-                    hasLocationPermission = true;
                     userLocationClient.startUserLocationTracking();
+                    hasLocationPermission = true;
                 } else {
                     Log.d(TAG, "onRequestPermissionResult : User has denied location permissions");
                     //Permission Denied
@@ -134,6 +158,41 @@ public class MapsFragment extends Fragment
                 }
             }
         }
+    }
+
+    /**
+     * Animates the camera to the user's current location
+     *
+     * @param userCurrentLocation The user's current latitude and longitude
+     */
+    @Override
+    public void onInitialLocationReceived(LatLng userCurrentLocation) {
+        Log.d(TAG, "onInitialLocationReceived : initial location has been received");
+        if (googleMap != null) {
+            progressBar.setVisibility(View.GONE);
+        }
+        ScreenAnimator screenAnimator = new ScreenAnimator();
+        screenAnimator.doInBackground(userCurrentLocation);
+    }
+
+
+    /**
+     * Updates the user's current location
+     *
+     * @param userCurrentLocation The user's current latitude and longitude
+     */
+    @Override
+    public void onLocationUpdated(LatLng userCurrentLocation) {
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        //Map is Ready, initialize map interface
+        MapsInitializer.initialize(getContext());
+
+        this.googleMap = googleMap;
+        this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
     }
 
     /**
@@ -145,39 +204,4 @@ public class MapsFragment extends Fragment
         return isRetrievingUserPermission;
     }
 
-    /**
-     * Begins tracking the user's location if they have permission
-     * If they don't have any permissions, this methods asks them for the permissions
-     */
-    @Override
-    public void onStart() {
-        super.onStart();
-        //If we have the user's permission to receive their location, start the location tracking
-        if(hasLocationPermission) {
-            userLocationClient.startUserLocationTracking();
-        } else {
-            //We do not have permission to receive the user's location, ask for permission
-            requestPermission();
-        }
-    }
-
-    /**
-     * The map is ready to be displayed
-     *
-     * @param googleMap The google map object to be used in this fragment
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-    }
-
-    /**
-     * Stops tracking the user's current location
-     */
-    @Override
-    public void onStop() {
-        super.onStop();
-        userLocationClient.stopUserLocationTracking();
-    }
 }

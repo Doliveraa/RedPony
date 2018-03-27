@@ -9,6 +9,7 @@ import android.util.Log;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
@@ -29,6 +30,9 @@ public class SplashActivity extends Activity {
 
         //Initialize CognitoUserPool object
         cognitoUserPool = AuthHelper.getCognitoUserPool(this);
+
+        //Initialize Facebook SDK
+        FacebookSdk.sdkInitialize(this);
 
         //Check if the user has already signed in before
         if (userIsSignedIn()) {

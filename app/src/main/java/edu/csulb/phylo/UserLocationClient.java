@@ -27,7 +27,13 @@ public class UserLocationClient {
     public interface InitialLocationReceived{
         void onInitialLocationReceived(LatLng userCurrentLocation);
     }
+    public interface CurrLocationListener{
+        void onLocationUpdated(LatLng userCurrentLocation);
+    }
     //Listener
+    private InitialLocationReceived initialLocationReceiveListener;
+    private CurrLocationListener currLocationListener;
+
     private OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
         @Override
         public void onLocationUpdated(Location location) {
@@ -36,10 +42,12 @@ public class UserLocationClient {
             handler.postDelayed(locationRunnable, 10000);
             if(!initialLocationReceived) {
                 initialLocationReceiveListener.onInitialLocationReceived(new LatLng(latitude, longitude));
+                initialLocationReceived = true;
+            } else {
+                currLocationListener.onLocationUpdated(new LatLng(latitude, longitude));
             }
         }
     };
-    private InitialLocationReceived initialLocationReceiveListener;
 
     //Initialization constructor
     public UserLocationClient(Context context) {
@@ -57,17 +65,14 @@ public class UserLocationClient {
         SmartLocation.with(context).location().stop();
     }
 
-    //Retrieves the user's location only if the initial location has been received
-    public LatLng getUserLocation() {
-        if(initialLocationReceived) {
-            return new LatLng(latitude, longitude);
-        }
-        return null;
-    }
 
     //Sets the listener that keeps track of if the initial location has been received
     public void setInitialLocationReceiveListener(InitialLocationReceived listener) {
         initialLocationReceiveListener = listener;
+    }
+
+    public void setCurrLocationListener(CurrLocationListener listener) {
+        currLocationListener = listener;
     }
 
     //Runnable that constantly runs the same method depending on the timer

@@ -1,11 +1,13 @@
 package edu.csulb.phylo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 
 /**
@@ -84,6 +86,18 @@ public class MainActivityContainer extends AppCompatActivity{
         pinnedFragment = PinnedFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
         userFragment = UserFragment.newInstance();
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //If MapFragment is currently receiving permission on the user's location,
+        //Send the result back to MapFragment
+        if (mapsFragment.isRetrievingLocPermission()) {
+            Log.d(TAG, "onActivityResult: Back from receiving User Permission");
+            mapsFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     /**
