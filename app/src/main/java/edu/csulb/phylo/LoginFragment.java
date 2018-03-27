@@ -2,14 +2,10 @@ package edu.csulb.phylo;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Process;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,12 +16,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AnonymousAWSCredentials;
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
@@ -33,29 +25,8 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Auth
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.exceptions.CognitoInternalErrorException;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoAccessToken;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoIdToken;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoRefreshToken;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.util.CognitoSecretHash;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.util.CognitoServiceConstants;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
-import com.amazonaws.services.cognitoidentityprovider.AmazonCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidentityprovider.AmazonCognitoIdentityProviderClient;
-import com.amazonaws.services.cognitoidentityprovider.model.AuthFlowType;
-import com.amazonaws.services.cognitoidentityprovider.model.AuthenticationResultType;
-import com.amazonaws.services.cognitoidentityprovider.model.InitiateAuthRequest;
-import com.amazonaws.services.cognitoidentityprovider.model.InitiateAuthResult;
-import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
-import com.amazonaws.services.cognitoidentityprovider.model.RespondToAuthChallengeRequest;
-import com.amazonaws.services.cognitoidentityprovider.model.RespondToAuthChallengeResult;
-import com.amazonaws.util.Base64;
-import com.amazonaws.util.StringUtils;
-import com.auth0.android.jwt.JWT;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -63,29 +34,15 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.Task;
 
-import java.math.BigInteger;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by Danie on 1/24/2018.
