@@ -8,4 +8,6 @@
     <color name="black">#000</color>
     <color name="navy">#000080</color>
     <color name="white">#FFFFFF</color>
+    <color name="aqua">#00FFFF</color>
+    <color name="lightNavy">#0272A6</color>
 </resources>
