@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +18,13 @@ import android.widget.Button;
 
 public class UserFragment extends Fragment
     implements View.OnClickListener{
-    //Fragment Variables
+    //User Variable
     private User user;
+
+    //Fragment Variables
+    UploadedFilesFragment uploadedFilesFragment;
+    DownloadedFilesFragment downloadedFilesFragment;
+    SettingsFragment settingsFragment;
 
     /**
      * Instantiates an instance of UserFragment
@@ -41,10 +47,21 @@ public class UserFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
 
         //Initiate Views
+        Button uploadedButton = getActivity().findViewById(R.id.user_files);
+        Button downloadedButton = getActivity().findViewById(R.id.downloaded_files);
+        Button settingsB = getActivity().findViewById(R.id.settings);
         Button logoutButton = getActivity().findViewById(R.id.logout_button);
 
         //Attach listeners to buttons
+        uploadedButton.setOnClickListener(this);
+        downloadedButton.setOnClickListener(this);
+        settingsB.setOnClickListener(this);
         logoutButton.setOnClickListener(this);
+
+        //Instantiate Fragments
+        uploadedFilesFragment = uploadedFilesFragment.newInstance();
+        downloadedFilesFragment = downloadedFilesFragment.newInstance();
+        settingsFragment = settingsFragment.newInstance();
     }
 
     /**
@@ -54,12 +71,25 @@ public class UserFragment extends Fragment
      */
     @Override
     public void onClick(View v) {
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
         switch(v.getId()) {
-            case R.id.logout_button: {
+            case R.id.user_files:
+                fragmentTransaction.replace(R.id.main_activity_container, uploadedFilesFragment);
+                break;
+            case R.id.downloaded_files:
+                fragmentTransaction.replace(R.id.main_activity_container, downloadedFilesFragment);
+                break;
+            case R.id.settings:
+                fragmentTransaction.replace(R.id.main_activity_container, settingsFragment);
+                break;
+            case R.id.logout_button:
                 AuthHelper.signOutUser(getActivity(), user);
-            }
-            break;
+                break;
         }
+        fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        fragmentTransaction.commit();
+
     }
 
     /**

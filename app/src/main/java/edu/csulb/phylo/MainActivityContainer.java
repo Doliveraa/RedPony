@@ -29,7 +29,7 @@ public class MainActivityContainer extends AppCompatActivity{
     private static final String TAG = "MainActivityContainer";
 
     /**
-     *
+     * Bottom Navigation Bar
      */
     private BottomNavigationView.OnNavigationItemSelectedListener NavItemListen =
             new BottomNavigationView.OnNavigationItemSelectedListener(){
@@ -105,7 +105,7 @@ public class MainActivityContainer extends AppCompatActivity{
      */
     public void createBottomNavigationView() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        //TODO: What does this do?
+        //Disables automatic shifting from the bottom navigation bar
         BottomNavigationBarShiftHelp.disableShiftMode(bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.home_lobby);
         bottomNavigationView.setOnNavigationItemSelectedListener(NavItemListen);

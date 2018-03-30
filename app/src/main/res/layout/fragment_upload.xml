@@ -32,12 +32,10 @@
         android:id="@+id/comment_widget"
         android:layout_width="0dp"
         android:layout_height="180dp"
-        android:layout_gravity="center"
         android:layout_marginEnd="42dp"
         android:layout_marginStart="42dp"
         android:layout_marginTop="122dp"
         android:background="@android:color/white"
-        android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -46,31 +44,39 @@
             android:id="@+id/comment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
+            android:gravity="top|left"
             android:hint="@string/comment"
-            android:inputType="textNoSuggestions|textEmailAddress" />
+            android:inputType="textMultiLine"
+            android:maxLines="10"
+            android:scrollbars="vertical"/>
     </android.support.design.widget.TextInputLayout>
 
     <Button
         android:id="@+id/select_file"
-        android:layout_width="wrap_content"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="290dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="136dp"
-        android:layout_marginTop="192dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="200dp"
+        android:alpha="0.7"
+        android:background="@color/lightNavy"
         android:text="@string/select_file"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/comment_widget" />
 
     <Button
         android:id="@+id/upload"
-        android:layout_width="wrap_content"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="290dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="148dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="72dp"
+        android:alpha="0.7"
+        android:background="@color/lightNavy"
         android:text="@string/upload_file"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/select_file" />
