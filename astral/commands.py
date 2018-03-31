@@ -24,7 +24,22 @@ def add_app(file, name):
 def setup_api(port, secret, file):
     astral.setup_api(port, secret, file)
 
+@click.command(name='start')
+def start():
+    astral.run_script('start.sh')
+
+@click.command(name='restart')
+def restart():
+    astral.run_script('stop.sh')
+    astral.run_script('start.sh')
+
+@click.command(name='stop')
+def stop():
+    astral.run_script('stop.sh')
 
 main.add_command(get_app_token)
 main.add_command(add_app)
 main.add_command(setup_api)
+main.add_command(start)
+main.add_command(restart)
+main.add_command(stop)
