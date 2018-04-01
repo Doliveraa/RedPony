@@ -48,7 +48,7 @@
     <!-- Strings related to User Fragment -->
     <string name="email_address_user">Email Address</string>
     <string name="password_user">Password</string>
-    <string name="user_files">My Files</string>
+    <string name="user_files">Uploaded Files</string>
     <string name="download_files">Downloaded Files</string>
     <string name="settings_user">Settings</string>
     <string name="log_out_user">Log Out</string>
