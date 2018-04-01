@@ -7,7 +7,8 @@ import subprocess
 file_path = os.path.dirname(os.path.realpath(__file__))
 
 def init():
-    config = json.load(open('config.json'))
+    path = os.path.join(file_path, 'config.json')
+    config = json.load(path)
     client = MongoClient('localhost', 27017)
     db = client.astral
     return config, client, db
@@ -20,7 +21,7 @@ def get_app_token(file, name):
     apps = db.apps
     try: appid = apps.find_one({"name": name})["_id"]
     except: return None
-    if file: 
+    if file:
         with open(file, 'wb+') as fp: fp.write(encode(appid, config["secret"]))
     else: print(encode(appid, config["secret"]).decode('utf-8'))
 
@@ -50,4 +51,3 @@ def setup_api(port, secret, config_file):
 def run_script(script):
     path = os.path.join(file_path, script)
     subprocess.call(path)
-
