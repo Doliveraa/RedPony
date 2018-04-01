@@ -8,7 +8,8 @@ file_path = os.path.dirname(os.path.realpath(__file__))
 
 def init():
     path = os.path.join(file_path, 'config.json')
-    config = json.load(path)
+    with open(path) as fp:
+        config = json.load(fp)
     client = MongoClient('localhost', 27017)
     db = client.astral
     return config, client, db
@@ -22,7 +23,8 @@ def get_app_token(file, name):
     try: appid = apps.find_one({"name": name})["_id"]
     except: return None
     if file:
-        with open(file, 'wb+') as fp: fp.write(encode(appid, config["secret"]))
+        with open(file, 'wb+') as fp:
+            fp.write(encode(appid, config["secret"]))
     else: print(encode(appid, config["secret"]).decode('utf-8'))
 
 def add_app(file, name):
@@ -36,7 +38,8 @@ def add_app(file, name):
     try: appid = apps.insert_one(app).inserted_id
     except: print('Error adding {}'.format(name))
     if file:
-        with open(file, 'wb+') as fp: fp.write(encode(appid, config["secret"]))
+        with open(file, 'wb+') as fp:
+            fp.write(encode(appid, config["secret"]))
     else: print(encode(appid, config["secret"]).decode('utf-8'))
 
 def setup_api(port, secret, config_file):
