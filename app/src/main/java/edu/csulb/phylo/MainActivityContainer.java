@@ -62,8 +62,7 @@ public class MainActivityContainer extends AppCompatActivity{
                             break;
 
                     }
-                    fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    //transaction.replace(R.id.container, selectedFragment);
+                    //fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     fragmentTransaction.commit();
                     return true;
                 }
@@ -101,7 +100,7 @@ public class MainActivityContainer extends AppCompatActivity{
     }
 
     /**
-     * Creates the bottom navigation for the activity container
+     * Creates the bottom navigation for the activity container. Sets the home screen as default.
      */
     public void createBottomNavigationView() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);

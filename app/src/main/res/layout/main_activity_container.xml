@@ -18,9 +18,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-    </FrameLayout>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_navigation"

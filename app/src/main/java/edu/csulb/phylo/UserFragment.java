@@ -87,7 +87,7 @@ public class UserFragment extends Fragment
                 AuthHelper.signOutUser(getActivity(), user);
                 break;
         }
-        fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+   //   fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.commit();
 
     }

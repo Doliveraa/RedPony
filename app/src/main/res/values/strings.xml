@@ -67,4 +67,16 @@
     <string name="pinned_menu">Pinned</string>
     <string name="profile_menu">Profile</string>
 
+    <!-- Strings related to Notifications -->
+    <string name="nearby_files">Nearby Files</string>
+    <string name="expire_files">Expiring Files</string>
+    <string name="cluster_files">Nearby Clusters</string>
+    <string name="notifications_settings">Notifications</string>
+
+    <!-- Strings related to Lobby -->
+    <string name="lobby_home">Lobby</string>
+
+    <!-- String related to Pinned -->
+    <string name="pinned_main">Pinned</string>
+
 </resources>
