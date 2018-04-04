@@ -26,8 +26,10 @@ sudo systemctl enable mongod
 # Install astral
 cd $SCRIPT_DIR/astral
 pip3 install -e --upgrade --force-reinstall .
-if grep -Fxq ".*_ASTRAL_COMPLETE.*"
-echo "eval $(_ASTRAL_COMPLETE=source astral)" >> ./bashrc
+if ! grep -Fxq ".*_ASTRAL_COMPLETE.*" ~/.bashrc 
+then
+    echo 'eval "$(_ASTRAL_COMPLETE=source astral)"' >> ~/.bashrc
+fi
 
 # Generate config file
 read -p 'Enter a secret phrase: ' secret_phrase
