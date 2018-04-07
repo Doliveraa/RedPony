@@ -79,4 +79,8 @@
     <!-- String related to Pinned -->
     <string name="pinned_main">Pinned</string>
 
+    <!-- String related to image buttons -->
+    <string name="back_image">Back Button</string>
+    <string name="help_image">Question Mark Button</string>
+
 </resources>

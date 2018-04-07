@@ -7,6 +7,34 @@
     android:background="@color/navy"
     android:orientation="vertical">
 
+    <ImageButton
+        android:id="@+id/back_button_uploaded"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="15dp"
+        android:contentDescription="@string/back_image"
+        android:src="@drawable/ic_back_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageButton
+        android:id="@+id/help_button_uploaded"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:contentDescription="@string/help_image"
+        android:src="@drawable/ic_question_mark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/uploaded_files_display"
         android:layout_width="match_parent"
@@ -25,10 +53,10 @@
         android:id="@+id/display_files_view_upload"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="80dp"
         android:layout_marginEnd="15dp"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="95sp"
+        android:layout_marginTop="95dp"
         android:alpha="0.85"
         android:background="@color/white"
         android:orientation="vertical"
@@ -36,10 +64,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="@+id/uploaded_files_display">
 
-        <TextView
+        <Button
+            android:id="@+id/file_uploaded_button"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="There are my Files" />
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="First File"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

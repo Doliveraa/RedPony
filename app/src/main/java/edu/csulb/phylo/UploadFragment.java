@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +14,11 @@ import android.view.ViewGroup;
  * Created by vietl on 2/25/2018.
  */
 
-public class UploadFragment extends Fragment{
-        public static UploadFragment newInstance(){
-            UploadFragment fragment = new UploadFragment();
-            return fragment;
+public class UploadFragment extends Fragment implements View.OnClickListener{
+
+    public static UploadFragment newInstance(){
+        UploadFragment fragment = new UploadFragment();
+        return fragment;
         }
 
     @Nullable
@@ -33,5 +35,26 @@ public class UploadFragment extends Fragment{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+    }
+
+    /**
+     * Provides a way for screen items to react to user events
+     *
+     * @param v the View item that the user has interacted with
+     */
+    @Override
+    public void onClick(View v) {
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
+        switch(v.getId()) {
+            case R.id.select_file:
+                //If the user selects this, select a file from the user's phone
+                break;
+            case R.id.upload:
+                //Upload the file
+                break;
+        }
+        fragmentTransaction.commit();
+
     }
 }
