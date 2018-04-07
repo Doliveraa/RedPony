@@ -11,19 +11,19 @@ def main():
 @click.argument('app')
 def get_app_token(file, app):
     """Gets the json web token for APP."""
-    astral.get_app_token(file, app)
+    astral.get_app_token(app, file)
 
 @click.command(name='add-app')
-@click.option('--file', default=None, help="File to write token to.", 
+@click.option('--file', default=None, help="File to write token to.",
               metavar="<filepath>")
 @click.argument('app')
 def add_app(file, app):
     """Adds APP and returns its json web token."""
-    astral.add_app(file, app)
+    astral.add_app(app, file)
 
 @click.command(name='setup-api')
 @click.option('--port', help="Port to setup API at.", metavar="<integer>")
-@click.option('--secret', help="Secret to use for json web tokens", 
+@click.option('--secret', help="Secret to use for json web tokens",
               metavar="<string>")
 @click.option('--file', default='./config.json', help="File to write " + \
               "configs to.", metavar="<filepath>")
