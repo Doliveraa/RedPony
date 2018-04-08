@@ -73,14 +73,17 @@ const createUser = function createUser(req, res){
     findApp(req.get('appKey'), function(err, app) {
         if (err) return callback(err, null);
 
-        if (req.body.email && req.body.username &&
-            req.body.password && req.body.data) {
+        if (req.body.email && req.body.username && req.body.data) {
 
+            let password = ""
+            if (req.body.password) {
+                password = req.body.password;
+            }
             let userData = {
                 app: app.name,
                 email: req.body.email,
                 username: req.body.username,
-                password: req.body.password,
+                password: password,
                 data: req.body.data
             };
 
@@ -102,8 +105,12 @@ const createUser = function createUser(req, res){
 
 const getUser = function(req, res) {
     if (req.get("appKey")) {
-        if (req.get("email") && req.get("password")) {
-            getToken(req.get("appKey"), req.get("email"), req.get("password"), function(err, token) {
+        password = "";
+        if (req.get("password")) {
+          let password = req.get("password");
+        }
+        if (req.get("email")) {
+            getToken(req.get("appKey"), req.get("email"), password, function(err, token) {
                 if (err) {
                     res.status = 401;
                     return res.json({message: err.message});
