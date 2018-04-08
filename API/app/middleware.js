@@ -74,8 +74,7 @@ const createUser = function createUser(req, res){
         if (err) return callback(err, null);
 
         if (req.body.email && req.body.username && req.body.data) {
-
-            let password = ""
+            let password = "";
             if (req.body.password) {
                 password = req.body.password;
             }

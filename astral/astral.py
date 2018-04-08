@@ -37,9 +37,6 @@ def get_app_token(name, file=None):
     Returns:
         (bytes): JSON Web Token
     """
-    print(name)
-    print(file)
-    return
     (config, client, db)= init()
     apps = db.apps
     try: appid = apps.find_one({"name": name})["_id"]
@@ -59,9 +56,6 @@ def add_app(name, file=None):
     Returns:
         (bytes): JSON Web Token
     """
-    print(name)
-    print(file)
-    return
     (config, client, db)= init()
     print(name)
     apps = db.apps
