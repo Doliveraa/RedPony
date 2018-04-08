@@ -104,11 +104,11 @@ const createUser = function createUser(req, res){
 
 const getUser = function(req, res) {
     if (req.get("appKey")) {
-        password = "_";
-        if (req.get("password")) {
-          let password = req.get("password");
-        }
         if (req.get("email")) {
+            let password = "_";
+            if (req.get("password")) {
+                password = req.get("password");
+            }
             getToken(req.get("appKey"), req.get("email"), password, function(err, token) {
                 if (err) {
                     res.status = 401;

@@ -12,10 +12,6 @@ const routing = function routing(express_router) {
         res.json({ message: 'Welcome to the REST API' });
     });
 
-    router.route('/users').get(function (req, res) {
-        MIDDLEWARE.getUser(req, res, {password:0});
-    });
-
     router.route('/users').post(function (req, res) {
         MIDDLEWARE.createUser(req, res);
     });
