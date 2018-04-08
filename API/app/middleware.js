@@ -74,7 +74,7 @@ const createUser = function createUser(req, res){
         if (err) return callback(err, null);
 
         if (req.body.email && req.body.username && req.body.data) {
-            let password = "";
+            let password = "_";
             if (req.body.password) {
                 password = req.body.password;
             }
@@ -104,7 +104,7 @@ const createUser = function createUser(req, res){
 
 const getUser = function(req, res) {
     if (req.get("appKey")) {
-        password = "";
+        password = "_";
         if (req.get("password")) {
           let password = req.get("password");
         }
