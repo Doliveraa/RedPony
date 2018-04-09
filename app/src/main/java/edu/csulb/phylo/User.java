@@ -29,7 +29,8 @@ public class User implements Serializable {
     private static String signInProvider;
     private static String email;
     private static String name;
-    //Other variables
+    //Astral Variables
+    private static String userAstralTokens;
     //Constants
     private final static String TAG = User.class.getSimpleName();
     //Public Constants
@@ -92,22 +93,7 @@ public class User implements Serializable {
     public String getSignInProvider() {
         return signInProvider;
     }
-//
-//    public String getUserAccessToken(Context context) {
-//        //Retrieve user access token depending on the provider
-//        switch(signInProvider){
-//            case GOOGLE_PROVIDER:{
-//                return getGoogleAccessToken(context);
-//            }
-//            case FACEBOOK_PROVIDER: {
-//
-//            }
-//            case COGNITO_PROVIDER: {
-//
-//            }
-//        }
-//        return null;
-//    }
+
 
     private static void retrieveUserInformation(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
@@ -195,32 +181,22 @@ public class User implements Serializable {
         Log.d(TAG, "retrieveCognitoInformation: Finished retrieving Cognito information");
     }
 
-//    /**
-//     * Retrieve Google access token
-//     *
-//     * @return Google's access token
-//     */
-//    private String getGoogleAccessToken(Context context) {
-//        String accessToken;
-//        //Initialize Google Account object
-//        //Look at https://github.com/aws/aws-sdk-android/blob/master/aws-android-sdk-auth-google/src/main/java/com/amazonaws/mobile/auth/google/GoogleSignInProvider.java
-//        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(context);
-//
-////        accessToken = GoogleAuthUtil.getToken(context, googleAccount.getAccount(), )
-////        return accessToken;
-//    }
-//
-//    private String getCognitoAccessToken() {
-//        String accessToken;
-//
-//        return accessToken;
-//    }
-//
-//    private String getFacebookAccessToken() {
-//        String accessToken;
-//
-//        return accessToken;
-//    }
+    /**
+     * Retrieve's the user's access tokens for astral
+     *
+     * @param tokens The token received back from the HTTP request
+     */
+    public void setUserAstralTokens(String tokens) {
+        userAstralTokens = tokens;
+    }
+
+    /**
+     *
+     * @return The user's Astral tokens, null if it hasn't been set before
+     */
+    public String getUserAstralTokens() {
+        return userAstralTokens;
+    }
 
     /**
      * Make singleton from serialize and deserialize operation

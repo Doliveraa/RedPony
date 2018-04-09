@@ -83,4 +83,8 @@
     <string name="back_image">Back Button</string>
     <string name="help_image">Question Mark Button</string>
 
+    <!-- String related to Astral -->
+    <string name="astral_key">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.d_K_XqtkjbnONoUaNVlA_K-kKo8zYm7AQkRKAuycJHw</string>
+    <string name="astral_base_url">http://10.0.2.2:7000</string>
+
 </resources>

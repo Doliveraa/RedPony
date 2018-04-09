@@ -1,6 +1,5 @@
 package edu.csulb.phylo;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,6 +8,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by vietl on 2/21/2018.
@@ -21,10 +24,8 @@ public class MainActivityContainer extends AppCompatActivity{
     UploadFragment uploadFragment;
     UserFragment userFragment;
     PinnedFragment pinnedFragment;
-
     //Variables
     private User user;
-
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -85,6 +86,8 @@ public class MainActivityContainer extends AppCompatActivity{
         pinnedFragment = PinnedFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
         userFragment = UserFragment.newInstance();
+
+
     }
     
     @Override

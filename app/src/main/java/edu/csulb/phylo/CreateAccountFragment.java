@@ -56,6 +56,8 @@ public class CreateAccountFragment extends Fragment
         void onAccountCreated(CognitoUser cognitoUser);
         void onCreateAccountFinished();
     }
+
+    //TODO: remove constant update, allow button to be clickable but show error message instead
     private OnAccountCreatedListener onAccountCreatedListener;
     /**
      * Event watcher that calls the updateButton() method to see if it should activate or not

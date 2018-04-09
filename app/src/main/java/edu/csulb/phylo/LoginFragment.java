@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -147,6 +148,8 @@ public class LoginFragment extends Fragment
 
             //Creates a CognitoUser object to be used as a starting point for authentication
             cognitoUser = cognitoUserPool.getUser(userEmail);
+
+            Looper.prepare();
 
             Runnable authRunnable = cognitoUser.initiateUserAuthentication(authDetails, authHandler, true);
             authRunnable.run();
@@ -376,8 +379,11 @@ public class LoginFragment extends Fragment
     private void startNormalLogin() {
         String userEmail = emailEditText.getText().toString().toLowerCase();
         String userPassword = passwordEditText.getText().toString();
+        Log.d(TAG, "startNormalLogin: email = " + userEmail);
+        Log.d(TAG, "startNormalLogin: password = " + userPassword);
         if (userEmail.isEmpty() || userPassword.isEmpty()) {
             alertDialog = createErrorDialog("Email and password fields cannot be empty");
+            alertDialog.show();
             return;
         }
         CognitoAuthHelper cognitoHelper = new CognitoAuthHelper();
