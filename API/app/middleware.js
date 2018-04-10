@@ -205,6 +205,43 @@ const createFile = function(req, res) {
     }
 };
 
+//Verify if a username is already taken return 200 if user is taken, return 404 if username not found
+const checkUserAvailability = function(req, res) {
+    let appKey = req.get("appKey");
+    let usernameReq = req.query.username;
+
+    if (appKey) {
+        //check if query is empty
+        if (req.query !== {}) {
+            User.findOne({username: usernameReq, app: appKey.name }, function(err, user) {
+                //if error return error status and message
+                if (err) {
+                    console.log(err);
+                    err = new Error('query error');
+                    err.status = 500;
+                    return callback(err, null);
+                }
+                //if user not found return not found status
+                if (!user)
+                {
+                    let notFound = new Error('Not Found: User not found');
+                    notFound.status = 404;
+                    return callback(notFound, null);
+                }
+                //if user found return request okay status
+                return callback(null, res.status(200).json({message: "Okay: User with username is found"}));
+            })
+        } else {
+            res.status = 400;
+            return res.json({message: "Bad Request: No username parameter"})
+        }
+    } else {
+        res.status = 401;
+        return res.json({message: "No appKey provided"});
+    }
+};
+
+
 const getFiles = function(req, res) {
     if (req.get("appKey") && req.get("token")) {
         if (req.get("latitude") && req.get("longitude") && req.get("radius")) {
@@ -286,5 +323,6 @@ module.exports = {
   updateUser,
   createFile,
   getFiles,
-  updateFile
+  updateFile,
+  checkUserAvailability
 };
