@@ -10,6 +10,7 @@
    * [Create a user](#post-user)
    * [Retrieve a user's JSON Web Token](#login-user)
    * [Retrieve a user's info](#get-user)
+   * [Check if a username exists](#get-user-check)
    * [Create a file](#post-file)
    * [Retrieve a users created files](#get-created-files)
    * [Retrieve files at location](#get-files-by-location)
@@ -71,9 +72,9 @@
       * User's email address
     * `password`
       * User's password
-
+     
 <a name="get-user"></a>
-### Retrieve a user's info
+### Check username availability
 * Route: __GET__ https://api.domain.com/users
 * Purpose: Get information about a user: username,  etc
 * Required parameters
@@ -82,7 +83,20 @@
      * JSON Web Token for application
    * `token`
      * JSON Web Token for user
-
+     
+<a name="get-user-check"></a>
+### Check if a username exists
+* Route: __GET__ https://api.domain.com/users/check?username=[someUsername]
+* Purpose: Check if a username exists within an application
+* Return: 200 if user is found, 404 for user not found
+* Required parameters
+ * Request query
+   * `[someUsername]`
+     * the username to verify
+ * Request header
+   * `appKey`
+     * JSON Web Token for application
+  
 <a name="post-file"></a>
 ### Create a file
 * Route: __POST__ https://api.domain.com/files
