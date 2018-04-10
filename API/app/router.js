@@ -23,6 +23,11 @@ const routing = function routing(express_router) {
     router.route('/users').get(function (req, res) {
         MIDDLEWARE.getUser(req, res);
     });
+    
+    //Search for username availability
+    router.route('/users/check').get(function (req, res) {
+        MIDDLEWARE.checkUserAvailability(req, res);
+    });
 
     router.route('/files').post(function (req, res) {
         MIDDLEWARE.createFile(req, res);
