@@ -86,12 +86,12 @@
      
 <a name="get-user-check"></a>
 ### Check if a username exists
-* Route: __GET__ https://api.domain.com/users/check?username=
+* Route: __GET__ https://api.domain.com/users/check?username=[someUsername]
 * Purpose: Check if a username exists within an application
 * Return: 200 if user is found, 404 for user not found
 * Required parameters
  * Request query
-   * `username`
+   * `[someUsername]`
      * the username to verify
  * Request header
    * `appKey`
