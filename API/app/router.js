@@ -1,6 +1,3 @@
-const USER = require('./schemas/user');
-const FILE = require('./schemas/file');
-const UUID = require('uuid/v1');
 const MIDDLEWARE = require('./middleware');
 
 // noinspection JSAnnotator
