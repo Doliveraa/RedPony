@@ -95,7 +95,7 @@ public class MainActivityContainer extends AppCompatActivity{
         //If MapFragment is currently receiving permission on the user's location,
         //Send the result back to MapFragment
         if (mapsFragment.isRetrievingLocPermission()) {
-            Log.d(TAG, "onActivityResult: Back from receiving User Permission");
+            Log.d(TAG, "onActivityResult: Back from receiving AstralUser Permission");
             mapsFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);

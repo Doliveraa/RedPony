@@ -18,7 +18,7 @@ import android.widget.Button;
 
 public class UserFragment extends Fragment
     implements View.OnClickListener{
-    //User Variable
+    //AstralUser Variable
     private User user;
 
     //Fragment Variables

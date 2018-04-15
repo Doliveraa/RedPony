@@ -8,9 +8,9 @@ import retrofit2.http.POST;
 
 public interface AstralHttpInterface {
 
-    //Creates a user once they have created an account with us or it is their first time signing
+    //Creates a astralUser once they have created an account with us or it is their first time signing
     //in to this application
     @FormUrlEncoded
     @POST("users")
-    Call<ResponseBody> createUser(@Body User user);
+    Call<ResponseBody> createUser(@Body AstralUser astralUser);
 }

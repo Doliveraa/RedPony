@@ -37,12 +37,12 @@ public class SplashActivity extends Activity {
         //Check if the user has already signed in before
         if (userIsSignedIn()) {
             //Move to main activity because the user is already signed in
-            Log.d(TAG, "onCreate: User is already signed in, moving to main activity");
+            Log.d(TAG, "onCreate: AstralUser is already signed in, moving to main activity");
             Intent moveToMainIntent = new Intent(this, MainActivityContainer.class);
             startActivity(moveToMainIntent);
         } else {
             //Send intent to start the login activity
-            Log.d(TAG, "onCreate: User is not signed in, moving to authentication activity");
+            Log.d(TAG, "onCreate: AstralUser is not signed in, moving to authentication activity");
             Intent loginIntent = new Intent(this, AuthenticationContainer.class);
             loginIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
             startActivity(loginIntent);

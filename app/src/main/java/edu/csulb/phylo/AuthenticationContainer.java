@@ -21,7 +21,6 @@ public class AuthenticationContainer extends Activity
     private static final String TAG = AuthenticationContainer.class.getSimpleName();
     public static final String START_LOGIN_ACTION = "SLA";
     //Variables
-    private CognitoUserPool cognitoUserPool;
     private CognitoUser cognitoUser;
 
     //Enumerator
@@ -43,20 +42,15 @@ public class AuthenticationContainer extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
 
-        //Initialize variables
-        cognitoUserPool = AuthHelper.getCognitoUserPool(this);
-
         //Initialize Login Fragment
         loginFragment = new LoginFragment();
         loginFragment.setOnChangeFragmentListener(this);
-        loginFragment.setCognitoUserPool(cognitoUserPool);
 
         //Initialize Verify Code Fragment
         verifyCodeFragment = new VerifyCodeFragment();
 
         //Initialize Create Account Fragment
         createAccountFragment = new CreateAccountFragment();
-        createAccountFragment.setCognitoUserPool(cognitoUserPool);
         createAccountFragment.setOnAccountCreatedListener(new CreateAccountFragment.OnAccountCreatedListener() {
             @Override
             public void onAccountCreated(CognitoUser receivedCognitoUser) {

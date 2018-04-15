@@ -36,7 +36,7 @@ public class AuthHelper {
     private final static String LAST_USER_CACHE = "CognitoIdentityProviderCache";
 
     /**
-     * User should not be able to generate this class
+     * AstralUser should not be able to generate this class
      */
     private AuthHelper() {
         throw new RuntimeException("AuthHelper should not be generated");
@@ -153,7 +153,7 @@ public class AuthHelper {
             default:
                 resultMessage = "Error, Did not enter case statements";
         }
-        Log.d(TAG, "signOutUser: User Sign out Result: " + resultMessage);
+        Log.d(TAG, "signOutUser: AstralUser Sign out Result: " + resultMessage);
     }
 
     public static GoogleSignInClient getGoogleSignInClient(Context context) {

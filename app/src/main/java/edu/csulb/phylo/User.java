@@ -20,15 +20,18 @@ import java.io.Serializable;
  * Created by Danie on 3/19/2018.
  */
 
+//TODO: Create a way to update the AstralUser sign in provider
+
 public class User implements Serializable {
 
     //Forces userInstance to be thread safe, all the write will happen on this instance
     //before being read from
     private static volatile User userInstace;
-    //User Variables
+    //AstralUser Variables
     private static String signInProvider;
     private static String email;
     private static String name;
+    private static String username;
     //Astral Variables
     private static String userAstralTokens;
     //Constants
@@ -39,7 +42,7 @@ public class User implements Serializable {
 
 
     /**
-     * Does not allow the developer to create a User object through the constructor
+     * Does not allow the developer to create a AstralUser object through the constructor
      */
     private User() {
         //Prevent instantiation from the reflection API
@@ -49,13 +52,13 @@ public class User implements Serializable {
     }
 
     /**
-     * Automatically looks into the shared preferences and builds a User object
+     * Automatically looks into the shared preferences and builds a AstralUser object
      * based on the current sign in provider
      *
      * @return
      */
     public static User getInstance(Context context) {
-        //Create a new user object if there is no current User object
+        //Create a new user object if there is no current AstralUser object
         if(userInstace == null) {
             synchronized (User.class) {
                 if(userInstace == null) {
@@ -84,6 +87,13 @@ public class User implements Serializable {
     public String getEmail() {
         return email;
     }
+
+    /**
+     * The user's username retrieved from Astral
+     *
+     * @return The user's username
+     */
+    public String getUsername() { return username; }
 
     /**
      * The user's sign in provider
@@ -123,7 +133,7 @@ public class User implements Serializable {
     /**
      * Retrieve's the user's google information
      *
-     * @param context The activity where the User object is created
+     * @param context The activity where the AstralUser object is created
      */
     private static void retrieveGoogleInformation(Context context) {
         GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(context);
@@ -167,7 +177,7 @@ public class User implements Serializable {
     /**
      * Retrieve's the user's cognito user pool information
      *
-     * @param context The activity where the User object is created
+     * @param context The activity where the AstralUser object is created
      */
     private static void retrieveCognitoInformation(Context context) {
         //Retrieve user's information from shared preferences

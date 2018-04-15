@@ -148,11 +148,11 @@ public class MapsFragment extends Fragment
             case PERMISSION_REQUEST_CODE: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Permission has been granted, we can now start tracking the user's location
-                    Log.d(TAG, "onRequestPermissionResult : User has accepted location permissions");
+                    Log.d(TAG, "onRequestPermissionResult : AstralUser has accepted location permissions");
                     userLocationClient.startUserLocationTracking();
                     hasLocationPermission = true;
                 } else {
-                    Log.d(TAG, "onRequestPermissionResult : User has denied location permissions");
+                    Log.d(TAG, "onRequestPermissionResult : AstralUser has denied location permissions");
                     //Permission Denied
                     Toast.makeText(getActivity(), "Location Permission Denied", Toast.LENGTH_SHORT).show();
                 }

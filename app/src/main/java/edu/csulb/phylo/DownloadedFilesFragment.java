@@ -19,7 +19,7 @@ import android.widget.ImageButton;
 public class DownloadedFilesFragment extends Fragment
         implements View.OnClickListener{
 
-    //User Fragment
+    //AstralUser Fragment
     UserFragment userFragment;
 
     public static DownloadedFilesFragment newInstance(){

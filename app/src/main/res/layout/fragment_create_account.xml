@@ -38,6 +38,24 @@
                 android:inputType="textPersonName|textNoSuggestions" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/text_view_username_format"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12dp"
+            android:layout_marginLeft="10dp"
+            android:textColor="@android:color/holo_red_dark"
+            android:text="@string/username_format"
+            android:visibility="gone"/>
+
+        <EditText
+            android:id="@+id/username_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:hint="@string/username" />
+
         <EditText
             android:id="@+id/email_edit_text"
             android:layout_width="match_parent"
@@ -47,6 +65,16 @@
             android:hint="@string/email"
             android:inputType="textEmailAddress|textNoSuggestions" />
 
+        <TextView
+            android:id="@+id/text_view_password_format"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12dp"
+            android:layout_marginLeft="10dp"
+            android:textColor="@android:color/holo_red_dark"
+            android:text="@string/password_format"
+            android:visibility="gone"/>
+
         <EditText
             android:id="@+id/password_edit_text"
             android:layout_width="match_parent"
@@ -55,21 +83,6 @@
             android:layout_marginStart="8dp"
             android:hint="@string/password"
             android:inputType="textPassword|textNoSuggestions" />
-
-        <TextView
-            android:id="@+id/invalid_password_guide_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:background="@android:drawable/editbox_background"
-            android:backgroundTint="@android:color/transparent"
-            android:clickable="false"
-            android:text="@string/incorrect_password_format"
-            android:textColor="@android:color/holo_red_dark"
-            android:textSize="11sp"
-            android:visibility="gone" />
 
         <EditText
             android:id="@+id/confirm_password_edit_text"
@@ -87,8 +100,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/create_account"
-            android:background="@android:color/transparent"
-            android:textColor="@color/gray"/>
+            android:background="@android:color/transparent"/>
     </LinearLayout>
 
     <RelativeLayout

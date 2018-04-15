@@ -131,7 +131,7 @@ public class LoginFragment extends Fragment
     };
 
     /**
-     * Used to communicate with the Cognito User Pool login for normal logins
+     * Used to communicate with the Cognito AstralUser Pool login for normal logins
      */
     private class CognitoAuthHelper extends AsyncTask<String, Void, Void> {
         @Override
@@ -192,6 +192,7 @@ public class LoginFragment extends Fragment
 
         //Initialize variables
         isSigningIn = false;
+        cognitoUserPool = AuthHelper.getCognitoUserPool(getActivity());
 
         //Initialize all of the views
         Button normalLoginButton = getActivity().findViewById(R.id.button_normal_login);
@@ -368,7 +369,7 @@ public class LoginFragment extends Fragment
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
         alertDialogBuilder.setTitle("PetSit SignIn");
         //Animate this later on
-        alertDialogBuilder.setMessage("Logging User In...");
+        alertDialogBuilder.setMessage("Logging AstralUser In...");
         alertDialogBuilder.setCancelable(false);
         return alertDialogBuilder.create();
     }
@@ -403,14 +404,6 @@ public class LoginFragment extends Fragment
         getActivity().finish();
     }
 
-    /**
-     * Sets the value to this cognito user pool
-     *
-     * @param cognitoUserPool The initialized cognito user pool to work with this activity
-     */
-    public void setCognitoUserPool(CognitoUserPool cognitoUserPool) {
-        this.cognitoUserPool = cognitoUserPool;
-    }
 
 
 }

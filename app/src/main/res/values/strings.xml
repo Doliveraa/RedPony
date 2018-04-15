@@ -18,7 +18,9 @@
     <string name="invalid_confirm_password">Passwords do not equal.</string>
     <string name="email_already_exists">Email already exists.</string>
     <string name="incorrect_email_format">This email is not valid</string>
-    <string name="incorrect_password_format">Password minimum 8 characters (a&#8211;z, A&#8211;Z, 0&#8211;9)</string>
+    <string name="password_format">Minimum 8 characters (a&#8211;z, A&#8211;Z, 0&#8211;9)</string>
+    <string name="username">Username</string>
+    <string name="username_format">In between 3-12 Characters (a-z, A-Z, 0-9, dots, dashes, underlines)</string>
 
     <!-- String related to Code Verification -->
     <string name="verify_code_hint">Received Code</string>
@@ -45,7 +47,7 @@
     <string name="r_tok">r_tok</string>
     <string name="i_tok">i_tok</string>
 
-    <!-- Strings related to User Fragment -->
+    <!-- Strings related to AstralUser Fragment -->
     <string name="email_address_user">Email Address</string>
     <string name="password_user">Password</string>
     <string name="user_files">Uploaded Files</string>

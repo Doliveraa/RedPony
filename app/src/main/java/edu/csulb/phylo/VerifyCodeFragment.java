@@ -18,13 +18,11 @@ import android.widget.Toast;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 
-import edu.csulb.phylo.Astral.AstralHttpInterface;
-import edu.csulb.phylo.Astral.User;
-import retrofit2.Retrofit;
-
 /**
  * Created by Daniel on 2/11/2018.
  */
+
+//TODO: Build user object and begin sending requests
 
 public class VerifyCodeFragment extends Fragment
         implements View.OnClickListener {
@@ -96,10 +94,8 @@ public class VerifyCodeFragment extends Fragment
                         AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
                         AuthHelper.cacheCurrentCognitoSignedInUser(getActivity(), cognitoUser.getUserId());
 
-                        Log.d(TAG, "Cognito User User Id: " + cognitoUser.getUserId());
 
-
-                        //Create an Astral User account
+                        //Create an Astral AstralUser account
                         Intent intent = new Intent(getActivity(), MainActivityContainer.class);
                         startActivity(intent);
                         getActivity().finish();
