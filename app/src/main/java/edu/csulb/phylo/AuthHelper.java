@@ -18,6 +18,8 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.Map;
 
+import edu.csulb.phylo.Astral.Astral;
+
 /**
  * Created by Daniel on 1/15/2018.
  */
@@ -118,6 +120,21 @@ public class AuthHelper {
         SharedPreferences.Editor spEditor = sharedPreferences.edit();
         spEditor.putString(User.USER_SIGN_IN_PROVIDER, provider);
         spEditor.commit();
+    }
+
+    /**
+     * Store the user's username inside of the phone for accessibility
+     *
+     * @param context The activity where this method is being called from
+     * @param username The User's username
+     */
+    public static void storeUsername(Context context, String username) {
+        //Create or open folder holding that hold's the user's Astral information
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Astral.ASTRAL_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //Add the User's username to the folder
+        editor.putString(Astral.ASTRAL_USERNAME, username);
+        editor.apply();
     }
 
     /**

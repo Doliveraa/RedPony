@@ -16,6 +16,8 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
+import edu.csulb.phylo.Astral.Astral;
+
 /**
  * Created by Danie on 3/19/2018.
  */
@@ -191,22 +193,6 @@ public class User implements Serializable {
         Log.d(TAG, "retrieveCognitoInformation: Finished retrieving Cognito information");
     }
 
-    /**
-     * Retrieve's the user's access tokens for astral
-     *
-     * @param tokens The token received back from the HTTP request
-     */
-    public void setUserAstralTokens(String tokens) {
-        userAstralTokens = tokens;
-    }
-
-    /**
-     *
-     * @return The user's Astral tokens, null if it hasn't been set before
-     */
-    public String getUserAstralTokens() {
-        return userAstralTokens;
-    }
 
     /**
      * Make singleton from serialize and deserialize operation

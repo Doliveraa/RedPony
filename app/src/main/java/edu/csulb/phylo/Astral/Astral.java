@@ -1,5 +1,8 @@
 package edu.csulb.phylo.Astral;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.io.Serializable;
 
 import edu.csulb.phylo.BuildConfig;
@@ -10,16 +13,22 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Astral{
-    //Constants
-    public final static String ASTRAL_USERNAME = "astral username";
+    //Astral Constants
+    public final static String APP_KEY_HEADER = "appKey";
+    public final static String ASTRAL_USERNAME = "username";
+    public final static String ASTRAL_STORAGE = "astral_storage";
+    public final static String ASTRAL_TOKEN = "token";
+    public final static int OK = 200;
+    public final static int NOT_FOUND = 404;
     //REST Api items
     private Retrofit.Builder retrofitBuilder;
     private OkHttpClient.Builder okHttpClientBuilder;
 
+
     /**
      * Astral object constructor
      */
-    private Astral(String baseUrl) {
+    public Astral(String baseUrl) {
         //Instantiate a Retrofit.Builder object
         retrofitBuilder = new Retrofit.Builder();
         //Instantiate an OkHttpClient.Builder object
@@ -29,7 +38,6 @@ public class Astral{
         retrofitBuilder.baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create());
     }
-
 
 
     /**
@@ -65,12 +73,25 @@ public class Astral{
      *
      * @return a Retrofit object
      */
-    public Retrofit geClient() {
+    public AstralHttpInterface getHttpInterface() {
         //Add the current OkHttpClient that the user has optionally built
         retrofitBuilder.client(okHttpClientBuilder.build());
         //Return the client to be used for requests and responses
-        return retrofitBuilder.build();
+        Retrofit retrofit = retrofitBuilder.build();
+        AstralHttpInterface astralHttpInterface = retrofit.create(AstralHttpInterface.class);
+        return astralHttpInterface;
     }
 
+    /**
+     * Stores the User's tokens to perform any other transactions later
+     *
+     * @param userToken The token item received from an Astral Request
+     */
+    public void storeAstralUserToken(Context context, String userToken) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ASTRAL_STORAGE, context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(Astral.ASTRAL_TOKEN, userToken);
+        editor.apply();
+    }
 
 }

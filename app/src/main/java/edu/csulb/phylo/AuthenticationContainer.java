@@ -8,8 +8,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
-import com.amazonaws.regions.Regions;
+
+import edu.csulb.phylo.Astral.AstralUser;
 
 /**
  * Created by Danie on 1/24/2018.
@@ -22,6 +22,7 @@ public class AuthenticationContainer extends Activity
     public static final String START_LOGIN_ACTION = "SLA";
     //Variables
     private CognitoUser cognitoUser;
+    private AstralUser astralUser;
 
     //Enumerator
     public enum AuthFragmentType {
@@ -53,8 +54,9 @@ public class AuthenticationContainer extends Activity
         createAccountFragment = new CreateAccountFragment();
         createAccountFragment.setOnAccountCreatedListener(new CreateAccountFragment.OnAccountCreatedListener() {
             @Override
-            public void onAccountCreated(CognitoUser receivedCognitoUser) {
+            public void onAccountCreated(CognitoUser receivedCognitoUser, AstralUser receivedAstralUser) {
                 cognitoUser = receivedCognitoUser;
+                astralUser = receivedAstralUser;
             }
 
             @Override
@@ -140,7 +142,7 @@ public class AuthenticationContainer extends Activity
             }
             break;
             case VERIFY_CODE: {
-                verifyCodeFragment.setCognitoUser(cognitoUser);
+                verifyCodeFragment.setUser(cognitoUser, astralUser);
                 fragmentTransaction.replace(R.id.user_authentication_container, verifyCodeFragment);
             }
             break;

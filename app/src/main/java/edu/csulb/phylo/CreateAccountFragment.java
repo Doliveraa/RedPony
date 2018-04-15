@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,9 +13,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
@@ -26,9 +24,21 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
 import com.amazonaws.services.cognitoidentityprovider.model.UsernameExistsException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import edu.csulb.phylo.Astral.Astral;
+import edu.csulb.phylo.Astral.AstralHttpInterface;
+import edu.csulb.phylo.Astral.AstralUser;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * Created by Daniel on 2/24/2018.
@@ -53,9 +63,12 @@ public class CreateAccountFragment extends Fragment
     private CognitoUserPool cognitoUserPool;
     private boolean accountCreated;
     private ArrayList<EditText> listOfInputFields;
+    private boolean usernameAvailable;
+
     //Interface
-    public interface OnAccountCreatedListener{
-        void onAccountCreated(CognitoUser cognitoUser);
+    public interface OnAccountCreatedListener {
+        void onAccountCreated(CognitoUser cognitoUser, AstralUser astralUser);
+
         void onCreateAccountFinished();
     }
 
@@ -73,8 +86,14 @@ public class CreateAccountFragment extends Fragment
             //Check if the user needs to be confirmed
             if (!userConfirmed) {
                 Log.d(TAG, "onSuccess: userNotConfirmed");
+
+                //Create an AstralUser object to send to the VerifyCodeFragment for its POST request
+                String userEmail = cognitoUser.getUserId();
+                String username = usernameEditText.getText().toString();
+                AstralUser astralUser = new AstralUser(userEmail, username, null);
+
                 //Send CognitoUser object to the container to hold it
-                onAccountCreatedListener.onAccountCreated(cognitoUser);
+                onAccountCreatedListener.onAccountCreated(cognitoUser, astralUser);
 
                 // This user must be confirmed and a confirmation code was sent to the user
                 // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
@@ -102,7 +121,7 @@ public class CreateAccountFragment extends Fragment
         public void onFailure(Exception exception) {
             //Sign up failed, check exception for the cause
             Log.d(TAG, "Sign Up Failed");
-            if(exception instanceof UsernameExistsException) {
+            if (exception instanceof UsernameExistsException) {
                 Log.d(TAG, "Email already exists : " + emailEditText.getText().toString());
                 progressBar.setVisibility(View.GONE);
                 displayErrorMessage("Email already exists.");
@@ -122,6 +141,7 @@ public class CreateAccountFragment extends Fragment
 
         //Initalize Variables
         accountCreated = false;
+        usernameAvailable = false;
         cognitoUserPool = AuthHelper.getCognitoUserPool(getActivity());
 
         //Initialize the views
@@ -151,17 +171,88 @@ public class CreateAccountFragment extends Fragment
             //Makes the username format hint appear if on focus and disappear otherwise
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus) {
+                if (hasFocus) {
                     usernameFormatTextView.setVisibility(View.VISIBLE);
                 } else {
                     usernameFormatTextView.setVisibility(View.GONE);
+
+                    if (!usernameEditText.getText().toString().isEmpty()) {
+                        //Begin progress bar animation
+                        final ProgressBar usernamePb = getActivity().findViewById(R.id.progress_bar_username_availability);
+                        usernamePb.setVisibility(View.VISIBLE);
+
+                        //Retrieve the user's username
+                        String username = usernameEditText.getText().toString();
+
+                        //Start a GET request to check if the username is available
+                        final Astral astral = new Astral(getString(R.string.astral_base_url));
+                        //Intercept the request to add a header item
+                        astral.addRequestInterceptor(new Interceptor() {
+                            @Override
+                            public Response intercept(Chain chain) throws IOException {
+                                Request request = chain.request();
+                                //Add the app key to the request header
+                                Request.Builder newRequest = request.newBuilder().header(
+                                        Astral.APP_KEY_HEADER, getString(R.string.astral_key));
+                                //Continue the request
+                                return chain.proceed(newRequest.build());
+                            }
+                        });
+                        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+                        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+
+                        //Create the GET Request
+                        Call<ResponseBody> request = astralHttpInterface.checkUsernameAvailability(username);
+
+                        //Call the request asynchronously
+                        request.enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                                //Make the progress bar dissappear regardless of the response code
+                                usernamePb.setVisibility(View.GONE);
+                                ImageView xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability);
+                                ImageView checkmarkImage = getActivity().findViewById(R.id.checkmark_username_availability);
+
+                                if (response.isSuccessful()) {
+                                    Log.d(TAG, "onFocusChange-> onResponse: Successful Response Code " + response.code());
+                                    if (response.code() == Astral.OK) {
+                                        //The username is not available
+                                        usernameAvailable = false;
+                                        //Make the checkmark disappear if it is currently visible
+                                        if (xMarkImage.getVisibility() == View.VISIBLE) {
+                                            checkmarkImage.setVisibility(View.GONE);
+                                        }
+                                        //Make the x mark appear
+                                        xMarkImage.setVisibility(View.VISIBLE);
+                                    }
+                                } else {
+                                    Log.d(TAG, "onFocusChange-> onResponse: Failure Response Code " + response.code());
+                                    if (response.code() == Astral.NOT_FOUND) {
+                                        //We can use the username, it was not found
+                                        usernameAvailable = true;
+                                        //Make the x mark disappear if it is currently visible
+                                        if(checkmarkImage.getVisibility() == View.VISIBLE) {
+                                            xMarkImage.setVisibility(View.GONE);
+                                        }
+                                        //Make the checkmark appear
+                                        checkmarkImage.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.d(TAG, "onFocusChange-> onFailure");
+                            }
+                        });
+                    }
                 }
             }
         });
         passwordEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus) {
+                if (hasFocus) {
                     passwordFormatTextView.setVisibility(View.VISIBLE);
                 } else {
                     passwordFormatTextView.setVisibility(View.GONE);
@@ -190,10 +281,10 @@ public class CreateAccountFragment extends Fragment
     /**
      * Calls the CognitoUserPool API to create a user account
      *
-     * @param firstName The user's first name
-     * @param lastName The user's last name
+     * @param firstName    The user's first name
+     * @param lastName     The user's last name
      * @param emailAddress The user's email address
-     * @param password The user's password
+     * @param password     The user's password
      */
     private void createUserAccount(String firstName, String lastName, String emailAddress, String password) {
         CognitoUserAttributes userAttributes = new CognitoUserAttributes();
@@ -211,7 +302,6 @@ public class CreateAccountFragment extends Fragment
      * Checks the user's password to make sure it is strong enough to prevent dictionary attacks
      *
      * @param password The user's desired password
-     *
      * @return True if the password is strong enough and false otherwise
      */
     private boolean passwordGuidelineCheck(String password) {
@@ -228,7 +318,6 @@ public class CreateAccountFragment extends Fragment
      * Checks if the email matches the specified pattern
      *
      * @param email The user's email
-     *
      * @return True if the email specified is valid and false otherwise
      */
     public boolean isEmailValid(String email) {
@@ -247,7 +336,6 @@ public class CreateAccountFragment extends Fragment
      * Checks if the username matches the specified pattern
      *
      * @param username The user's username choice
-     *
      * @return True if the username is valid and false otherwise
      */
     public boolean isUsernameValid(String username) {
@@ -273,9 +361,9 @@ public class CreateAccountFragment extends Fragment
     /**
      * This method will not be called if there exists any fields that are empty
      * Allows the user to create their account upon successful pre-requisites that include:
-     *  AstralUser email field must contain the right format
-     *  AstralUser password field must follow proper password guidelines
-     *  Confirm password must match the user's previously entered password
+     * AstralUser email field must contain the right format
+     * AstralUser password field must follow proper password guidelines
+     * Confirm password must match the user's previously entered password
      *
      * @param view
      */
@@ -284,24 +372,27 @@ public class CreateAccountFragment extends Fragment
         switch (view.getId()) {
             case R.id.create_account_button:
                 //Check if there are any empty fields
-                for(EditText inputField : listOfInputFields) {
-                    if(inputField.getText().toString().isEmpty()) {
+                for (EditText inputField : listOfInputFields) {
+                    if (inputField.getText().toString().isEmpty()) {
                         displayErrorMessage("All fields must not be empty.");
                         return;
                     }
                 }
-                //Check if username is valid
+                //Check if username is valid and if the username is available
                 String username = usernameEditText.getText().toString();
-                if(!isUsernameValid(username)) {
+                if (!isUsernameValid(username)) {
                     displayErrorMessage("Username must be 3-12 characters and only use" +
                             " the following: \n(a-z, A-Z, 0-9, dots, dashes, underlines");
+                    return;
+                } else if(!usernameAvailable) {
+                    displayErrorMessage("Chosen username is not available.");
                     return;
                 }
 
                 //Check if the email address field is properly formatted and display an error
                 //error message if the format is wrong
                 String emailAddress = emailEditText.getText().toString().toLowerCase();
-                if(!isEmailValid(emailAddress)) {
+                if (!isEmailValid(emailAddress)) {
                     displayErrorMessage("Email is not valid.");
                     return;
                 }
@@ -309,7 +400,7 @@ public class CreateAccountFragment extends Fragment
                 //Check if the user password field is not empty and contains the proper format
                 //and displays an error message if the password does not meet the guidelines
                 String password = passwordEditText.getText().toString();
-                if(!passwordGuidelineCheck(password)) {
+                if (!passwordGuidelineCheck(password)) {
                     displayErrorMessage("Password must contain a minimum of 8 characters and " +
                             "the following : (a-z, A-Z, 0-9).");
                     return;
@@ -318,7 +409,7 @@ public class CreateAccountFragment extends Fragment
                 //Makes sure that the confirm password is exactly the same as the password
                 //and displays an error message if the passwords do not equal
                 String confirmPassword = confirmPasswordEditText.getText().toString();
-                if(!confirmPassword.equals(password)) {
+                if (!confirmPassword.equals(password)) {
                     displayErrorMessage("Passwords do not equal");
                     return;
                 }
@@ -335,7 +426,7 @@ public class CreateAccountFragment extends Fragment
                 progressBar.setVisibility(View.VISIBLE);
                 //Hide the soft input keyboard from the user
                 View currentlyFocusedView = getActivity().getCurrentFocus();
-                InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(currentlyFocusedView.getWindowToken(), 0);
 
                 break;

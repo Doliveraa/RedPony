@@ -10,4 +10,6 @@
     <color name="white">#FFFFFF</color>
     <color name="aqua">#00FFFF</color>
     <color name="lightNavy">#0272A6</color>
+    <color name="green">#3fec0b</color>
+    <color name="red">#FF3F0000</color>
 </resources>

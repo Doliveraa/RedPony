@@ -18,6 +18,19 @@ import android.widget.Toast;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 
+import java.io.IOException;
+
+import edu.csulb.phylo.Astral.Astral;
+import edu.csulb.phylo.Astral.AstralHttpInterface;
+import edu.csulb.phylo.Astral.AstralUser;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+
 /**
  * Created by Daniel on 2/11/2018.
  */
@@ -31,6 +44,7 @@ public class VerifyCodeFragment extends Fragment
     private EditText codeInputEditText;
     //Variables
     private CognitoUser cognitoUser;
+    private AstralUser astralUser;
     //Constants
     private final static String TAG = VerifyCodeFragment.class.getSimpleName();
 
@@ -93,12 +107,55 @@ public class VerifyCodeFragment extends Fragment
                         //Set that the user has authenticated with Cognito
                         AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
                         AuthHelper.cacheCurrentCognitoSignedInUser(getActivity(), cognitoUser.getUserId());
+                        AuthHelper.storeUsername(getActivity(), astralUser.getUsername());
 
+                        //Start at POST request to create the user in the Astral Framework
+                        final Astral astral = new Astral(getString(R.string.astral_base_url));
+                        //Intercept the request to add a header item
+                        astral.addRequestInterceptor(new Interceptor() {
+                            @Override
+                            public Response intercept(Chain chain) throws IOException {
+                                Request request = chain.request();
+                                //Add the app key to the request header
+                                Request.Builder newRequest = request.newBuilder().header(
+                                        Astral.APP_KEY_HEADER, getString(R.string.astral_key));
+                                //Continue the request
+                                return chain.proceed(newRequest.build());
+                            }
+                        });
+                        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+                        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+                        //Create the POST request
+                        Call<AstralUser> request = astralHttpInterface.createUser(astralUser);
+                        //Call the request asynchronously
+                        request.enqueue(new Callback<AstralUser>() {
+                            @Override
+                            public void onResponse(Call<AstralUser> call, retrofit2.Response<AstralUser> response) {
+                                if(response.isSuccessful()) {
+                                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code());
 
-                        //Create an Astral AstralUser account
-                        Intent intent = new Intent(getActivity(), MainActivityContainer.class);
-                        startActivity(intent);
-                        getActivity().finish();
+                                    //Retrieve the token received
+                                    String userToken = response.body().getUserToken();
+
+                                    //Store the User's token item
+                                    astral.storeAstralUserToken(getActivity(), userToken);
+
+                                    //Create an Astral AstralUser account
+                                    Intent intent = new Intent(getActivity(), MainActivityContainer.class);
+                                    startActivity(intent);
+                                    getActivity().finish();
+                                } else {
+                                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<AstralUser> call, Throwable t) {
+                                //The request has unexpectedly failed
+                                Log.d(TAG, "onCLick-> onSuccess-> onResponse: Unexpected request failure");
+                            }
+                        });
+
                     }
 
                     @Override
@@ -113,9 +170,17 @@ public class VerifyCodeFragment extends Fragment
         }
     }
 
-    public void setCognitoUser(CognitoUser cognitoUser) {
+    /**
+     * Sets the CognitoUser object and Astral object to complete account creation
+     *
+     * @param cognitoUser the CognitoUser object being sent to AWS Cognito
+     * @param astralUser the AstralUser object being sent to the Astral Framework
+     */
+    public void setUser(CognitoUser cognitoUser, AstralUser astralUser) {
         this.cognitoUser = cognitoUser;
+        this.astralUser = astralUser;
     }
+
 
     private void printToast(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();

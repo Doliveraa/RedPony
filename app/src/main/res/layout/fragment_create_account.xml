@@ -48,13 +48,45 @@
             android:text="@string/username_format"
             android:visibility="gone"/>
 
-        <EditText
-            android:id="@+id/username_edit_text"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:hint="@string/username" />
+            android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/username_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:hint="@string/username" />
+            <ProgressBar
+                android:id="@+id/progress_bar_username_availability"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical|right"
+                android:layout_marginRight="14dp"
+                android:indeterminateDrawable="@drawable/progress"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/checkmark_username_availability"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical|right"
+                android:layout_marginRight="14dp"
+                android:src="@drawable/check_mark"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/x_mark_username_availability"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical|right"
+                android:layout_marginRight="14dp"
+                android:src="@drawable/x_mark"
+                android:visibility="gone"/>
+
+
+        </FrameLayout>
 
         <EditText
             android:id="@+id/email_edit_text"
