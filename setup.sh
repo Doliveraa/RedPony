@@ -45,15 +45,25 @@ while test $# -gt 0; do
 done
 
 # Install curl
+<<<<<<< Updated upstream
 if [[ ! -z `which curl` ]]
     printf "${WHITE}Installing curl${NC}"
+=======
+if [[ ! -z `which curl` ]]; then
+    printf "${WHITE}Installing curl${NC}\n"
+>>>>>>> Stashed changes
     sudo apt-get update >/dev/null
     sudo apt-get install curl >/dev/null
 fi
 
 # Install Node.js
+<<<<<<< Updated upstream
 if [[ ! -z `which nodejs` ]]
     printf "${WHITE}Installing NodeJS${NC}"
+=======
+if [[ ! -z `which nodejs` ]]; then
+    printf "${WHITE}Installing NodeJS${NC}\n"
+>>>>>>> Stashed changes
     cd ~
     curl -sL https://deb.nodesource.com/setup_8.x -o nodesource_setup.sh >/dev/null
     sudo bash nodesource_setup.sh >/dev/null
@@ -62,12 +72,21 @@ if [[ ! -z `which nodejs` ]]
 fi
 
 # Install Python
+<<<<<<< Updated upstream
 if [[ ! -z `which python3` ]]
     printf "${WHITE}Installing Python${NC}"
     sudo apt-get install python3 >/dev/null
 fi
 if [[ ! -z `which pip3` ]]
     printf "${WHITE}Installing PIP3${NC}"
+=======
+if [[ ! -z `which python3` ]]; then
+    printf "${WHITE}Installing Python${NC}\n"
+    sudo apt-get install python3 >/dev/null
+fi
+if [[ ! -z `which pip3` ]]; then
+    printf "${WHITE}Installing PIP3${NC}\n"
+>>>>>>> Stashed changes
     sudo apt-get install python3-pip >/dev/null
 fi
 
@@ -108,8 +127,13 @@ astral setup_api $OPTIONS
 # Install node packages
 printf "${WHITE}Installing Astral API Dependencies${NC}"
 cd $SCRIPT_DIR/API
+<<<<<<< Updated upstream
 npm install
 sudo npm install -g forever
+=======
+npm install >/dev/null
+sudo npm install -g forever >/dev/null
+>>>>>>> Stashed changes
 
 # Setup ssl
 if $SSL; then
