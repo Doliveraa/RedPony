@@ -1,6 +1,11 @@
 #!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+WHITE='\033[0;37m'
+NC='\033[0m'
 
 SSL=false
 SECRET=""
@@ -39,34 +44,49 @@ while test $# -gt 0; do
         esac
 done
 
-# Add Mongo Keyserver
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-
-# Update apt-get
-sudo apt-get update
-
 # Install curl
-sudo apt-get install curl
+if [[ ! -z `which curl` ]]
+    printf "${WHITE}Installing curl${NC}"
+    sudo apt-get update >/dev/null
+    sudo apt-get install curl >/dev/null
+fi
 
 # Install Node.js
-cd ~
-curl -sL https://deb.nodesource.com/setup_8.x -o nodesource_setup.sh
-sudo bash nodesource_setup.sh
-sudo apt-get install nodejs
-rm nodesource_setup.sh
+if [[ ! -z `which nodejs` ]]
+    printf "${WHITE}Installing NodeJS${NC}"
+    cd ~
+    curl -sL https://deb.nodesource.com/setup_8.x -o nodesource_setup.sh >/dev/null
+    sudo bash nodesource_setup.sh >/dev/null
+    sudo apt-get install nodejs >/dev/null
+    rm nodesource_setup.sh >/dev/null
+fi
 
 # Install Python
-sudo apt-get install python3 python3-pip
+if [[ ! -z `which python3` ]]
+    printf "${WHITE}Installing Python${NC}"
+    sudo apt-get install python3 >/dev/null
+fi
+if [[ ! -z `which pip3` ]]
+    printf "${WHITE}Installing PIP3${NC}"
+    sudo apt-get install python3-pip >/dev/null
+fi
 
 # Install mongodb
-sudo apt-get install -y mongodb-org
-sudo systemctl start mongod
-sudo systemctl enable mongod
+if [[ ! -z `which mongod` ]]; then
+    printf "${WHITE}Installing MongoDB${NC}"
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 >/dev/null
+    echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list >/dev/null
+    sudo apt-get update >/dev/null
+
+    sudo apt-get install -y mongodb-org >/dev/null
+    sudo systemctl start mongod >/dev/null
+    sudo systemctl enable mongod >/dev/null
+fi
 
 # Install astral
+printf "${WHITE}Installing Astral${NC}"
 cd $SCRIPT_DIR/astral
-pip3 install -e . --upgrade --force-reinstall
+pip3 install -e . --upgrade --force-reinstall >/dev/null
 if ! grep -Fxq ".*_ASTRAL_COMPLETE.*" ~/.bashrc
 then
     echo 'eval "$(_ASTRAL_COMPLETE=source astral)"' >> ~/.bashrc
@@ -86,14 +106,18 @@ fi
 astral setup_api $OPTIONS
 
 # Install node packages
+printf "${WHITE}Installing Astral API Dependencies${NC}"
 cd $SCRIPT_DIR/API
 npm install
 sudo npm install -g forever
 
 # Setup ssl
-cd $SCRIPT_DIR/API
-read -p "Enter your domain name: " DOMAIN_NAME
-sudo apt-get install letsencrypt
-sudo certbot certonly --standalone -d $DOMAIN_NAME
-sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/privkey.pem $SCRIPT_DIR/API/config/privkey.pem
-sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/
+if $SSL; then
+    printf "${GREEN}Astral Installed, Let's setup SSL${NC}"
+    cd $SCRIPT_DIR/API
+    read -p "Enter your domain name: " DOMAIN_NAME
+    sudo apt-get install letsencrypt >/dev/null
+    sudo certbot certonly --standalone -d $DOMAIN_NAME
+    sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/privkey.pem $SCRIPT_DIR/API/config/privkey.pem
+    sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/
+fi
