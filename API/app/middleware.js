@@ -214,7 +214,7 @@ const checkUserAvailability = function(req, res) {
         //verify appKey
         let appDecoded;
         findApp(appKey, function (err, decoded) {
-            if (err) return callback(err, null);
+            if (err) return err;
             appDecoded = decoded;
         });
 
@@ -226,17 +226,15 @@ const checkUserAvailability = function(req, res) {
                     console.log(err);
                     err = new Error('query error');
                     err.status = 500;
-                    return callback(err, null);
+                    return err;
                 }
                 //if user not found return not found status
                 if (!user)
                 {
-                    let notFound = new Error('Not Found: User not found');
-                    notFound.status = 404;
-                    return callback(notFound, null);
+                    return res.status(404).json({message: "Not Found: User not found"});
                 }
                 //if user found return request okay status
-                return callback(null, res.status(200).json({message: "Okay: User with username is found"}));
+                return res.status(200).json({message: "Okay: User with username is found"});
             })
         } else {
             return res.status(400).json({message: "Bad Request: No username parameter"});
