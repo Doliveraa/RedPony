@@ -29,7 +29,7 @@ def add_app(file, app):
 @click.option('--ssl', is_flag=True, help="Setup API on ssl port (443)", metavar="<filepath>")
 def setup_api(port, secret, savedir, ssl):
     """Creates api config at FILE with PORT and SECRET."""
-    if ssl and port != 443:
+    if ssl and port and port != 443:
         raise Exception("SSL requires port 443")
     if not port and ssl: port = 443
     astral.setup_api(port, secret, savedir)

@@ -71,13 +71,13 @@ def add_app(name, file=None):
             fp.write(encode(appid, config["secret"]))
     else: print(encode(appid, config["secret"]).decode('utf-8'))
 
-def setup_api(port, secret, config_file):
+def setup_api(port, secret, savedir):
     """Sets up the API.
 
     Args:
         port (int): port to setup API at
         secret (str): secret for creating JSON Web Tokens
-        config_file (str): path to file to write config to
+        savedir (str): directory to write config to
     """
     if not secret:
         while True:
@@ -99,7 +99,7 @@ def setup_api(port, secret, config_file):
     json.dump(config, open(os.path.join(savedir, 'config.json'), 'w+'))
 
     mongojs = "module.exports = { path: 'mongodb://localhost/astral' }"
-    open(os.path.join(savedir, 'mongo.js'), 'w+').writeline(mongojs)
+    open(os.path.join(savedir, 'mongo.js'), 'w+').write(mongojs)
 
 def run_script(script):
     """Runs a script.
