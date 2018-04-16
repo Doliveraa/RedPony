@@ -74,7 +74,7 @@
       * User's password
      
 <a name="get-user"></a>
-### Check username availability
+### Retrieve a users info
 * Route: __GET__ https://api.domain.com/users
 * Purpose: Get information about a user: username,  etc
 * Required parameters
