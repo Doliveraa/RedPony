@@ -212,7 +212,7 @@ const checkUserAvailability = function(req, res) {
 
     if (appKey) {
         //verify appKey
-        let appDecoded = "";
+        let appDecoded = null;
         findApp(appKey, function (err, decoded) {
             if (err) return err;
             appDecoded = decoded;
@@ -243,7 +243,6 @@ const checkUserAvailability = function(req, res) {
         return res.status(401).json({message: "No appKey provided"});
     }
 };
-
 
 const getFiles = function(req, res) {
     if (req.get("appKey") && req.get("token")) {
