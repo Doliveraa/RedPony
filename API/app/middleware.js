@@ -219,7 +219,7 @@ const checkUserAvailability = function(req, res) {
         });
 
         //check if query is empty
-        if (req.query !== {} ) {
+        if (req.query !== {} && appDecoded != null) {
             User.findOne({username: usernameReq, app: appDecoded.name }, function(err, user) {
                 //if error return error status and message
                 if (err) {
