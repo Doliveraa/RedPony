@@ -212,7 +212,7 @@ const checkUserAvailability = function(req, res) {
 
     if (appKey) {
         //verify appKey
-        let appDecoded;
+        let appDecoded = "";
         findApp(appKey, function (err, decoded) {
             if (err) return err;
             appDecoded = decoded;
