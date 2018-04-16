@@ -218,8 +218,8 @@ const checkUserAvailability = function(req, res) {
             appDecoded = decoded;
         });
 
-        //check if query is empty and app was decoded
-        if (req.query !== {} && appDecoded) {
+        //check if query is empty
+        if (req.query !== {} ) {
             User.findOne({username: usernameReq, app: appDecoded.name }, function(err, user) {
                 //if error return error status and message
                 if (err) {
@@ -239,12 +239,10 @@ const checkUserAvailability = function(req, res) {
                 return callback(null, res.status(200).json({message: "Okay: User with username is found"}));
             })
         } else {
-            res.status = 400;
-            return res.json({message: "Bad Request: No username parameter"})
+            return res.status(400).json({message: "Bad Request: No username parameter"});
         }
     } else {
-        res.status = 401;
-        return res.json({message: "No appKey provided"});
+        return res.status(401).json({message: "No appKey provided"});
     }
 };
 
