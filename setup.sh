@@ -2,9 +2,9 @@
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 
-SSL=true
+SSL=false
 SECRET=""
-PORT=-1
+PORT=""
 while test $# -gt 0; do
         case "$1" in
                 -h|--help)
@@ -24,10 +24,12 @@ while test $# -gt 0; do
                         shift
                         ;;
                 --secret*)
+                        shift
                         export SECRET=`echo $1 | sed -e 's/^[^=]*=//g'`
                         shift
                         ;;
                 --port*)
+                        shift
                         export PORT=`echo $1 | sed -e 's/^[^=]*=//g'`
                         shift
                         ;;
@@ -71,18 +73,16 @@ then
 fi
 
 # Generate config file
-OPTIONS = "--savedir $SCRIPT_DIR/API/config"
-if $SECRET; then
-    $OPTIONS .= "$OPTIONS --secret $SECRET"
+OPTIONS="--savedir $SCRIPT_DIR/API/config"
+if [[ ! -z $SECRET ]]; then
+    OPTIONS=$OPTIONS" --secret $SECRET"
 fi
-if $PORT; then
-    $OPTIONS .= "$OPTIONS --port $PORT"
+if [[ ! -z $PORT ]]; then
+    OPTIONS=$OPTIONS" --port $PORT"
 fi
 if $SSL; then
-    $OPTIONS .= "$OPTIONS --ssl"
+    OPTIONS=$OPTIONS" --ssl"
 fi
-
-echo "astral setup_api $OPTIONS"
 astral setup_api $OPTIONS
 
 # Install node packages
