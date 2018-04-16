@@ -85,9 +85,8 @@ def setup_api(port, secret, savedir):
             if len(secret) > 1: break
     if not port:
         while True:
-            port = input("Enter a port (Press enter for 80): ")
-            if int(port) >= 0 and port <= 65535: break
-            elif len(port) <= 0: port = 80
+            port = input("Enter a port (Press enter for 80): ") or 80
+            if int(port) >= 0 and int(port) <= 65535: break
 
     pathlib.Path(savedir).mkdir(parents=True, exist_ok=True)
 
