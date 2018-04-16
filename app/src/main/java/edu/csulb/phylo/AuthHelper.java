@@ -3,6 +3,7 @@ package edu.csulb.phylo;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
@@ -14,6 +15,7 @@ import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.Map;
@@ -150,6 +152,12 @@ public class AuthHelper {
                 Log.d(TAG, "Attempting to sign out from Google");
                 GoogleSignInClient googleSignInClient = getGoogleSignInClient(context);
                 Task task = googleSignInClient.signOut();
+//                task.addOnCompleteListener(this, new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        // ...
+//                    }
+//                });
                 resultMessage = "Successful Signout";
             }
             break;

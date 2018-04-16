@@ -68,6 +68,12 @@
             android:id="@+id/file_uploaded_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/white"
+            android:backgroundTint="@color/gray"
             android:textColor="@color/white"
             android:text="First File"/>
     </LinearLayout>

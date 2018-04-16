@@ -85,11 +85,22 @@ public class UserFragment extends Fragment
                 break;
             case R.id.logout_button:
                 AuthHelper.signOutUser(getActivity(), user);
+                returnToLoginScreen();
                 break;
         }
    //   fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.commit();
+    }
 
+    /**
+     * Returns to the login screen and pops the activity from the stack
+     */
+    public void returnToLoginScreen(){
+        getActivity().finishAffinity();
+        Intent loginIntent = new Intent(getActivity(), AuthenticationContainer.class);
+        loginIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
+        startActivity(loginIntent);
+        getActivity().finish();
     }
 
     /**
