@@ -28,7 +28,7 @@ def add_app(file, app):
 @click.option('--savedir', help="Directory to write configs to.", metavar="<filepath>")
 @click.option('--ssl', is_flag=True, help="Setup API on ssl port (443)", metavar="<filepath>")
 def setup_api(port, secret, savedir, ssl):
-    """Creates api config at FILE with PORT and SECRET."""
+    """Creates api config files at SAVEDIR."""
     if ssl and port and port != 443:
         raise Exception("SSL requires port 443")
     if not port and ssl: port = 443
