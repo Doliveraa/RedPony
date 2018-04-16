@@ -86,10 +86,14 @@ fi
 # Install astral
 printf "${WHITE}Installing Astral${NC}"
 cd $SCRIPT_DIR/astral
-pip3 install -e . --upgrade --force-reinstall >/dev/null
-if ! grep -Fxq ".*_ASTRAL_COMPLETE.*" ~/.bashrc
-then
-    echo 'eval "$(_ASTRAL_COMPLETE=source astral)"' >> ~/.bashrc
+if [[ -z `which astral` ]]; then
+    pip3 install -e . >/dev/null
+    if ! grep -Fxq ".*_ASTRAL_COMPLETE.*" ~/.bashrc
+    then
+        echo 'eval "$(_ASTRAL_COMPLETE=source astral)"' >> ~/.bashrc
+    fi
+else
+    pip3 install -e . --upgrade --force-reinstall >/dev/null
 fi
 
 # Generate config file

@@ -32,7 +32,7 @@ astral <command> --help
 The setup script mentioned in the [Installation](#installation) section does this for you, but if you would like to set up your API using astral, run:
 
 ```bash
-astral setup-api --port <port_for_api> --secret <secret_for_jwt_tokens>
+astral setup-api --savedir <directory to save configs to>
 ```
 
 ### Deployment
