@@ -25,19 +25,24 @@ sudo systemctl enable mongod
 
 # Install astral
 cd $SCRIPT_DIR/astral
-pip3 install -e --upgrade --force-reinstall .
-if ! grep -Fxq ".*_ASTRAL_COMPLETE.*" ~/.bashrc 
+pip3 install -e . --upgrade --force-reinstall 
+if ! grep -Fxq ".*_ASTRAL_COMPLETE.*" ~/.bashrc
 then
     echo 'eval "$(_ASTRAL_COMPLETE=source astral)"' >> ~/.bashrc
 fi
 
 # Generate config file
-read -p 'Enter a secret phrase: ' secret_phrase
-read -p 'Enter a port for API: ' port
-astral setup-api --port $port --secret "$secret_phrase"
-cp $SCRIPT_DIR/astral/config.json $SCRIPT_DIR/API/config/config.json
+astral setup-api --savedir $SCRIPT_DIR/API/config --ssl
 
 # Install node packages
 cd $SCRIPT_DIR/API
 npm install
 sudo npm install -g forever
+
+# Setup ssl
+cd $SCRIPT_DIR/API
+read -p "Enter your domain name: " DOMAIN_NAME
+sudo apt-get install letsencrypt
+sudo certbot certonly --standalone -d $DOMAIN_NAME
+sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/privkey.pem $SCRIPT_DIR/API/config/privkey.pem
+sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/

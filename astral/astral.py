@@ -3,6 +3,7 @@ import jwt
 import json
 import os
 import subprocess
+import pathlib
 
 file_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -78,13 +79,27 @@ def setup_api(port, secret, config_file):
         secret (str): secret for creating JSON Web Tokens
         config_file (str): path to file to write config to
     """
+    if not secret:
+        while True:
+            secret = input("Enter a secret phrase: ")
+            if len(secret) > 1: break
+    if not port:
+        while True:
+            port = input("Enter a port (Press enter for 80): ")
+            if int(port) >= 0 and port <= 65535: break
+            elif len(port) <= 0: port = 80
+
+    pathlib.Path(savedir).mkdir(parents=True, exist_ok=True)
+
     config = {
         'port': int(port),
         'secret': secret
     }
-    path = os.path.join(file_path, 'config.json')
-    with open(path, 'w+') as fp:
-        json.dump(config, fp)
+    json.dump(config, open(os.path.join(file_path, 'config.json'), 'w+'))
+    json.dump(config, open(os.path.join(savedir, 'config.json'), 'w+'))
+
+    mongojs = "module.exports = { path: 'mongodb://localhost/astral' }"
+    open(os.path.join(savedir, 'mongo.js'), 'w+').writeline(mongojs)
 
 def run_script(script):
     """Runs a script.
