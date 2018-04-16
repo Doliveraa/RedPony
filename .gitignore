@@ -6,7 +6,8 @@
 html/
 
 #config file with secret
-**/config.json
+API/config
+astral/config.json
 
 # Logs
 logs
