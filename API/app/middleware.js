@@ -212,14 +212,15 @@ const checkUserAvailability = function(req, res) {
 
     if (appKey) {
         //verify appKey
-        let appDecoded = null;
+        var appDecoded = null;
         findApp(appKey, function (err, decoded) {
             if (err) return err;
             appDecoded = decoded;
         });
 
+        if (appDecoded == null) return res.status(400).json({message: "Appkey error"});
         //check if query is empty
-        if (req.query !== {} && appDecoded != null) {
+        if (req.query !== {}) {
             User.findOne({username: usernameReq, app: appDecoded.name }, function(err, user) {
                 //if error return error status and message
                 if (err) {
