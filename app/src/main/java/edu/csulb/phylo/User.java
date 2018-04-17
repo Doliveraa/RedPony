@@ -1,18 +1,6 @@
 package edu.csulb.phylo;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.util.Log;
-
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 
@@ -21,8 +9,6 @@ import edu.csulb.phylo.Astral.Astral;
 /**
  * Created by Danie on 3/19/2018.
  */
-
-//TODO: Create a way to update the AstralUser sign in provider
 
 public class User implements Serializable {
 
@@ -33,14 +19,11 @@ public class User implements Serializable {
     private static String signInProvider;
     private static String email;
     private static String name;
-    private static String username;
+    private static String astralUsername;
     //Astral Variables
     private static String userAstralTokens;
     //Constants
     private final static String TAG = User.class.getSimpleName();
-    //Public Constants
-    public final static String USER_PREFERENCES = "user";
-    public final static String USER_SIGN_IN_PROVIDER = "provider";
 
 
     /**
@@ -95,7 +78,7 @@ public class User implements Serializable {
      *
      * @return The user's username
      */
-    public String getUsername() { return username; }
+    public String getUsername() { return astralUsername; }
 
     /**
      * The user's sign in provider
@@ -107,90 +90,22 @@ public class User implements Serializable {
     }
 
 
-    private static void retrieveUserInformation(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
-        String signInProvider = sharedPreferences.getString(USER_SIGN_IN_PROVIDER, null);
+    private static void retrieveUserInformation(final Context context) {
+        //Retrieves the current sign in provider
+        signInProvider = AuthHelper.getCurrentSignInProvider(context);
         if(signInProvider == null) {
             throw new RuntimeException("Sign in provider is null, user is not signed in");
         }
-        switch(signInProvider) {
-            case AuthHelper.GOOGLE_PROVIDER:{
-                Log.d(TAG, "retrieveUserInformation: Retrieving user's google information");
-                retrieveGoogleInformation(context);
-            }
-            break;
-            case AuthHelper.FACEBOOK_PROVIDER: {
-                Log.d(TAG, "retrieveUserInformation: Retrieving user's facebook information");
-                retrieveFacebookInformation();
-            }
-            break;
-            case AuthHelper.COGNITO_PROVIDER: {
-                Log.d(TAG, "retrieveUserInformation: Retrieveing user's cognito information");
-                retrieveCognitoInformation(context);
-            }
-            break;
+
+        //Check if the user's information has already been cached
+        final boolean containsInfo = AuthHelper.containsUserInfo(context);
+        if(containsInfo) {
+            name = AuthHelper.getCachedUserName(context);
+            email = AuthHelper.getCachedUserEmail(context);
+            astralUsername = Astral.getCachedAstralUsername(context);
+        } else {
+            throw new RuntimeException("Attempt to retrieve null user information");
         }
-    }
-
-    /**
-     * Retrieve's the user's google information
-     *
-     * @param context The activity where the AstralUser object is created
-     */
-    private static void retrieveGoogleInformation(Context context) {
-        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(context);
-        email = googleAccount.getEmail();
-        name = googleAccount.getDisplayName();
-        signInProvider = AuthHelper.GOOGLE_PROVIDER;
-        Log.d(TAG, "retrieveGoogleInformation: Finished retrieving Google information");
-    }
-
-    /**
-     * Retrieve's the user's facebook information
-     */
-    private static void retrieveFacebookInformation() {
-        AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
-        Log.d(TAG, "retrieveFacebookInformation: userID = " + facebookAccessToken.getUserId());
-        GraphRequest request = GraphRequest.newMeRequest(
-                facebookAccessToken,
-                new GraphRequest.GraphJSONObjectCallback() {
-                    @Override
-                    public void onCompleted(JSONObject object, GraphResponse response) {
-                        try {
-                            name = object.getString("name");
-                            email = object.getString("email");
-                            signInProvider = AuthHelper.FACEBOOK_PROVIDER;
-                            Log.d(TAG, "retrieveFacebookInformation: onCompleted: Finished retrieving Facebook information");
-                        }catch(JSONException exception) {
-                            Log.d(TAG, "retrieveFacebookInformation: failure, response code: " + response.getError());
-                            exception.printStackTrace();
-                        } catch(Exception exception) {
-                            Log.d(TAG, "retrieveFacebookInformation: failure, response code: " + response.getError());
-                        }
-                    }
-                }
-        );
-        Bundle neededInformation = new Bundle();
-        neededInformation.putString("fields", "name, email");
-        request.setParameters(neededInformation);
-        request.executeAsync();
-    }
-
-    /**
-     * Retrieve's the user's cognito user pool information
-     *
-     * @param context The activity where the AstralUser object is created
-     */
-    private static void retrieveCognitoInformation(Context context) {
-        //Retrieve user's information from shared preferences
-        SharedPreferences sharedPreferences = context.getSharedPreferences(AuthHelper.COGNITO_INFO, Context.MODE_PRIVATE);
-        name = sharedPreferences.getString(AuthHelper.COGNITO_USER_NAME, null);
-        email = sharedPreferences.getString(AuthHelper.COGNITO_EMAIL, null);
-        if(name == null || email == null) {
-            throw new RuntimeException("Attempt to retrieve empty Cognito user details");
-        }
-        signInProvider = AuthHelper.COGNITO_PROVIDER;
-        Log.d(TAG, "retrieveCognitoInformation: Finished retrieving Cognito information");
     }
 
 

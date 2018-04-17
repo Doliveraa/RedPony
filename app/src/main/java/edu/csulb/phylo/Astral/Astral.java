@@ -2,13 +2,20 @@ package edu.csulb.phylo.Astral;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import edu.csulb.phylo.BuildConfig;
+import edu.csulb.phylo.R;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -17,9 +24,12 @@ public class Astral{
     public final static String APP_KEY_HEADER = "appKey";
     public final static String ASTRAL_USERNAME = "username";
     public final static String ASTRAL_STORAGE = "astral_storage";
+    public final static String ASTRAL_EMAIL = "email";
     public final static String ASTRAL_TOKEN = "token";
     public final static int OK = 200;
     public final static int NOT_FOUND = 404;
+    //Private Constants
+    private final static String TAG = Astral.class.getSimpleName();
     //REST Api items
     private Retrofit.Builder retrofitBuilder;
     private OkHttpClient.Builder okHttpClientBuilder;
@@ -83,15 +93,66 @@ public class Astral{
     }
 
     /**
+     * Store the user's username inside of the phone for accessibility
+     *
+     * @param context The activity where this method is being called from
+     * @param username The User's username
+     */
+    public static void storeAstralUsername(Context context, String username) {
+        //Create or open folder holding that hold's the user's Astral information
+        SharedPreferences sharedPreferences = getAstralSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //Add the User's username to the folder
+        editor.putString(ASTRAL_USERNAME, username);
+        editor.apply();
+    }
+
+    /**
+     * Retrieve's the user's  Astral username from storage
+     *
+     * @param context
+     */
+    public static String getCachedAstralUsername(final Context context) {
+        //Open the folder containing Astral's information
+        SharedPreferences sharedPreferences = getAstralSharedPreferences(context);
+        return sharedPreferences.getString(Astral.ASTRAL_USERNAME, null);
+    }
+
+    /**
      * Stores the User's tokens to perform any other transactions later
      *
      * @param userToken The token item received from an Astral Request
      */
-    public void storeAstralUserToken(Context context, String userToken) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(ASTRAL_STORAGE, context.MODE_PRIVATE);
+    public static void storeAstralUserToken(Context context, String userToken) {
+        SharedPreferences sharedPreferences = getAstralSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Astral.ASTRAL_TOKEN, userToken);
         editor.apply();
+    }
+
+    /**
+     * Removes the astral token from cache
+     *
+     * @param context The activity in which this method was called
+     */
+    public static void removeAstralToken(final Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Astral.ASTRAL_STORAGE, context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(Astral.ASTRAL_TOKEN);
+    }
+
+
+
+    /**
+     * Retrieves the Astral shared preferences
+     *
+     * @param context The current context of the application
+     *
+     * @return Astral's shared preferences folder
+     */
+    private static SharedPreferences getAstralSharedPreferences(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(ASTRAL_STORAGE, Context.MODE_PRIVATE);
+        return sharedPreferences;
     }
 
 }

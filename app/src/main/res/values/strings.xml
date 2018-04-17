@@ -9,6 +9,7 @@
     <string name="create_new_account">Create Account</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="or_sign_in_with">Or Sign in With</string>
+    <string name="create_username">Create Username</string>
 
     <!-- Strings related to Create Account -->
     <string name="first_name">First name</string>
@@ -88,5 +89,7 @@
     <!-- String related to Astral -->
     <string name="astral_key">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.d_K_XqtkjbnONoUaNVlA_K-kKo8zYm7AQkRKAuycJHw</string>
     <string name="astral_base_url">http://10.0.2.2:7000</string>
+    <string name="enter_username">Enter Username</string>
+    <string name="create_username">Create Username</string>
 
 </resources>

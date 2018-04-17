@@ -177,6 +177,12 @@ public class CreateAccountFragment extends Fragment
                     usernameFormatTextView.setVisibility(View.GONE);
 
                     if (!usernameEditText.getText().toString().isEmpty()) {
+                        //Reset the image on the right of the input field
+                        final ImageView xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability);
+                        final ImageView checkmarkImage = getActivity().findViewById(R.id.checkmark_username_availability);
+                        xMarkImage.setVisibility(View.GONE);
+                        checkmarkImage.setVisibility(View.GONE);
+
                         //Begin progress bar animation
                         final ProgressBar usernamePb = getActivity().findViewById(R.id.progress_bar_username_availability);
                         usernamePb.setVisibility(View.VISIBLE);
@@ -210,18 +216,12 @@ public class CreateAccountFragment extends Fragment
                             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                                 //Make the progress bar dissappear regardless of the response code
                                 usernamePb.setVisibility(View.GONE);
-                                ImageView xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability);
-                                ImageView checkmarkImage = getActivity().findViewById(R.id.checkmark_username_availability);
 
                                 if (response.isSuccessful()) {
                                     Log.d(TAG, "onFocusChange-> onResponse: Successful Response Code " + response.code());
                                     if (response.code() == Astral.OK) {
                                         //The username is not available
                                         usernameAvailable = false;
-                                        //Make the checkmark disappear if it is currently visible
-                                        if (xMarkImage.getVisibility() == View.VISIBLE) {
-                                            checkmarkImage.setVisibility(View.GONE);
-                                        }
                                         //Make the x mark appear
                                         xMarkImage.setVisibility(View.VISIBLE);
                                     }
@@ -230,10 +230,6 @@ public class CreateAccountFragment extends Fragment
                                     if (response.code() == Astral.NOT_FOUND) {
                                         //We can use the username, it was not found
                                         usernameAvailable = true;
-                                        //Make the x mark disappear if it is currently visible
-                                        if(checkmarkImage.getVisibility() == View.VISIBLE) {
-                                            xMarkImage.setVisibility(View.GONE);
-                                        }
                                         //Make the checkmark appear
                                         checkmarkImage.setVisibility(View.VISIBLE);
                                     }
@@ -242,7 +238,7 @@ public class CreateAccountFragment extends Fragment
 
                             @Override
                             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.d(TAG, "onFocusChange-> onFailure");
+                                Log.w(TAG, "onFocusChange-> onFailure");
                             }
                         });
                     }

@@ -12,6 +12,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.regions.Regions;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.Task;
@@ -27,12 +28,14 @@ import edu.csulb.phylo.Astral.Astral;
 public class AuthHelper {
 
     //Authentication Constants
-    public final static String COGNITO_INFO = "cognito info";
-    public final static String COGNITO_EMAIL = "cognito email";
-    public final static String COGNITO_USER_NAME = "cognito user name";
+    public final static String USER_INFO = "user_info";
+    public final static String USER_EMAIL = "cognito email";
+    public final static String USER_NAME = "users_name";
+    public final static String USER_SIGN_IN_PROVIDER = "sign_in_provider";
     public final static String GOOGLE_PROVIDER  = "google";
     public final static String FACEBOOK_PROVIDER = "facebook";
     public final static String COGNITO_PROVIDER = "cognito";
+    public final static String CONTAINS_INFO = "contains_info";
     //Private Authentication Constants
     private final static String TAG = AuthHelper.class.getSimpleName();
     private final static String LAST_USER_CACHE = "CognitoIdentityProviderCache";
@@ -56,19 +59,6 @@ public class AuthHelper {
         return cognitoUserPool;
     }
 
-    /**
-     * Caches the user information if given a CognitoUserDetails object
-     *
-     * @param context The activity in which this method was called
-     *
-     * @param cognitoUserDetails The object that encapsulates the user's information
-     */
-    public static void cacheUserInformation(Context context, CognitoUserDetails cognitoUserDetails) {
-        CognitoUserAttributes cognitoUserAttributes = cognitoUserDetails.getAttributes();
-        Map<String, String> userInfo = cognitoUserAttributes.getAttributes();
-        //Store the user details inside of Shared Preferences
-        cacheUserInformation(context, userInfo.get("name"), userInfo.get("email"));
-    }
 
     /**
      * A more general method that caches the user information based on the values that you give
@@ -77,15 +67,16 @@ public class AuthHelper {
      * @param name The name of the user
      * @param email The email of the user
      */
-    public static void cacheUserInformation(Context context, String name, String email) {
+    public static void cacheUserInformation(final Context context, final String name,final String email) {
         //Initialize the SharedPreferences object and choose the folder
-        SharedPreferences sharedPreferences = context.getSharedPreferences(AuthHelper.COGNITO_INFO, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getAuthPreferences(context);
         SharedPreferences.Editor spEditor = sharedPreferences.edit();
         //Store the information
-        spEditor.putString(AuthHelper.COGNITO_EMAIL, email);
-        spEditor.putString(AuthHelper.COGNITO_USER_NAME, name);
+        spEditor.putString(AuthHelper.USER_EMAIL, email);
+        spEditor.putString(AuthHelper.USER_NAME, name);
+        spEditor.putBoolean(AuthHelper.CONTAINS_INFO, true);
         //Commit the changes
-        spEditor.commit();
+        spEditor.apply();
     }
 
     /**
@@ -115,26 +106,61 @@ public class AuthHelper {
      * @param context The activity in which this method was called
      * @param provider The sign in provider used for the user authentication
      */
-    public static void setCurrentSignInProvider(Context context, String provider){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(User.USER_PREFERENCES, Context.MODE_PRIVATE);
+    public static void setCurrentSignInProvider(final Context context, final String provider){
+        SharedPreferences sharedPreferences = getAuthPreferences(context);
         SharedPreferences.Editor spEditor = sharedPreferences.edit();
-        spEditor.putString(User.USER_SIGN_IN_PROVIDER, provider);
+        spEditor.putString(USER_SIGN_IN_PROVIDER, provider);
         spEditor.commit();
     }
 
+
     /**
-     * Store the user's username inside of the phone for accessibility
+     * Retrieves the current user's sign in provider
      *
-     * @param context The activity where this method is being called from
-     * @param username The User's username
+     * @param context The application's current context
+     *
+     * @return The current sign in provider
      */
-    public static void storeUsername(Context context, String username) {
-        //Create or open folder holding that hold's the user's Astral information
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Astral.ASTRAL_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        //Add the User's username to the folder
-        editor.putString(Astral.ASTRAL_USERNAME, username);
-        editor.apply();
+    public static String getCurrentSignInProvider(final Context context) {
+        SharedPreferences sharedPreferences = getAuthPreferences(context);
+        String signInProvider = sharedPreferences.getString(USER_SIGN_IN_PROVIDER, null);
+        return signInProvider;
+    }
+
+    /**
+     * Retrieves the current user's name
+     *
+     * @param context The application's current context
+     *
+     * @return The current signed in User's name
+     */
+    public static String getCachedUserName(final Context context) {
+        SharedPreferences sharedPreferences = getAuthPreferences(context);
+        return sharedPreferences.getString(USER_NAME, null);
+    }
+
+    /**
+     * Retrieves the current user's email
+     *
+     * @param context The application's current context
+     *
+     * @return The current signed in User's email
+     */
+    public static String getCachedUserEmail(final Context context) {
+        SharedPreferences sharedPreferences = getAuthPreferences(context);
+        return sharedPreferences.getString(USER_EMAIL, null);
+    }
+
+    /**
+     * Checks to see if the Authentication preferences folder contains the user's information
+     *
+     * @param context The application's current context
+     *
+     * @return True if it contains the user's information and false otherwise
+     */
+    public static boolean containsUserInfo(final Context context) {
+        SharedPreferences sharedPreferences = getAuthPreferences(context);
+        return sharedPreferences.getBoolean(CONTAINS_INFO, false);
     }
 
     /**
@@ -179,6 +205,18 @@ public class AuthHelper {
                 .requestEmail().requestProfile().build();
 
         return GoogleSignIn.getClient(context, gso);
+    }
+
+    /**
+     * Retrieves the shared preferences folder storing all the user information
+     *
+     * @param context The current context of the application
+     *
+     * @return A shared preferences object
+     */
+    private static SharedPreferences getAuthPreferences(final Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);
+        return sharedPreferences;
     }
 }
 

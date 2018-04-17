@@ -86,8 +86,6 @@ public class MainActivityContainer extends AppCompatActivity{
         pinnedFragment = PinnedFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
         userFragment = UserFragment.newInstance();
-
-
     }
     
     @Override

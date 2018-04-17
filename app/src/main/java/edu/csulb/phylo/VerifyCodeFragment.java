@@ -26,7 +26,6 @@ import edu.csulb.phylo.Astral.AstralUser;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -107,7 +106,7 @@ public class VerifyCodeFragment extends Fragment
                         //Set that the user has authenticated with Cognito
                         AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
                         AuthHelper.cacheCurrentCognitoSignedInUser(getActivity(), cognitoUser.getUserId());
-                        AuthHelper.storeUsername(getActivity(), astralUser.getUsername());
+                        Astral.storeAstralUsername(getActivity(), astralUser.getUsername());
 
                         //Start at POST request to create the user in the Astral Framework
                         final Astral astral = new Astral(getString(R.string.astral_base_url));
@@ -135,10 +134,10 @@ public class VerifyCodeFragment extends Fragment
                                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code());
 
                                     //Retrieve the token received
-                                    String userToken = response.body().getUserToken();
+                                    String userToken = response.body().getToken();
 
                                     //Store the User's token item
-                                    astral.storeAstralUserToken(getActivity(), userToken);
+                                    Astral.storeAstralUserToken(getActivity(), userToken);
 
                                     //Create an Astral AstralUser account
                                     Intent intent = new Intent(getActivity(), MainActivityContainer.class);

@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import edu.csulb.phylo.Astral.Astral;
+
 /**
  * Created by vietl on 2/25/2018.
  */
@@ -85,6 +87,15 @@ public class UserFragment extends Fragment
                 break;
             case R.id.logout_button:
                 AuthHelper.signOutUser(getActivity(), user);
+
+                //Removes the user's astral token from cache
+                Astral.removeAstralToken(getActivity());
+
+                //Sends the user back to the Authentication Screen
+                Intent signoutIntent = new Intent(getActivity(), AuthenticationContainer.class);
+                signoutIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
+                startActivity(signoutIntent);
+                getActivity().finish();
                 break;
         }
    //   fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
