@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/navy">
+
+    <TextView
+        android:id="@+id/user_name_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_marginTop="44dp"
+        android:text="@string/email_address_user"
+        android:textColor="@color/white"
+        android:textSize="25sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/change_password"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="224dp"
+        android:text="@string/change_password_user"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/downloaded_files" />
+
+
+    <Button
+        android:id="@+id/user_files"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="104dp"
+        android:alpha="0.7"
+        android:background="@color/lightNavy"
+        android:text="@string/user_files"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:drawableStart="@drawable/ic_cloud"
+        android:gravity="start|center_vertical"
+        android:paddingLeft="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/user_name_text_view" />
+
+    <Button
+        android:id="@+id/downloaded_files"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:alpha="0.7"
+        android:background="@color/lightNavy"
+        android:text="@string/download_files"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:drawableStart="@drawable/ic_folder"
+        android:gravity="start|center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_files" />
+
+    <Button
+        android:id="@+id/settings"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="100dp"
+        android:alpha="0.7"
+        android:background="@color/lightNavy"
+        android:text="@string/settings_user"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:drawableStart="@drawable/ic_settings"
+        android:gravity="start|center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/downloaded_files" />
+
+    <Button
+        android:id="@+id/logout_button"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="240dp"
+        android:layout_marginTop="224dp"
+        android:gravity="center"
+        android:text="@string/log_out_user"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/downloaded_files" />
+
+
+</android.support.constraint.ConstraintLayout>

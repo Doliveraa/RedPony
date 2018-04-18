@@ -1,0 +1,95 @@
+<resources>
+    <string name="app_name">Phylo</string>
+
+    <!-- Strings related to Login -->
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_new_account">Create Account</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="or_sign_in_with">Or Sign in With</string>
+    <string name="create_username">Create Username</string>
+
+    <!-- Strings related to Create Account -->
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="create_account">Create account</string>
+    <string name="invalid_confirm_password">Passwords do not equal.</string>
+    <string name="email_already_exists">Email already exists.</string>
+    <string name="incorrect_email_format">This email is not valid</string>
+    <string name="password_format">Minimum 8 characters (a&#8211;z, A&#8211;Z, 0&#8211;9)</string>
+    <string name="username">Username</string>
+    <string name="username_format">In between 3-12 Characters (a-z, A-Z, 0-9, dots, dashes, underlines)</string>
+
+    <!-- String related to Code Verification -->
+    <string name="verify_code_hint">Received Code</string>
+    <string name="verify_code_text">Please enter the code that you have received</string>
+
+
+    <!-- Strings related to Credentials/API/Keys -->
+    <string name="title_activity_maps">Map</string>
+
+    <!-- Amazon Cognito Strings -->
+    <string name="application_client_id">3ccjmr6r112jnlnsmneo15bi3r</string>
+    <string name="application_client_secret">19578hkj8b192k9ap2kopq24175ps6i3e460p61nhb52dfsjadvd</string>
+    <string name="cognito_pool_id">us-west-2_uQNGu6gEa</string>
+    <string name="cognito_identity_id">us-west-2:c3a2e69e-5cf1-4e08-a26e-5e985e4373f6</string>
+    <string name="cognito_pool_arn">arn:aws:cognito-idp:us-west-2:589913346854:userpool/us-west-2_uQNGu6gEa</string>
+    <!-- Facebook Strings -->
+    <string name="facebook_app_id">1956864414640879</string>
+    <string name="fb_login_protocol_scheme">fb1956864414640879</string>
+    <!-- Google Strings -->
+    <string name="google_web_client_id">1058877043367-2trb7ecou4t7g9nbguop95479k3tk31t.apps.googleusercontent.com</string>
+    <!-- General Strings -->
+    <string name="confirm_text">Confirm</string>
+    <string name="a_tok">a_tok</string>
+    <string name="r_tok">r_tok</string>
+    <string name="i_tok">i_tok</string>
+
+    <!-- Strings related to AstralUser Fragment -->
+    <string name="email_address_user">Email Address</string>
+    <string name="password_user">Password</string>
+    <string name="user_files">Uploaded Files</string>
+    <string name="download_files">Downloaded Files</string>
+    <string name="settings_user">Settings</string>
+    <string name="log_out_user">Log Out</string>
+    <string name="change_password_user">Change Password</string>
+
+    <!-- Strings related to Upload Fragment -->
+    <string name="comment">Comment</string>
+    <string name="file_name">File Name</string>
+    <string name="select_file">Select File</string>
+    <string name="upload_file">Upload</string>
+
+    <!-- Strings related to Bottom Navigation Bar - Menu -->
+    <string name="map_menu">Map</string>
+    <string name="upload_menu">Upload</string>
+    <string name="home_menu">Home</string>
+    <string name="pinned_menu">Pinned</string>
+    <string name="profile_menu">Profile</string>
+
+    <!-- Strings related to Notifications -->
+    <string name="nearby_files">Nearby Files</string>
+    <string name="expire_files">Expiring Files</string>
+    <string name="cluster_files">Nearby Clusters</string>
+    <string name="notifications_settings">Notifications</string>
+
+    <!-- Strings related to Lobby -->
+    <string name="lobby_home">Lobby</string>
+
+    <!-- String related to Pinned -->
+    <string name="pinned_main">Pinned</string>
+
+    <!-- String related to image buttons -->
+    <string name="back_image">Back Button</string>
+    <string name="help_image">Question Mark Button</string>
+
+    <!-- String related to Astral -->
+    <string name="astral_key">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.d_K_XqtkjbnONoUaNVlA_K-kKo8zYm7AQkRKAuycJHw</string>
+    <string name="astral_base_url">http://10.0.2.2:7000</string>
+    <string name="enter_username">Enter Username</string>
+    <string name="create_username">Create Username</string>
+
+</resources>

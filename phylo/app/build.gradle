@@ -1,0 +1,53 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "edu.csulb.phylo"
+        minSdkVersion 24
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:animated-vector-drawable:27.0.2'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.google.android.gms:play-services-maps:12.0.1'
+    implementation 'com.google.android.gms:play-services-auth:12.0.1'
+    implementation 'com.google.android.gms:play-services-base:12.0.1'
+    implementation 'com.google.android.gms:play-services-location:12.0.1'
+    implementation 'io.nlopez.smartlocation:library:3.3.3'
+    implementation 'com.android.support:design:27.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    implementation 'com.amazonaws:aws-android-sdk-auth-core:2.6.16'
+    implementation 'com.amazonaws:aws-android-sdk-auth-ui:2.6.15'
+    implementation 'com.amazonaws:aws-android-sdk-auth-userpools:2.6.15'
+    implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.6.16'
+    implementation 'com.amazonaws:aws-android-sdk-auth-facebook:2.6.15'
+    implementation 'com.amazonaws:aws-android-sdk-auth-google:2.6.15'
+    implementation 'io.jsonwebtoken:jjwt:0.9.0'
+    implementation 'com.android.support:support-annotations:28.0.0-alpha1'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
+}
