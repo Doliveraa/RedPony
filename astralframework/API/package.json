@@ -1,0 +1,21 @@
+{
+  "name": "restapi",
+  "version": "0.1.0",
+  "description": "A restful api for the Astral Framework",
+  "main": "index.js",
+  "author": "Daniel Olivera",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "forever": "^0.15.3",
+    "jsonwebtoken": "^8.2.0",
+    "mongoose": "^5.0.3",
+    "uuid": "^3.2.1"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
