@@ -212,34 +212,32 @@ const checkUserAvailability = function(req, res) {
 
     if (appKey) {
         //verify appKey
-        var appDecoded = null;
         findApp(appKey, function (err, decoded) {
             if (err) return err;
-            appDecoded = decoded;
-        });
-
-        if (appDecoded == null) return res.status(400).json({message: "Appkey error"});
-        //check if query is empty
-        if (req.query !== {}) {
-            User.findOne({username: usernameReq, app: appDecoded.name }, function(err, user) {
-                //if error return error status and message
-                if (err) {
-                    console.log(err);
-                    err = new Error('query error');
-                    err.status = 500;
-                    return err;
-                }
-                //if user not found return not found status
-                if (!user)
-                {
-                    return res.status(404).json({message: "Not Found: User not found"});
-                }
-                //if user found return request okay status
-                return res.status(200).json({message: "Okay: User with username is found"});
-            })
-        } else {
-            return res.status(400).json({message: "Bad Request: No username parameter"});
-        }
+            let appDecoded = decoded;
+            if (appDecoded == null) return res.status(400).json({message: "Appkey error"});
+            //check if query is empty
+            if (req.query !== {}) {
+                User.findOne({username: usernameReq, app: appDecoded.name }, function(err, user) {
+                    //if error return error status and message
+                    if (err) {
+                        console.log(err);
+                        err = new Error('query error');
+                        err.status = 500;
+                        return err;
+                    }
+                    //if user not found return not found status
+                    if (!user)
+                    {
+                        return res.status(404).json({message: "Not Found: User not found"});
+                    }
+                    //if user found return request okay status
+                    return res.status(200).json({message: "Okay: User with username is found"});
+                })
+            } else {
+                return res.status(400).json({message: "Bad Request: No username parameter"});
+            }
+        })
     } else {
         return res.status(401).json({message: "No appKey provided"});
     }
