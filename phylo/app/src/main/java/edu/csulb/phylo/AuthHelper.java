@@ -170,7 +170,7 @@ public class AuthHelper {
      *
      * @param user The currently signed in user
      */
-    public static void signOutUser(Context context, User user) {
+    public static void signOutUser(final Context context, User user) {
 
         String resultMessage;
         switch(user.getSignInProvider()) {
@@ -178,13 +178,12 @@ public class AuthHelper {
                 Log.d(TAG, "Attempting to sign out from Google");
                 GoogleSignInClient googleSignInClient = getGoogleSignInClient(context);
                 Task task = googleSignInClient.signOut();
-//                task.addOnCompleteListener(this, new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        // ...
-//                    }
-//                });
-                resultMessage = "Successful Signout";
+                task.addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                    }
+                });
+                resultMessage = "Successful Google Signout";
             }
             break;
             case FACEBOOK_PROVIDER: {
@@ -204,7 +203,9 @@ public class AuthHelper {
             default:
                 resultMessage = "Error, Did not enter case statements";
         }
-        Log.d(TAG, "signOutUser: AstralUser Sign out Result: " + resultMessage);
+        Log.d(TAG, resultMessage);
+        //Removes the User's cached information
+        removeUserData(context);
     }
 
     public static GoogleSignInClient getGoogleSignInClient(Context context) {
@@ -225,6 +226,21 @@ public class AuthHelper {
     private static SharedPreferences getAuthPreferences(final Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);
         return sharedPreferences;
+    }
+
+    /**
+     * Removes all of the user's cached information
+     *
+     * @param context The application's current context
+     */
+    private static void removeUserData(final Context context) {
+        SharedPreferences sharedPreferences = getAuthPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(USER_EMAIL);
+        editor.remove(USER_NAME);
+        editor.remove(USER_SIGN_IN_PROVIDER);
+        Astral.removeCachedAstralUsername(context);
+        editor.apply();
     }
 }
 

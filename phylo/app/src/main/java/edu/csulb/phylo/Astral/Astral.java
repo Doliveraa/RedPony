@@ -136,11 +136,23 @@ public class Astral{
      * @param context The activity in which this method was called
      */
     public static void removeAstralToken(final Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Astral.ASTRAL_STORAGE, context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getAstralSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(Astral.ASTRAL_TOKEN);
+        editor.apply();
     }
 
+    /**
+     * Removes the User's username that is cached
+     *
+     * @param context The application's current context
+     */
+    public static void removeCachedAstralUsername(final Context context) {
+        SharedPreferences sharedPreferences = getAstralSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(ASTRAL_USERNAME);
+        editor.apply();
+    }
 
 
     /**
