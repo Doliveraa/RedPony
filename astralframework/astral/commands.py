@@ -21,18 +21,18 @@ def add_app(file, app):
     """Adds APP and returns its json web token."""
     astral.add_app(app, file)
 
-@click.command(name='setup-api')
+@click.command(name='gen-configs')
 @click.option('--port', default=None, help="Port to setup API at.", metavar="<integer>")
 @click.option('--secret', default=None, help="Secret to use for json web tokens",
               metavar="<string>")
 @click.option('--savedir', help="Directory to write configs to.", metavar="<filepath>")
 @click.option('--ssl', is_flag=True, help="Setup API on ssl port (443)", metavar="<filepath>")
-def setup_api(port, secret, savedir, ssl):
+def gen_configs(port, secret, savedir, ssl):
     """Creates api config files at SAVEDIR."""
     if ssl and port and port != 443:
         raise Exception("SSL requires port 443")
     if not port and ssl: port = 443
-    astral.setup_api(port, secret, savedir)
+    astral.gen_configs(port, secret, savedir)
 
 @click.command(name='start')
 def start():
@@ -52,7 +52,7 @@ def stop():
 
 main.add_command(get_app_token)
 main.add_command(add_app)
-main.add_command(setup_api)
+main.add_command(gen_configs)
 main.add_command(start)
 main.add_command(restart)
 main.add_command(stop)

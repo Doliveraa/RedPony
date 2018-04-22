@@ -58,6 +58,7 @@ def add_app(name, file=None):
         (bytes): JSON Web Token
     """
     (config, client, db)= init()
+    print(name)
     apps = db.apps
     if apps.find_one({"name": name}):
         return get_app_token(name, file)
@@ -70,7 +71,7 @@ def add_app(name, file=None):
             fp.write(encode(appid, config["secret"]))
     else: print(encode(appid, config["secret"]).decode('utf-8'))
 
-def setup_api(port, secret, savedir):
+def gen_configs(port, secret, savedir):
     """Sets up the API.
 
     Args:
