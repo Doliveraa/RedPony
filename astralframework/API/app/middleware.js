@@ -71,7 +71,7 @@ const getToken = function(appKey, email, password, callback) {
 
 const createUser = function createUser(req, res){
     findApp(req.get('appKey'), function(err, app) {
-        if (err) return callback(err, null);
+        if (err) return res.json({message: err.message});
 
         if (req.body.email && req.body.username) {
             let password = "_";
