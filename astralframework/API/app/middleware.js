@@ -10,7 +10,7 @@ const config = JSON.parse(fs.readFileSync('config/config.json'));
 const findApp = function(token, callback) {
     jwt.verify(token, config.secret, function(err, decoded) {
         if (err) {
-            err = new Error('Unable to app key');
+            err = new Error('Unable to verify appKey');
             err.status = 500;
             return callback(err, null);
         }
@@ -201,7 +201,7 @@ const createFile = function(req, res) {
             } else {
                 let err = new Error("Invalid parameters");
                 err.status = 401;
-                return next(err);
+                return res.json({message: err.message});
             }
         });
     } else {
