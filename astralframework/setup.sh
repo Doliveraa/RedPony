@@ -48,7 +48,7 @@ done
 if [[ -z `which curl` ]]; then
     printf "${WHITE}Installing curl${NC}\n"
     sudo apt-get update
-    sudo apt-get install curl
+    sudo apt-get install -y curl
 fi
 
 # Install Node.js
@@ -57,18 +57,18 @@ if [[ -z `which nodejs` ]]; then
     cd ~
     curl -sL https://deb.nodesource.com/setup_8.x -o nodesource_setup.sh
     sudo bash nodesource_setup.sh
-    sudo apt-get install nodejs
+    sudo apt-get install -y nodejs
     rm nodesource_setup.sh
 fi
 
 # Install Python
 if [[ -z `which python3` ]]; then
     printf "${WHITE}Installing Python${NC}\n"
-    sudo apt-get install python3
+    sudo apt-get install -y python3
 fi
 if [[ -z `which pip3` ]]; then
     printf "${WHITE}Installing PIP3${NC}\n"
-    sudo apt-get install python3-pip
+    sudo apt-get install -y python3-pip
 fi
 
 # Install mongodb
@@ -120,7 +120,7 @@ if $SSL; then
     printf "${GREEN}Astral Installed, Let's setup SSL${NC}"
     cd $SCRIPT_DIR/API
     read -p "Enter your domain name: " DOMAIN_NAME
-    sudo apt-get install letsencrypt
+    sudo apt-get install -y letsencrypt
     sudo certbot certonly --standalone -d $DOMAIN_NAME
     sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/privkey.pem $SCRIPT_DIR/API/config/privkey.pem
     sudo cp /etc/live/letsencrypt/$DOMAIN_NAME/
