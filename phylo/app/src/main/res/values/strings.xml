@@ -87,8 +87,14 @@
     <string name="help_image">Question Mark Button</string>
 
     <!-- String related to Astral -->
-    <string name="astral_key">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.d_K_XqtkjbnONoUaNVlA_K-kKo8zYm7AQkRKAuycJHw</string>
+    <string name="astral_key">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.HcgYhZ2n2zQjAPLHJpcE5HKLiHIdLcksNJVOTOudO4Y</string>
     <string name="astral_base_url">http://10.0.2.2:7000</string>
     <string name="enter_username">Enter Username</string>
+    <string name="set_expiration_date">Set Expiration Date</string>
+    <string name="room_name">Room Name</string>
+    <string name="create_a_room">Create a Room</string>
+    <string name="lock_room">Lock Room</string>
+    <string name="create_room">Create Room</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

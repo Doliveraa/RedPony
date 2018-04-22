@@ -101,7 +101,7 @@ public class VerifyCodeFragment extends Fragment
                     @Override
                     public void onSuccess() {
                         //Verification successful
-                        Log.d(TAG, "onClick-> onSuccess: Confirmation successful, sending user to main activity");
+                        Log.d(TAG, "onClick-> onSuccess: Starting Post Request");
 
                         //Set that the user has authenticated with Cognito
                         AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
@@ -125,7 +125,7 @@ public class VerifyCodeFragment extends Fragment
                         astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
                         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
                         //Create the POST request
-                        Call<AstralUser> request = astralHttpInterface.createUser(astralUser);
+                        Call<AstralUser> request = astralHttpInterface.createUser(astralUser.toMap());
                         //Call the request asynchronously
                         request.enqueue(new Callback<AstralUser>() {
                             @Override

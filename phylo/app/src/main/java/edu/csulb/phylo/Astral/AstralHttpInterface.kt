@@ -11,7 +11,7 @@ interface AstralHttpInterface {
      */
     @FormUrlEncoded
     @POST("users")
-    fun createUser(@Body astralUser : AstralUser)
+    fun createUser(@FieldMap userInfoMap : Map<String, String>)
             : Call<AstralUser>
 
     /**
@@ -19,21 +19,31 @@ interface AstralHttpInterface {
      */
     @GET("users/check")
     fun checkUsernameAvailability(
-            @Query("username") username : String
-    ) : Call<ResponseBody>
+            @Query("username") username: String
+    ): Call<ResponseBody>
 
     /**
      * Retrieve user token
      */
     @GET("users")
     fun getUserToken()
-    : Call<AstralUser>
+            : Call<AstralUser>
 
     /**
      * Retrieves the User's information
      */
     @GET("users")
     fun getUserInformation()
-    : Call<AstralUser>
+            : Call<AstralUser>
 
+    /**
+     * Creates a Room with certain specifications
+     */
+    @FormUrlEncoded
+    @POST("files")
+    fun createRoom(@Field("name") roomName: String,
+                   @Field("latitude") latitude: Float,
+                   @Field("longitude") longitude: Float,
+                   @Field("expirationDate") expirationDate: Long)
+            :Call<ResponseBody>
 }

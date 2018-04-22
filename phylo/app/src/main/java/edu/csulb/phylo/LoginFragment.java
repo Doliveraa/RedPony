@@ -536,7 +536,7 @@ public class LoginFragment extends Fragment
         astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
         //Create the POST request
-        Call<AstralUser> request = astralHttpInterface.createUser(astralUser);
+        Call<AstralUser> request = astralHttpInterface.createUser(astralUser.toMap());
         //Call the request asynchronously
         request.enqueue(new Callback<AstralUser>() {
             @Override
@@ -691,7 +691,7 @@ public class LoginFragment extends Fragment
                         //Add the app key to the request header
                         Request.Builder newRequest = request.newBuilder().header(
                                 Astral.APP_KEY_HEADER, getString(R.string.astral_key));
-                        //Continue the request
+                        //Continue the requestp
                         return chain.proceed(newRequest.build());
                     }
                 });

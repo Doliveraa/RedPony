@@ -48,10 +48,10 @@ public class User implements Serializable {
             synchronized (User.class) {
                 if(userInstace == null) {
                     userInstace = new User();
-                    retrieveUserInformation(context);
                 }
             }
         }
+        retrieveUserInformation(context);
         return userInstace;
     }
 

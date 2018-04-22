@@ -2,8 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/EditTextTheme"
-    android:background="@drawable/login_activity_gradient_background">
+    android:background="@drawable/login_activity_gradient_background"
+    android:theme="@style/EditTextTheme">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -42,51 +43,65 @@
             android:id="@+id/text_view_username_format"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
             android:layout_marginLeft="10dp"
-            android:textColor="@android:color/holo_red_dark"
             android:text="@string/username_format"
-            android:visibility="gone"/>
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/username_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:hint="@string/username" />
-            <ProgressBar
-                android:id="@+id/progress_bar_username_availability"
-                android:layout_width="30dp"
+
+            <FrameLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/username_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:hint="@string/username" />
+
+                <ProgressBar
+                    android:id="@+id/progress_bar_username_availability"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_marginRight="14dp"
+                    android:indeterminateDrawable="@drawable/progress"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/checkmark_username_availability"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_marginRight="14dp"
+                    android:src="@drawable/check_mark"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/x_mark_username_availability"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_marginRight="14dp"
+                    android:src="@drawable/x_mark"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/button_check_username"
+                android:layout_width="wrap_content"
                 android:layout_height="30dp"
-                android:layout_gravity="center_vertical|right"
-                android:layout_marginRight="14dp"
-                android:indeterminateDrawable="@drawable/progress"
-                android:visibility="gone"/>
-
-            <ImageView
-                android:id="@+id/checkmark_username_availability"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical|right"
-                android:layout_marginRight="14dp"
-                android:src="@drawable/check_mark"
-                android:visibility="gone"/>
-
-            <ImageView
-                android:id="@+id/x_mark_username_availability"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical|right"
-                android:layout_marginRight="14dp"
-                android:src="@drawable/x_mark"
-                android:visibility="gone"/>
-
-
-        </FrameLayout>
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/black"
+                android:text="Check"
+                android:background="@android:color/transparent"/>
+        </LinearLayout>
 
         <EditText
             android:id="@+id/email_edit_text"
@@ -101,11 +116,11 @@
             android:id="@+id/text_view_password_format"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
             android:layout_marginLeft="10dp"
-            android:textColor="@android:color/holo_red_dark"
             android:text="@string/password_format"
-            android:visibility="gone"/>
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="12dp"
+            android:visibility="gone" />
 
         <EditText
             android:id="@+id/password_edit_text"
@@ -127,12 +142,12 @@
 
         <Button
             android:id="@+id/create_account_button"
-            android:layout_marginTop="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/create_account"
-            android:background="@android:color/transparent"/>
+            android:layout_marginTop="5dp"
+            android:background="@android:color/transparent"
+            android:text="@string/create_account" />
     </LinearLayout>
 
     <RelativeLayout
@@ -140,6 +155,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="20dp">
+
         <ProgressBar
             android:id="@+id/create_account_progress_bar"
             android:layout_width="60dp"

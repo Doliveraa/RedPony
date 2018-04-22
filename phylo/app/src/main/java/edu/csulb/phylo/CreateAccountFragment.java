@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +28,8 @@ import com.amazonaws.services.cognitoidentityprovider.model.UsernameExistsExcept
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,7 +59,8 @@ public class CreateAccountFragment extends Fragment
     private EditText confirmPasswordEditText;
     private EditText usernameEditText;
     private ProgressBar progressBar;
-    private Button createAccountButton;
+    private ImageView xMarkImage;
+    private ImageView checkmarkImage;
     //Constants
     private String TAG = "CreateAccountFragment";
     //Variables
@@ -64,6 +69,8 @@ public class CreateAccountFragment extends Fragment
     private boolean accountCreated;
     private ArrayList<EditText> listOfInputFields;
     private boolean usernameAvailable;
+    private HashSet<String> previouslySuccessfulUsernames;
+    private boolean usernameChecked;
 
     //Interface
     public interface OnAccountCreatedListener {
@@ -90,7 +97,7 @@ public class CreateAccountFragment extends Fragment
                 //Create an AstralUser object to send to the VerifyCodeFragment for its POST request
                 String userEmail = cognitoUser.getUserId();
                 String username = usernameEditText.getText().toString();
-                AstralUser astralUser = new AstralUser(userEmail, username, null);
+                AstralUser astralUser = new AstralUser(username, userEmail, null);
 
                 //Send CognitoUser object to the container to hold it
                 onAccountCreatedListener.onAccountCreated(cognitoUser, astralUser);
@@ -143,6 +150,7 @@ public class CreateAccountFragment extends Fragment
         accountCreated = false;
         usernameAvailable = false;
         cognitoUserPool = AuthHelper.getCognitoUserPool(getActivity());
+        previouslySuccessfulUsernames = new HashSet<String>();
 
         //Initialize the views
         firstNameEditText = (EditText) getActivity().findViewById(R.id.first_name_edit_text);
@@ -152,9 +160,12 @@ public class CreateAccountFragment extends Fragment
         confirmPasswordEditText = (EditText) getActivity().findViewById(R.id.confirm_password_edit_text);
         usernameEditText = (EditText) getActivity().findViewById(R.id.username_edit_text);
         progressBar = (ProgressBar) getActivity().findViewById(R.id.create_account_progress_bar);
-        createAccountButton = (Button) getActivity().findViewById(R.id.create_account_button);
+        Button createAccountButton = (Button) getActivity().findViewById(R.id.create_account_button);
+        Button checkUsernameButton = (Button) getActivity().findViewById(R.id.button_check_username);
         final TextView usernameFormatTextView = (TextView) getActivity().findViewById(R.id.text_view_username_format);
         final TextView passwordFormatTextView = (TextView) getActivity().findViewById(R.id.text_view_password_format);
+        xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability);
+        checkmarkImage = getActivity().findViewById(R.id.checkmark_username_availability);
 
         //Add all of the EditText views in an array to check if they are empty later on
         listOfInputFields = new ArrayList<>();
@@ -175,74 +186,36 @@ public class CreateAccountFragment extends Fragment
                     usernameFormatTextView.setVisibility(View.VISIBLE);
                 } else {
                     usernameFormatTextView.setVisibility(View.GONE);
+                }
+            }
+        });
+        usernameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    if (!usernameEditText.getText().toString().isEmpty()) {
-                        //Reset the image on the right of the input field
-                        final ImageView xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability);
-                        final ImageView checkmarkImage = getActivity().findViewById(R.id.checkmark_username_availability);
-                        xMarkImage.setVisibility(View.GONE);
-                        checkmarkImage.setVisibility(View.GONE);
+            }
 
-                        //Begin progress bar animation
-                        final ProgressBar usernamePb = getActivity().findViewById(R.id.progress_bar_username_availability);
-                        usernamePb.setVisibility(View.VISIBLE);
-
-                        //Retrieve the user's username
-                        String username = usernameEditText.getText().toString();
-
-                        //Start a GET request to check if the username is available
-                        final Astral astral = new Astral(getString(R.string.astral_base_url));
-                        //Intercept the request to add a header item
-                        astral.addRequestInterceptor(new Interceptor() {
-                            @Override
-                            public Response intercept(Chain chain) throws IOException {
-                                Request request = chain.request();
-                                //Add the app key to the request header
-                                Request.Builder newRequest = request.newBuilder().header(
-                                        Astral.APP_KEY_HEADER, getString(R.string.astral_key));
-                                //Continue the request
-                                return chain.proceed(newRequest.build());
-                            }
-                        });
-                        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
-                        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
-
-                        //Create the GET Request
-                        Call<ResponseBody> request = astralHttpInterface.checkUsernameAvailability(username);
-
-                        //Call the request asynchronously
-                        request.enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-                                //Make the progress bar dissappear regardless of the response code
-                                usernamePb.setVisibility(View.GONE);
-
-                                if (response.isSuccessful()) {
-                                    Log.d(TAG, "onFocusChange-> onResponse: Successful Response Code " + response.code());
-                                    if (response.code() == Astral.OK) {
-                                        //The username is not available
-                                        usernameAvailable = false;
-                                        //Make the x mark appear
-                                        xMarkImage.setVisibility(View.VISIBLE);
-                                    }
-                                } else {
-                                    Log.d(TAG, "onFocusChange-> onResponse: Failure Response Code " + response.code());
-                                    if (response.code() == Astral.NOT_FOUND) {
-                                        //We can use the username, it was not found
-                                        usernameAvailable = true;
-                                        //Make the checkmark appear
-                                        checkmarkImage.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.w(TAG, "onFocusChange-> onFailure");
-                            }
-                        });
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(!previouslySuccessfulUsernames.isEmpty()) {
+                    //Reset the check-marks and x-marks
+                    xMarkImage.setVisibility(View.GONE);
+                    checkmarkImage.setVisibility(View.GONE);
+                    //Retrieve the user's username
+                    String currUsername = s.toString();
+                    //See if the username was previously successful
+                    boolean prevSuccess = previouslySuccessfulUsernames.contains(currUsername);
+                    if(prevSuccess) {
+                        checkmarkImage.setVisibility(View.VISIBLE);
+                    } else {
+                        usernameAvailable = false;
                     }
                 }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
         passwordEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -252,6 +225,16 @@ public class CreateAccountFragment extends Fragment
                     passwordFormatTextView.setVisibility(View.VISIBLE);
                 } else {
                     passwordFormatTextView.setVisibility(View.GONE);
+                }
+            }
+        });
+        checkUsernameButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!usernameAvailable) {
+                    Log.d(TAG, "Checking if username exists.");
+                    usernameChecked = true;
+                    checkUsername();
                 }
             }
         });
@@ -374,13 +357,20 @@ public class CreateAccountFragment extends Fragment
                         return;
                     }
                 }
+
+                //See if the user has checked if their username is available
+                if(!usernameChecked) {
+                    displayErrorMessage("Please check to see if your username is available");
+                    return;
+                }
+
                 //Check if username is valid and if the username is available
                 String username = usernameEditText.getText().toString();
                 if (!isUsernameValid(username)) {
                     displayErrorMessage("Username must be 3-12 characters and only use" +
                             " the following: \n(a-z, A-Z, 0-9, dots, dashes, underlines");
                     return;
-                } else if(!usernameAvailable) {
+                } else if (!usernameAvailable) {
                     displayErrorMessage("Chosen username is not available.");
                     return;
                 }
@@ -441,6 +431,88 @@ public class CreateAccountFragment extends Fragment
         confirmPasswordEditText.setText("");
         emailEditText.setText("");
         passwordEditText.setText("");
+    }
+
+
+    /**
+     * Checks the existence of a username through a GET request
+     */
+    private void checkUsername() {
+        if (!usernameEditText.getText().toString().isEmpty()) {
+            //Retrieve the user's username
+            final String username = usernameEditText.getText().toString();
+
+            //First check if the username is of the right format
+            if(!isUsernameValid(username)) {
+                //Show the user an error message and break out of the method
+                displayErrorMessage("Username does not meet format criteria");
+                return;
+            }
+
+            //Reset the image on the right of the input field
+            xMarkImage.setVisibility(View.GONE);
+            checkmarkImage.setVisibility(View.GONE);
+
+            //Begin progress bar animation
+            final ProgressBar usernamePb = getActivity().findViewById(R.id.progress_bar_username_availability);
+            usernamePb.setVisibility(View.VISIBLE);
+
+            //Start a GET request to check if the username is available
+            final Astral astral = new Astral(getString(R.string.astral_base_url));
+            //Intercept the request to add a header item
+            astral.addRequestInterceptor(new Interceptor() {
+                @Override
+                public Response intercept(Chain chain) throws IOException {
+                    Request request = chain.request();
+                    //Add the app key to the request header
+                    Request.Builder newRequest = request.newBuilder().header(
+                            Astral.APP_KEY_HEADER, getString(R.string.astral_key));
+                    //Continue the request
+                    return chain.proceed(newRequest.build());
+                }
+            });
+            astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+            AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+
+            //Create the GET Request
+            Call<ResponseBody> request = astralHttpInterface.checkUsernameAvailability(username);
+
+            //Call the request asynchronously
+            request.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                    //Make the progress bar dissappear regardless of the response code
+                    usernamePb.setVisibility(View.GONE);
+
+                    if (response.isSuccessful()) {
+                        Log.d(TAG, "onFocusChange-> onResponse: Successful Response Code " + response.code());
+                        if (response.code() == Astral.OK) {
+                            //The username is not available
+                            usernameAvailable = false;
+                            //Make the x mark appear
+                            xMarkImage.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        Log.d(TAG, "onFocusChange-> onResponse: Failure Response Code " + response.code());
+                        if (response.code() == Astral.NOT_FOUND) {
+                            //We can use the username, it was not found
+                            usernameAvailable = true;
+                            //Add it to the list of usernames that the user has tried
+                            previouslySuccessfulUsernames.add(username);
+                            //Make the checkmark appear
+                            checkmarkImage.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.w(TAG, "onFocusChange-> onFailure");
+                }
+            });
+        } else {
+            displayErrorMessage("Username field must not be empty");
+        }
     }
 
     /**
