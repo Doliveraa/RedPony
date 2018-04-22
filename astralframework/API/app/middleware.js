@@ -78,7 +78,7 @@ const createUser = function createUser(req, res){
             if (req.body.password) {
                 password = req.body.password;
             }
-            let data = {};
+            let data = "";
             if (req.body.data) {
               data = req.body.data;
             }
@@ -124,7 +124,7 @@ const getUser = function(req, res) {
             findUser(req.get("appKey"), req.get("token"), {password:0}, function(err, user) {
                 if (err) {
                     res.status = 401;
-                    res.json({message: "Could not verify user"});
+                    return res.json({message: "Could not verify user"});
                 }
                 return res.json(user);
             })
@@ -153,6 +153,7 @@ const updateUser = function(req, res) {
 
             user.save(function(err) {
                if (err) {
+                   console.log(err);
                    res.status = 401;
                    return res.json({message: "Unable to update user"});
                }
