@@ -1,8 +1,13 @@
 package edu.csulb.phylo;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -15,13 +20,20 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by vietl on 2/25/2018.
@@ -41,12 +53,13 @@ public class MapsFragment extends Fragment
     private boolean hasLocationPermission;
     private UserLocationClient userLocationClient;
     private boolean isRetrievingUserPermission;
+    public boolean firstPass;
 
     private class ScreenAnimator extends AsyncTask<LatLng, Void, Void> {
         @Override
         protected Void doInBackground(LatLng... location) {
             googleMap.addMarker(new MarkerOptions().position(location[0]));
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], 10f));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], 18f));
             return null;
         }
     }
@@ -86,6 +99,7 @@ public class MapsFragment extends Fragment
 
         //Initialize variables
         userLocationClient = new UserLocationClient(getActivity());
+        firstPass = true;
 
         //Initialize Listeners
         userLocationClient.setInitialLocationReceiveListener(this);
@@ -93,6 +107,7 @@ public class MapsFragment extends Fragment
 
         //Check if we currently have the user's permission to access their location
         hasLocationPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.LOCATION_PERMISSION);
+
     }
 
     /**
@@ -111,6 +126,31 @@ public class MapsFragment extends Fragment
         }
     }
 
+    /**
+     * When the user leaves the fragment, it saves their location.
+     */
+    @Override
+    public void onPause(){
+        super.onPause();
+        // Get the zoom level
+        float zoom = googleMap.getCameraPosition().zoom;
+        // Save the zoom level so it can be restored
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putFloat("Zoom_value", zoom);
+        editor.apply();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        // Get the shared preferences
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        // Get the zoom level (change the 13f to the default zoom level that you want)
+        float zoom = sharedPreferences.getFloat("Zoom_value", 18f);
+    }
     /**
      * Stops tracking the user's current location
      */
@@ -168,11 +208,17 @@ public class MapsFragment extends Fragment
     @Override
     public void onInitialLocationReceived(LatLng userCurrentLocation) {
         Log.d(TAG, "onInitialLocationReceived : initial location has been received");
+        ScreenAnimator screenAnimator = new ScreenAnimator();
         if (googleMap != null) {
             progressBar.setVisibility(View.GONE);
+            screenAnimator.doInBackground(userCurrentLocation);
+
         }
-        ScreenAnimator screenAnimator = new ScreenAnimator();
-        screenAnimator.doInBackground(userCurrentLocation);
+        else{
+            googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(userCurrentLocation , 18.0f) );
+        }
+
+
     }
 
 
@@ -184,6 +230,19 @@ public class MapsFragment extends Fragment
     @Override
     public void onLocationUpdated(LatLng userCurrentLocation) {
 
+        //clear the markers on the map
+        googleMap.clear();
+        //Place current location marker
+        LatLng latLng = new LatLng(userCurrentLocation.latitude, userCurrentLocation.longitude);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+        googleMap.addMarker(markerOptions);
+
+        //move map camera
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //googleMap.animateCamera(CameraUpdateFactory.zoomTo(30));
     }
 
     @Override
@@ -195,6 +254,7 @@ public class MapsFragment extends Fragment
         this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
     }
 
+
     /**
      * Used to check if the fragment is currently retrieving the user's permissions
      *
@@ -203,5 +263,7 @@ public class MapsFragment extends Fragment
     public boolean isRetrievingLocPermission() {
         return isRetrievingUserPermission;
     }
+
+
 
 }
