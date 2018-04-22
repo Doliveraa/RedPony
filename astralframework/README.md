@@ -9,6 +9,11 @@ Astral is a framework that allows developers to create file-sharing and social a
     *  [Apps](#apps)
 
 ## Installation
+First, clone the repository:
+```bash 
+git clone https://github.com/jaredraycoleman/astralframework.git
+```
+
 To install, use the provided setup script:
 
 ```bash
@@ -32,7 +37,7 @@ astral <command> --help
 The setup script mentioned in the [Installation](#installation) section does this for you, but if you would like to set up your API using astral, run:
 
 ```bash
-astral setup-api --savedir <directory to save configs to>
+astral gen-configs --savedir <directory to save configs to>
 ```
 
 ### Deployment
