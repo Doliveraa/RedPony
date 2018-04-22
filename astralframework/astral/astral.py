@@ -58,7 +58,6 @@ def add_app(name, file=None):
         (bytes): JSON Web Token
     """
     (config, client, db)= init()
-    print(name)
     apps = db.apps
     if apps.find_one({"name": name}):
         return get_app_token(name, file)
