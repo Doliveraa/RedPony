@@ -216,20 +216,25 @@
             <h4 class="text-uppercase mb-4">The Team</h4>
             <ul class="list-inline mb-0">
               <li class="list-inline-item">
-                Jared Coleman
+                Daniel Kim
               </li>
-              <li class="list-inline-item">
-                Viet Le
-              </li>
+
               <li class="list-inline-item">
                 Daniel Olivera
               </li>
+
+              <li class="list-inline-item">
+                Jared Coleman
+              </li>
+
+              <li class="list-inline-item">
+                Viet Le
+              </li>
+
               <li class="list-inline-item">
                 Mario Lopez
               </li>
-              <li class="list-inline-item">
-                Daniel Kim
-              </li>
+
             </ul>
           </div>
           <div class="col-md-4">
@@ -335,11 +340,11 @@
               <hr class="star-dark mb-5">
               <img class="img-fluid mb-5" src="img/portfolio/uses.png" alt="">
 
-              <h3 class="text-secondary text-uppercase mb-0">Uses-Cases</h2>
-              <p class="mb-5"></p>
-
               <h3 class="text-secondary text-uppercase mb-0">Phylo</h2>
-              <p class="mb-5"></p>
+              <p class="mb-5">Phylo is an application that allows users to share files to specific locations.
+                Phylo is different from other file-sharing applications in that only users at a file's location
+                can view it. This allows users to share digital files in the same way they would share physical
+                ones. Phylo creates a digital world over the existing physical world.</p>
 
               <a class="btn btn-primary btn-lg rounded-pill portfolio-modal-dismiss" href="#">
                 <i class="fa fa-close"></i>
@@ -365,20 +370,24 @@
               <hr class="star-dark mb-5">
               <img class="img-fluid mb-5" src="img/portfolio/team.png" alt="">
 
-              <h3 class="text-secondary text-uppercase mb-0">Jared Coleman</h2>
-              <p class="mb-5"></p>
-
-              <h3 class="text-secondary text-uppercase mb-0">Viet Le</h2>
-              <p class="mb-5"></p>
-
               <h3 class="text-secondary text-uppercase mb-0">Daniel Kim</h2>
-              <p class="mb-5"></p>
+              <p class="mb-5">As team leader, Daniel managed all subsections of astral. He also led development for Phylo, Astral's
+                first application.</p>
 
               <h3 class="text-secondary text-uppercase mb-0">Daniel Olivera</h2>
-              <p class="mb-5"></p>
+              <p class="mb-5">Daniel led the development of the flexible RESTful API that is the base for Astral.</p>
+
+              <h3 class="text-secondary text-uppercase mb-0">Jared Coleman</h2>
+              <p class="mb-5">Jared led development for the astral command-line tool that developers can use to customize their API and database.
+                He also contributed to the astral API.</p>
+
+              <h3 class="text-secondary text-uppercase mb-0">Viet Le</h2>
+              <p class="mb-5">Viet was responsible for user interface design and security for Phylo.</p>
+
 
               <h3 class="text-secondary text-uppercase mb-0">Mario Lopez</h2>
-              <p class="mb-5"></p>
+              <p class="mb-5">Mario was responsible for testing the astral API, the astral tool and Phylo.
+                He was also responsible for documenting development processes.</p>
 
               <a class="btn btn-primary btn-lg rounded-pill portfolio-modal-dismiss" href="#">
                 <i class="fa fa-close"></i>
@@ -432,10 +441,30 @@
               <img class="img-fluid mb-5" src="img/portfolio/security.png" alt="">
 
               <h3 class="text-secondary text-uppercase mb-0">Features</h2>
-              <p class="mb-5"></p>
+              <ul style="list-style-type: none">
+                <li>
+                  Astral allows users to setup their servers with SSL (Secure Socket Layer).
+                </li>
+                <li>
+                  Astral never stores user passwords as plaintext. <a href="https://www.npmjs.com/package/bcrypt">Bcrypt</a> is used to hash passwords before storing.
+                </li>
+                <li>
+                  Applications can only be created using the astral command-line tool on the APIs server.
+                </li>
+                <li>
+                  JSON Web Tokens are used to authenticate application keys and users.
+                </li>
+              </ul>
 
               <h3 class="text-secondary text-uppercase mb-0">Limitations</h2>
-              <p class="mb-5"></p>
+              <ul style="list-style-type: none">
+                <li>
+                  No Two-factor authentication. (Can be implemented by applications)
+                </li>
+                <li>
+                  Use of passwords is optional. (Can be enforced by applications)
+                </li>
+              </ul>
 
               <a class="btn btn-primary btn-lg rounded-pill portfolio-modal-dismiss" href="#">
                 <i class="fa fa-close"></i>
