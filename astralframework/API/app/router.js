@@ -38,6 +38,14 @@ const routing = function routing(express_router) {
         MIDDLEWARE.updateFile(req, res);
     });
 
+    router.route('/files/delete').delete(function (req, res) {
+        MIDDLEWARE.deleteFile(req, res);
+    });
+
+    router.route('/users/delete').delete(function (req, res) {
+        MIDDLEWARE.deleteUser(req, res);
+    });
+
     return router;
 };
 
