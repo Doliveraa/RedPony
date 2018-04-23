@@ -40,20 +40,28 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  */
 
 public class MapsFragment extends Fragment
-        implements OnMapReadyCallback, UserLocationClient.InitialLocationReceived, UserLocationClient.CurrLocationListener {
+        implements OnMapReadyCallback, UserLocationClient.LocationUpdateListener {
     //Constants
     private final String TAG = MapsFragment.class.getSimpleName();
     private final int PERMISSION_REQUEST_CODE = 2035;
-    //View variables
-    private GoogleMap googleMap;
-    private MapView mapView;
+    //Class Variables
     private View fragmentView;
-    private ProgressBar progressBar;
-    //Other Variables
-    private boolean hasLocationPermission;
-    private UserLocationClient userLocationClient;
     private boolean isRetrievingUserPermission;
-    public boolean firstPass;
+    private UserLocationClient userLocationClient;
+    private boolean hasLocationPermission;
+    //Views
+    private MapView mapView;
+    private GoogleMap googleMap;
+
+    /**
+     * Instantiates an instance of UserFragment
+     *
+     * @return A MapFragment Object
+     */
+    public static MapsFragment newInstance() {
+        MapsFragment fragment = new MapsFragment();
+        return fragment;
+    }
 
     private class ScreenAnimator extends AsyncTask<LatLng, Void, Void> {
         @Override
@@ -64,16 +72,6 @@ public class MapsFragment extends Fragment
         }
     }
 
-    /**
-     * Instantiates an instance of UserFragment
-     *
-     * @return A UserFragment object
-     */
-    public static MapsFragment newInstance() {
-        MapsFragment fragment = new MapsFragment();
-        return fragment;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -82,75 +80,46 @@ public class MapsFragment extends Fragment
     }
 
     @Override
+    public void onMapReady(GoogleMap googleMap) {
+        //Map is Ready, initialize map interface
+        MapsInitializer.initialize(getContext());
+
+        this.googleMap = googleMap;
+        this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        //Initialize variables
+        isRetrievingUserPermission = false;
+        userLocationClient = new UserLocationClient(getActivity());
+
         //Initialize the map view item
         mapView = fragmentView.findViewById(R.id.map);
-        if (mapView != null) {
+
+        //MapView
+        if(mapView != null) {
             mapView.onCreate(null);
             mapView.onResume();
             mapView.getMapAsync(this);
         }
 
-        //Initialize Fragment Views
-        progressBar = fragmentView.findViewById(R.id.map_progress_bar);
-        //Begin the progress bar
-        progressBar.setVisibility(View.VISIBLE);
-
-        //Initialize variables
-        userLocationClient = new UserLocationClient(getActivity());
-        firstPass = true;
-
-        //Initialize Listeners
-        userLocationClient.setInitialLocationReceiveListener(this);
-        userLocationClient.setCurrLocationListener(this);
-
-        //Check if we currently have the user's permission to access their location
-        hasLocationPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.LOCATION_PERMISSION);
-
+        //Check if we have location permission
+        hasLocationPermission = UserPermission.checkUserPermission(getActivity(),
+                UserPermission.Permission.LOCATION_PERMISSION);
     }
 
-    /**
-     * Begins tracking the user's location if they have permission
-     * If they don't have any permissions, this methods asks them for the permissions
-     */
     @Override
     public void onStart() {
         super.onStart();
-        //If we have the user's permission to receive their location, start the location tracking
-        if (hasLocationPermission) {
+        if(hasLocationPermission) {
             userLocationClient.startUserLocationTracking();
         } else {
-            //We do not have permission to receive the user's location, ask for permission
             requestPermission();
         }
     }
 
-    /**
-     * When the user leaves the fragment, it saves their location.
-     */
-    @Override
-    public void onPause(){
-        super.onPause();
-        // Get the zoom level
-        float zoom = googleMap.getCameraPosition().zoom;
-        // Save the zoom level so it can be restored
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putFloat("Zoom_value", zoom);
-        editor.apply();
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
-
-        // Get the shared preferences
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        // Get the zoom level (change the 13f to the default zoom level that you want)
-        float zoom = sharedPreferences.getFloat("Zoom_value", 18f);
-    }
     /**
      * Stops tracking the user's current location
      */
@@ -162,16 +131,13 @@ public class MapsFragment extends Fragment
     }
 
     /**
-     * Asks for the user's permission, double check just in case, don't want to ask the user a second time
+     * Updates the user's current location
+     *
+     * @param userCurrentLocation The user's current latitude and longitude
      */
-    private void requestPermission() {
-        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "requestPermission : Requesting Fine Location permission");
-            isRetrievingUserPermission = true;
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_REQUEST_CODE);
-        }
+    @Override
+    public void onLocationUpdated(LatLng userCurrentLocation) {
+
     }
 
     /**
@@ -201,57 +167,16 @@ public class MapsFragment extends Fragment
     }
 
     /**
-     * Animates the camera to the user's current location
-     *
-     * @param userCurrentLocation The user's current latitude and longitude
+     * Asks for the user's permission, double check just in case, don't want to ask the user a second time
      */
-    @Override
-    public void onInitialLocationReceived(LatLng userCurrentLocation) {
-        Log.d(TAG, "onInitialLocationReceived : initial location has been received");
-        ScreenAnimator screenAnimator = new ScreenAnimator();
-        if (googleMap != null) {
-            progressBar.setVisibility(View.GONE);
-            screenAnimator.doInBackground(userCurrentLocation);
-
+    private void requestPermission() {
+        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "requestPermission : Requesting Fine Location permission");
+            isRetrievingUserPermission = true;
+            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_REQUEST_CODE);
         }
-        else{
-            googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(userCurrentLocation , 18.0f) );
-        }
-
-
-    }
-
-
-    /**
-     * Updates the user's current location
-     *
-     * @param userCurrentLocation The user's current latitude and longitude
-     */
-    @Override
-    public void onLocationUpdated(LatLng userCurrentLocation) {
-
-        //clear the markers on the map
-        googleMap.clear();
-        //Place current location marker
-        LatLng latLng = new LatLng(userCurrentLocation.latitude, userCurrentLocation.longitude);
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-        googleMap.addMarker(markerOptions);
-
-        //move map camera
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        //googleMap.animateCamera(CameraUpdateFactory.zoomTo(30));
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        //Map is Ready, initialize map interface
-        MapsInitializer.initialize(getContext());
-
-        this.googleMap = googleMap;
-        this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
     }
 
 
@@ -263,7 +188,5 @@ public class MapsFragment extends Fragment
     public boolean isRetrievingLocPermission() {
         return isRetrievingUserPermission;
     }
-
-
 
 }
