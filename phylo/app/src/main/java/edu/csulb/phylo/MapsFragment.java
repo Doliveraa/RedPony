@@ -108,6 +108,7 @@ public class MapsFragment extends Fragment
             mapView.onResume();
             mapView.getMapAsync(this);
         }
+        userLocationClient.setLocationUpdatedListener(this);
 
         //Check if we have location permission
         hasLocationPermission = UserPermission.checkUserPermission(getActivity(),
