@@ -7,6 +7,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,6 +19,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -49,9 +53,12 @@ public class MapsFragment extends Fragment
     private boolean isRetrievingUserPermission;
     private UserLocationClient userLocationClient;
     private boolean hasLocationPermission;
+    private boolean isFirstTime;
+    private Marker currMarker;
     //Views
     private MapView mapView;
     private GoogleMap googleMap;
+    private ProgressBar progressBar;
 
     /**
      * Instantiates an instance of UserFragment
@@ -66,11 +73,12 @@ public class MapsFragment extends Fragment
     private class ScreenAnimator extends AsyncTask<LatLng, Void, Void> {
         @Override
         protected Void doInBackground(LatLng... location) {
-            googleMap.addMarker(new MarkerOptions().position(location[0]));
+            currMarker = googleMap.addMarker(new MarkerOptions().position(location[0]));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], 18f));
             return null;
         }
     }
+
 
     @Nullable
     @Override
@@ -94,9 +102,12 @@ public class MapsFragment extends Fragment
         //Initialize variables
         isRetrievingUserPermission = false;
         userLocationClient = new UserLocationClient(getActivity());
+        isFirstTime = true;
 
         //Initialize the map view item
         mapView = fragmentView.findViewById(R.id.map);
+        progressBar = fragmentView.findViewById(R.id.map_progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
 
         //MapView
         if(mapView != null) {
@@ -137,7 +148,56 @@ public class MapsFragment extends Fragment
      */
     @Override
     public void onLocationUpdated(LatLng userCurrentLocation) {
+        if(isFirstTime) {
+            animateToInitialLocation(userCurrentLocation);
+        } else {
+            animateMarkerToNewLoc(currMarker, new LatLng(userCurrentLocation.latitude, userCurrentLocation.longitude),
+                    new LatLngInterpolator.LinearFixed());
+        }
+    }
 
+    /**
+     * Animate the screen to the user's current location
+     *
+     * @param location The user'c current location
+     */
+    private void animateToInitialLocation(LatLng location) {
+        ScreenAnimator screenAnimator = new ScreenAnimator();
+        if(googleMap != null) {
+            progressBar.setVisibility(View.GONE);
+            screenAnimator.doInBackground(location);
+            isFirstTime = false;
+        }
+    }
+
+    private void animateMarkerToNewLoc(final Marker marker, final LatLng finalPosition,
+                                       final LatLngInterpolator latLngInterpolator) {
+        final LatLng startPosition = marker.getPosition();
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+        final float durationInMs = 3000;
+
+        handler.post(new Runnable() {
+            long elapsed;
+            float t;
+            float v;
+
+            @Override
+            public void run() {
+                elapsed = SystemClock.uptimeMillis() - start;
+                t = elapsed / durationInMs;
+                v = interpolator.getInterpolation(t);
+
+                marker.setPosition(latLngInterpolator.interpolate(v, startPosition, finalPosition));
+
+                //Repeat till process is complete
+                if(t < 1) {
+                    //Post again 16ms later
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
     }
 
     /**
@@ -188,5 +248,4 @@ public class MapsFragment extends Fragment
     public boolean isRetrievingLocPermission() {
         return isRetrievingUserPermission;
     }
-
 }

@@ -26,6 +26,8 @@ public class MainActivityContainer extends AppCompatActivity{
     PinnedFragment pinnedFragment;
     //Variables
     private User user;
+    private boolean mapFragmentFirstTime;
+    private boolean enteredMapFragment;
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -63,7 +65,6 @@ public class MainActivityContainer extends AppCompatActivity{
                             break;
 
                     }
-                    //fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     fragmentTransaction.commit();
                     return true;
                 }
@@ -73,6 +74,10 @@ public class MainActivityContainer extends AppCompatActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_container);
+
+        //Initialize Variables
+        mapFragmentFirstTime = true;
+        enteredMapFragment = false;
 
         //Instantiate user
         user = User.getInstance(this);

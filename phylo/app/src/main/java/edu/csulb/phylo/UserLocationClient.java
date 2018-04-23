@@ -22,7 +22,6 @@ import io.nlopez.smartlocation.SmartLocation;
 public class UserLocationClient
     implements OnLocationUpdatedListener{
     //Constants
-    public final static String ZOOM_LEVEL = "zoom_level";
     public final static String LATITUDE = "latitude";
     public final static String LONGITUDE = "longitude";
     //Class variables
