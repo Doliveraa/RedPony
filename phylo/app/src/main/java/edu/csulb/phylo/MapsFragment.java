@@ -138,6 +138,19 @@ public class MapsFragment extends Fragment
     @Override
     public void onLocationUpdated(LatLng userCurrentLocation) {
 
+        //clear the markers on the map
+        googleMap.clear();
+        //Place current location marker
+        LatLng latLng = new LatLng(userCurrentLocation.latitude, userCurrentLocation.longitude);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+        googleMap.addMarker(markerOptions);
+
+        //move map camera
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //googleMap.animateCamera(CameraUpdateFactory.zoomTo(30));
     }
 
     /**

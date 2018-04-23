@@ -30,14 +30,21 @@
         style="@style/Divider"
         android:layout_marginTop="5dp" />
 
-    <EditText
-        android:id="@+id/edit_text_room_name"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_marginLeft="14dp"
         android:layout_marginRight="14dp"
-        android:layout_marginTop="10dp"
-        android:hint="@string/room_name"/>
+        android:layout_marginTop="10dp">
+
+        <EditText
+            android:id="@+id/edit_text_room_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:inputType="text"
+            android:hint="@string/room_name"/>
+    </FrameLayout>
 
     <Button
         android:id="@+id/button_set_expiration"
@@ -71,8 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:textSize="20sp"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
         <TimePicker
             android:id="@+id/time_spinner"
