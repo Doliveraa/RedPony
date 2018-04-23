@@ -2,13 +2,18 @@ package edu.csulb.phylo;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,8 +28,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,8 +42,10 @@ import java.util.regex.Pattern;
  */
 
 public class HomeFragment extends Fragment
-    implements View.OnClickListener{
+        implements View.OnClickListener{
 
+    //Permissions
+    private final int PERMISSION_REQUEST_CODE = 2035;
     //Phone Hardware
     private Vibrator vibrator;
     //Constants
@@ -44,6 +54,11 @@ public class HomeFragment extends Fragment
     FloatingActionButton fabCreateRoom;
     //Variables
     private boolean roomLockedChoice;
+    //Location Permissions Variables
+    private boolean hasLocationPermission;
+    private boolean isRetrievingUserPermission;
+    private UserLocationClient userLocationClient;
+    private LocationManager locationManager;
 
     public static HomeFragment newInstance(){
         HomeFragment fragment = new HomeFragment();
@@ -62,7 +77,7 @@ public class HomeFragment extends Fragment
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) throws SecurityException{
         super.onActivityCreated(savedInstanceState);
 
         //Initialize Variables
@@ -76,7 +91,30 @@ public class HomeFragment extends Fragment
 
         //Set listeners
         fabCreateRoom.setOnClickListener(this);
+
+        userLocationClient = new UserLocationClient(getActivity());
+
+        //Get last known location
+//        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        //Check to see if we have the user's permission
+        hasLocationPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.LOCATION_PERMISSION);
     }
+
+    /**
+     * Begins tracking the user's location if they have permission
+     * If they don't have any permissions, this methods asks them for the permissions
+     */
+    @Override
+    public void onStart() {
+        super.onStart();
+        //If we have the user's permission to receive their location, start the location tracking
+        if (hasLocationPermission) {
+        } else {
+            //We do not have permission to receive the user's location, ask for permission
+            requestPermission();
+        }
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -251,4 +289,53 @@ public class HomeFragment extends Fragment
 
         return matcher.matches();
     }
+
+    /**
+     * Used to check if the fragment is currently retrieving the user's permissions
+     *
+     * @return True if the fragment is currently retrieving the user's location, False otherwise
+     */
+    public boolean isRetrievingLocPermission() {
+        return isRetrievingUserPermission;
+    }
+
+    /**
+     * Asks for the user's permission, double check just in case, don't want to ask the user a second time
+     */
+    private void requestPermission() {
+        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "requestPermission : Requesting Fine Location permission");
+            isRetrievingUserPermission = true;
+            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    /**
+     * Requests user permission to track their current location
+     *
+     * @param requestCode  The request code received back from asking permission
+     * @param permissions  The permissions asked
+     * @param grantResults The granted results
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //Permission has been granted, we can now start tracking the user's location
+                    Log.d(TAG, "onRequestPermissionResult : AstralUser has accepted location permissions");
+                    userLocationClient.startUserLocationTracking();
+                    hasLocationPermission = true;
+                } else {
+                    Log.d(TAG, "onRequestPermissionResult : AstralUser has denied location permissions");
+                    //Permission Denied
+                    Toast.makeText(getActivity(), "Location Permission Denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
 }
