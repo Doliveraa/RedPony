@@ -3,13 +3,10 @@ package edu.csulb.phylo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -24,20 +21,14 @@ import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by vietl on 2/25/2018.
@@ -48,7 +39,7 @@ public class MapsFragment extends Fragment
     //Constants
     private final String TAG = MapsFragment.class.getSimpleName();
     private final int PERMISSION_REQUEST_CODE = 2035;
-    private final String MAPS_FRAGMENT = "Maps Fragment";
+    public final static String MAPS_FRAGMENT_PREF = "Maps Fragment";
     public final static String IS_FIRST_TIME = "is first time";
     //Class Variables
     private View fragmentView;
@@ -271,7 +262,7 @@ public class MapsFragment extends Fragment
      * @return The Fragments shared preferences folder
      */
     public SharedPreferences getSharedPref() {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(MAPS_FRAGMENT,
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(MAPS_FRAGMENT_PREF,
                 Context.MODE_PRIVATE);
         return sharedPreferences;
     }

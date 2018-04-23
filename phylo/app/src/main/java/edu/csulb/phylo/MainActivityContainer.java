@@ -1,5 +1,6 @@
 package edu.csulb.phylo;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -129,7 +130,8 @@ public class MainActivityContainer extends AppCompatActivity{
      * Sets that the first time we are opening the map fragment to true
      */
     private void setMapFragmentFirstTime() {
-        SharedPreferences sharedPreferences = mapsFragment.getSharedPref();
+        SharedPreferences sharedPreferences = this.getSharedPreferences(MapsFragment.MAPS_FRAGMENT_PREF,
+                Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(MapsFragment.IS_FIRST_TIME, true);
         editor.commit();
