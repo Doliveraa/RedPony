@@ -48,6 +48,8 @@ public class MapsFragment extends Fragment
     //Constants
     private final String TAG = MapsFragment.class.getSimpleName();
     private final int PERMISSION_REQUEST_CODE = 2035;
+    private final String MAPS_FRAGMENT = "Maps Fragment";
+    public final static String IS_FIRST_TIME = "is first time";
     //Class Variables
     private View fragmentView;
     private boolean isRetrievingUserPermission;
@@ -124,6 +126,7 @@ public class MapsFragment extends Fragment
     @Override
     public void onStart() {
         super.onStart();
+        isFirstTime = checkIsFirstTime();
         if(hasLocationPermission) {
             userLocationClient.startUserLocationTracking();
         } else {
@@ -166,7 +169,10 @@ public class MapsFragment extends Fragment
         if(googleMap != null) {
             progressBar.setVisibility(View.GONE);
             screenAnimator.doInBackground(location);
-            isFirstTime = false;
+            SharedPreferences sharedPreferences = getSharedPref();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(IS_FIRST_TIME, false);
+            editor.commit();
         }
     }
 
@@ -247,5 +253,26 @@ public class MapsFragment extends Fragment
      */
     public boolean isRetrievingLocPermission() {
         return isRetrievingUserPermission;
+    }
+
+    /**
+     * Checks if this is the first time that the Maps Fragment is updating
+     *
+     * @return True if it is the first time the user has started this Fragment, false otherwise
+     */
+    private boolean checkIsFirstTime() {
+        SharedPreferences sharedPreferences = getSharedPref();
+        return sharedPreferences.getBoolean(IS_FIRST_TIME, true);
+    }
+
+    /**
+     * Retrieve's the fragment's shared preferences folder
+     *
+     * @return The Fragments shared preferences folder
+     */
+    public SharedPreferences getSharedPref() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(MAPS_FRAGMENT,
+                Context.MODE_PRIVATE);
+        return sharedPreferences;
     }
 }

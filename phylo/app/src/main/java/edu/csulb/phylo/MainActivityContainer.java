@@ -1,5 +1,6 @@
 package edu.csulb.phylo;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -91,6 +92,10 @@ public class MainActivityContainer extends AppCompatActivity{
         pinnedFragment = PinnedFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
         userFragment = UserFragment.newInstance();
+
+        //Set that it is the first time the Maps Fragment is opening
+        setMapFragmentFirstTime();
+
     }
     
     @Override
@@ -118,5 +123,15 @@ public class MainActivityContainer extends AppCompatActivity{
         transaction.replace(R.id.container, HomeFragment.newInstance());
         //Commit changes transaction
         transaction.commit();
+    }
+
+    /**
+     * Sets that the first time we are opening the map fragment to true
+     */
+    private void setMapFragmentFirstTime() {
+        SharedPreferences sharedPreferences = mapsFragment.getSharedPref();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(MapsFragment.IS_FIRST_TIME, true);
+        editor.commit();
     }
 }
