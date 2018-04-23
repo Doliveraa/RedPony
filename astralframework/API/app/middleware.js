@@ -189,14 +189,18 @@ const createFile = function(req, res) {
                 };
 
                 // TODO: if username is changed, user's files must also be updated
-
-                File.create(fileData, function(err) {
-                    if (err) {
-                        console.log(err);
-                        res.status = 401;
-                        return res.json({message: "Error creating file"});
+                File.findOne({username: fileData.username, name: fileData.name }, function(err, file){
+                    if (err) return res.status(404).json({message: "Error: error checking pre-existing file"});
+                    if (file) return res.status(409).json({message: "File already Exists"});
+                    if (!file) {
+                        File.create(fileData, function(err) {
+                            if (err) {
+                                console.log(err);
+                                return res.status(401).json({message: "Error creating file"});
+                            }
+                            else return res.json({message:"File created successfully"});
+                        });
                     }
-                    else return res.json({message:"File created successfully"});
                 });
             } else {
                 let err = new Error("Invalid parameters");
@@ -321,7 +325,59 @@ const updateFile = function(req, res) {
         res.status = 401;
         return res.json({message: "No appKey or token provided"});
     }
-}
+};
+
+const deleteFile = function(req, res) {
+    let appKey = req.get("appKey");
+    let token = req.get("token");
+    let fileid = req.body.fileid;
+
+    if (appKey && token) {
+        findApp(appKey, function (err, decoded) {
+            if (err) return err;
+            if (decoded == null) return res.status(400).json({message: "Appkey error"});
+
+            findUser(appKey, token, function(err){
+                if (err) return err;
+                File.findByIdAndRemove(fileid, function(err) {
+                    if (err) return err;
+                    else {
+                        return res.status(200).json({message: "File Deleted"});
+                    }
+                })
+            })
+        })
+
+    } else {
+        return res.status(401).json({message: "No appKey or token provided"});
+    }
+
+};
+
+const deleteUser = function(req, res) {
+    let appKey = req.get("appKey");
+    let token = req.get("token");
+
+    if (appKey && token) {
+        findApp(appKey, function (err, decoded) {
+            if (err) return err;
+            if (decoded == null) return res.status(400).json({message: "Appkey error"});
+
+            findUser(appKey, token, function(err, user){
+                if (err) return err;
+                User.findByIdAndRemove(user._id, function(err) {
+                    if (err) return err;
+                    else {
+                        return res.status(200).json({message: "User Deleted"});
+                    }
+                })
+            })
+        })
+
+    } else {
+        return res.status(401).json({message: "No appKey or token provided"});
+    }
+};
 
 module.exports = {
   createUser,
@@ -330,5 +386,7 @@ module.exports = {
   createFile,
   getFiles,
   updateFile,
-  checkUserAvailability
+  checkUserAvailability,
+    deleteUser,
+    deleteFile
 };
