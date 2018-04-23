@@ -189,14 +189,18 @@ const createFile = function(req, res) {
                 };
 
                 // TODO: if username is changed, user's files must also be updated
-
-                File.create(fileData, function(err) {
-                    if (err) {
-                        console.log(err);
-                        res.status = 401;
-                        return res.json({message: "Error creating file"});
+                File.findOne({username: fileData.username, name: fileData.name }, function(err, file){
+                    if (err) return res.status(404).json({message: "Error: error checking pre-existing file"});
+                    if (file) return res.status(409).json({message: "File already Exists"});
+                    if (!file) {
+                        File.create(fileData, function(err) {
+                            if (err) {
+                                console.log(err);
+                                return res.status(401).json({message: "Error creating file"});
+                            }
+                            else return res.json({message:"File created successfully"});
+                        });
                     }
-                    else return res.json({message:"File created successfully"});
                 });
             } else {
                 let err = new Error("Invalid parameters");
@@ -374,7 +378,6 @@ const deleteUser = function(req, res) {
         return res.status(401).json({message: "No appKey or token provided"});
     }
 };
-
 
 module.exports = {
   createUser,
