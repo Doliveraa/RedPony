@@ -181,6 +181,7 @@ public class HomeFragment extends Fragment
                     //Display the chosen expiration date
                     expirationDateText.setText(expDate);
                     dateSpinner.setVisibility(View.GONE);
+                    expirationTimeText.setVisibility(View.GONE);
                     expirationDateText.setVisibility(View.VISIBLE);
                     timeSpinner.setVisibility(View.VISIBLE);
                 } else {
@@ -225,13 +226,13 @@ public class HomeFragment extends Fragment
                     roomLockedChoice = false;
                     //Change the button color back to red
                     lockRoomButton.setBackgroundColor(getActivity().getColor(R.color.red));
-                    lockRoomButton.setText("Lock Room");
+                    lockRoomButton.setText(" Lock Room ");
                 } else {
                     //User wants to lock the room
                     roomLockedChoice = true;
                     //Change the button color to green
                     lockRoomButton.setBackgroundColor(getActivity().getColor(R.color.green));
-                    lockRoomButton.setText("Room is Locked");
+                    lockRoomButton.setText(" Room is Locked ");
                 }
             }
         });
@@ -239,6 +240,8 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 String roomName = roomNameEditText.getText().toString();
+
+
 
                 //Check if the Room name is in the correct format
                 if(roomName.isEmpty()) {

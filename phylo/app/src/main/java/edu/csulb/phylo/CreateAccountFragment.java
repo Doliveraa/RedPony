@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -166,6 +167,7 @@ public class CreateAccountFragment extends Fragment
         final TextView passwordFormatTextView = (TextView) getActivity().findViewById(R.id.text_view_password_format);
         xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability);
         checkmarkImage = getActivity().findViewById(R.id.checkmark_username_availability);
+        ImageButton backButton = getActivity().findViewById(R.id.back_button_create_account);
 
         //Add all of the EditText views in an array to check if they are empty later on
         listOfInputFields = new ArrayList<>();
@@ -176,8 +178,10 @@ public class CreateAccountFragment extends Fragment
         listOfInputFields.add(confirmPasswordEditText);
         listOfInputFields.add(usernameEditText);
 
+
         //Attach Listeners
         createAccountButton.setOnClickListener(this);
+        backButton.setOnClickListener(this);
         usernameEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             //Makes the username format hint appear if on focus and disappear otherwise
             @Override
@@ -416,6 +420,7 @@ public class CreateAccountFragment extends Fragment
                 imm.hideSoftInputFromWindow(currentlyFocusedView.getWindowToken(), 0);
 
                 break;
+            case R.id.back_button_create_account:
         }
     }
 
