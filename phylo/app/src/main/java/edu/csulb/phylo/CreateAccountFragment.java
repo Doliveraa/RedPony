@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
@@ -421,6 +422,12 @@ public class CreateAccountFragment extends Fragment
 
                 break;
             case R.id.back_button_create_account:
+                //Sends the user back to the Authentication Screen
+                Intent signoutIntent = new Intent(getActivity(), AuthenticationContainer.class);
+                signoutIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
+                startActivity(signoutIntent);
+                getActivity().finish();
+                break;
         }
     }
 

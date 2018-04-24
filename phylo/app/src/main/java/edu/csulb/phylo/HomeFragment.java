@@ -153,6 +153,12 @@ public class HomeFragment extends Fragment
         final TextView expirationDateText = (TextView) alertDialogView.findViewById(R.id.textview_expiration_date);
         final TextView expirationTimeText = (TextView) alertDialogView.findViewById(R.id.textview_expiration_time);
         final EditText roomNameEditText = (EditText) alertDialogView.findViewById(R.id.edit_text_room_name);
+        final EditText setPassword = (EditText) alertDialogView.findViewById(R.id.password_edit_text_set);
+        final Button cancelPassword = (Button) alertDialogView.findViewById(R.id.button_cancel_password);
+
+        //Set these buttons to invisible
+        setPassword.setVisibility(View.GONE);
+        cancelPassword.setVisibility(View.GONE);
 
         //Set Listeners
         setExpirationDateButton.setOnClickListener(new View.OnClickListener() {
@@ -167,6 +173,14 @@ public class HomeFragment extends Fragment
             public void onClick(View v) {
                 setDateLinear.setVisibility(View.GONE);
                 setExpirationDateButton.setVisibility(View.VISIBLE);
+            }
+        });
+        cancelPassword.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                lockRoomButton.setVisibility(View.VISIBLE);
+                setPassword.setVisibility(View.GONE);
+                cancelPassword.setVisibility(View.GONE);
             }
         });
         setButton.setOnClickListener(new View.OnClickListener(){
@@ -222,17 +236,21 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 if(roomLockedChoice) {
-                    //User wants the room to be unlocked
+                    //User wants the room to have no password
                     roomLockedChoice = false;
-                    //Change the button color back to red
-                    lockRoomButton.setBackgroundColor(getActivity().getColor(R.color.red));
-                    lockRoomButton.setText(" Lock Room ");
+                    //Remove the button
+                    lockRoomButton.setVisibility(View.VISIBLE);
+                    //The cancel button is gone
+                    setPassword.setVisibility(View.GONE);
+                    cancelPassword.setVisibility(View.GONE);
                 } else {
-                    //User wants to lock the room
+                    //User wants the room to have a password
                     roomLockedChoice = true;
-                    //Change the button color to green
-                    lockRoomButton.setBackgroundColor(getActivity().getColor(R.color.green));
-                    lockRoomButton.setText(" Room is Locked ");
+                    //Remove the button
+                    lockRoomButton.setVisibility(View.GONE);
+                    //Allow the cancel button to appear
+                    setPassword.setVisibility(View.VISIBLE);
+                    cancelPassword.setVisibility(View.VISIBLE);
                 }
             }
         });

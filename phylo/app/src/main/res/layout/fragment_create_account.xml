@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/create_account_background"
+    android:background="@drawable/login_activity_gradient_background"
     android:theme="@style/EditTextTheme">
 
     <LinearLayout
@@ -17,18 +17,14 @@
             android:tint="@color/black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
             android:contentDescription="@string/back_image"
-            android:src="@drawable/ic_back_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            android:src="@drawable/ic_back_button" />
 
         <ImageView
             android:layout_width="122dp"
             android:layout_height="59dp"
             android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
             android:src="@drawable/phylo" />
 
         <LinearLayout
@@ -43,6 +39,7 @@
                 android:layout_height="wrap_content"
                 android:ems="7"
                 android:hint="@string/first_name"
+                android:maxLines="1"
                 android:inputType="textPersonName|textNoSuggestions" />
 
             <EditText
@@ -51,6 +48,7 @@
                 android:layout_height="wrap_content"
                 android:ems="8"
                 android:hint="@string/last_name"
+                android:maxLines="1"
                 android:inputType="textPersonName|textNoSuggestions" />
         </LinearLayout>
 
@@ -78,6 +76,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
+                    android:maxLines="1"
+                    android:inputType="text|textNoSuggestions"
                     android:hint="@string/username" />
 
                 <ProgressBar
@@ -125,6 +125,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:hint="@string/email"
+            android:maxLines="1"
             android:inputType="textEmailAddress|textNoSuggestions" />
 
         <TextView
@@ -134,7 +135,7 @@
             android:layout_marginLeft="10dp"
             android:text="@string/password_format"
             android:textColor="@android:color/holo_red_dark"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:visibility="gone" />
 
         <EditText
@@ -143,6 +144,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:maxLines="1"
             android:hint="@string/password"
             android:inputType="textPassword|textNoSuggestions" />
 
@@ -153,6 +155,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:hint="@string/confirm_password"
+            android:maxLines="1"
             android:inputType="textPassword|textNoSuggestions" />
 
         <Button

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:theme="@style/LoginTheme"
-    android:background="@color/create_account_background">
+    android:background="@drawable/login_activity_gradient_background">
 
     <ImageView
         android:id="@+id/imageView"
