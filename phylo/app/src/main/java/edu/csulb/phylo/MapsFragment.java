@@ -3,11 +3,11 @@ package edu.csulb.phylo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import android.graphics.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -17,62 +17,66 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by vietl on 2/25/2018.
  */
 
 public class MapsFragment extends Fragment
-        implements OnMapReadyCallback, UserLocationClient.InitialLocationReceived, UserLocationClient.CurrLocationListener {
+        implements OnMapReadyCallback, UserLocationClient.LocationUpdateListener {
     //Constants
     private final String TAG = MapsFragment.class.getSimpleName();
     private final int PERMISSION_REQUEST_CODE = 2035;
-    //View variables
-    private GoogleMap googleMap;
-    private MapView mapView;
+    public final static String MAPS_FRAGMENT_PREF = "Maps Fragment";
+    public final static String IS_FIRST_TIME = "is first time";
+    private final String LATITUDE_PREF = "latitude";
+    private final String LONGITUDE_PREF = "longitude";
+    private final float DEFAULT_ZOOM = 18;
+    //Class Variables
     private View fragmentView;
-    private ProgressBar progressBar;
-    //Other Variables
-    private boolean hasLocationPermission;
-    private UserLocationClient userLocationClient;
     private boolean isRetrievingUserPermission;
-    public boolean firstPass;
-
-    private class ScreenAnimator extends AsyncTask<LatLng, Void, Void> {
-        @Override
-        protected Void doInBackground(LatLng... location) {
-            googleMap.addMarker(new MarkerOptions().position(location[0]));
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], 18f));
-            return null;
-        }
-    }
+    private UserLocationClient userLocationClient;
+    private boolean hasLocationPermission;
+    private boolean isFirstTime;
+    private Marker currMarker;
+    private LatLng onRestartCurrLocation;
+    //Views
+    private MapView mapView;
+    private GoogleMap googleMap;
+    private ProgressBar progressBar;
 
     /**
      * Instantiates an instance of UserFragment
      *
-     * @return A UserFragment object
+     * @return A MapFragment Object
      */
     public static MapsFragment newInstance() {
         MapsFragment fragment = new MapsFragment();
         return fragment;
     }
+
+    private class ScreenAnimator extends AsyncTask<LatLng, Void, Void> {
+        @Override
+        protected Void doInBackground(LatLng... location) {
+            currMarker = googleMap.addMarker(new MarkerOptions().position(location[0]));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], DEFAULT_ZOOM));
+            return null;
+        }
+    }
+
 
     @Nullable
     @Override
@@ -82,75 +86,61 @@ public class MapsFragment extends Fragment
     }
 
     @Override
+    public void onMapReady(GoogleMap googleMap) {
+        //Map is Ready, initialize map interface
+        MapsInitializer.initialize(getContext());
+
+        this.googleMap = googleMap;
+        this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        if(onRestartCurrLocation != null) {
+            progressBar.setVisibility(View.GONE);
+            this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(onRestartCurrLocation, DEFAULT_ZOOM));
+            currMarker = this.googleMap.addMarker(new MarkerOptions().position(onRestartCurrLocation));
+        }
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        //Initialize variables
+        isRetrievingUserPermission = false;
+        userLocationClient = new UserLocationClient(getActivity());
+        isFirstTime = true;
+
         //Initialize the map view item
         mapView = fragmentView.findViewById(R.id.map);
-        if (mapView != null) {
+        progressBar = fragmentView.findViewById(R.id.map_progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
+        //MapView
+        if(mapView != null) {
             mapView.onCreate(null);
             mapView.onResume();
             mapView.getMapAsync(this);
         }
+        userLocationClient.setLocationUpdatedListener(this);
 
-        //Initialize Fragment Views
-        progressBar = fragmentView.findViewById(R.id.map_progress_bar);
-        //Begin the progress bar
-        progressBar.setVisibility(View.VISIBLE);
-
-        //Initialize variables
-        userLocationClient = new UserLocationClient(getActivity());
-        firstPass = true;
-
-        //Initialize Listeners
-        userLocationClient.setInitialLocationReceiveListener(this);
-        userLocationClient.setCurrLocationListener(this);
-
-        //Check if we currently have the user's permission to access their location
-        hasLocationPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.LOCATION_PERMISSION);
-
+        //Check if we have location permission
+        hasLocationPermission = UserPermission.checkUserPermission(getActivity(),
+                UserPermission.Permission.LOCATION_PERMISSION);
     }
 
-    /**
-     * Begins tracking the user's location if they have permission
-     * If they don't have any permissions, this methods asks them for the permissions
-     */
     @Override
     public void onStart() {
         super.onStart();
-        //If we have the user's permission to receive their location, start the location tracking
-        if (hasLocationPermission) {
+        isFirstTime = checkIsFirstTime();
+
+        if(hasLocationPermission && isFirstTime) {
             userLocationClient.startUserLocationTracking();
-        } else {
-            //We do not have permission to receive the user's location, ask for permission
+        } else if (hasLocationPermission && !isFirstTime) {
+            onRestartCurrLocation = retrieveCachedUserLocation();
+            userLocationClient.startUserLocationTracking();
+        }else {
             requestPermission();
         }
     }
 
-    /**
-     * When the user leaves the fragment, it saves their location.
-     */
-    @Override
-    public void onPause(){
-        super.onPause();
-        // Get the zoom level
-        float zoom = googleMap.getCameraPosition().zoom;
-        // Save the zoom level so it can be restored
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putFloat("Zoom_value", zoom);
-        editor.apply();
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
-
-        // Get the shared preferences
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        // Get the zoom level (change the 13f to the default zoom level that you want)
-        float zoom = sharedPreferences.getFloat("Zoom_value", 18f);
-    }
     /**
      * Stops tracking the user's current location
      */
@@ -159,19 +149,69 @@ public class MapsFragment extends Fragment
         super.onStop();
         Log.d(TAG, "onStop: Stopping user's location tracking");
         userLocationClient.stopUserLocationTracking();
+        cacheUserLocation();
     }
 
     /**
-     * Asks for the user's permission, double check just in case, don't want to ask the user a second time
+     * Updates the user's current location
+     *
+     * @param userCurrentLocation The user's current latitude and longitude
      */
-    private void requestPermission() {
-        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "requestPermission : Requesting Fine Location permission");
-            isRetrievingUserPermission = true;
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_REQUEST_CODE);
+    @Override
+    public void onLocationUpdated(LatLng userCurrentLocation) {
+        if(isFirstTime) {
+            animateToInitialLocation(userCurrentLocation);
+        } else {
+            animateMarkerToNewLoc(currMarker, new LatLng(userCurrentLocation.latitude, userCurrentLocation.longitude),
+                    new LatLngInterpolator.LinearFixed());
         }
+    }
+
+    /**
+     * Animate the screen to the user's current location
+     *
+     * @param location The user'c current location
+     */
+    private void animateToInitialLocation(LatLng location) {
+        ScreenAnimator screenAnimator = new ScreenAnimator();
+        if(googleMap != null) {
+            progressBar.setVisibility(View.GONE);
+            screenAnimator.doInBackground(location);
+            SharedPreferences sharedPreferences = getSharedPref();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(IS_FIRST_TIME, false);
+            editor.commit();
+        }
+    }
+
+    private void animateMarkerToNewLoc(final Marker marker, final LatLng finalPosition,
+                                       final LatLngInterpolator latLngInterpolator) {
+        final LatLng startPosition = marker.getPosition();
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+        final float durationInMs = 3000;
+
+        handler.post(new Runnable() {
+            long elapsed;
+            float t;
+            float v;
+
+            @Override
+            public void run() {
+                elapsed = SystemClock.uptimeMillis() - start;
+                t = elapsed / durationInMs;
+                v = interpolator.getInterpolation(t);
+
+                marker.setPosition(latLngInterpolator.interpolate(v, startPosition, finalPosition));
+
+                //Repeat till process is complete
+                if(t < 1) {
+                    //Post again 16ms later
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
     }
 
     /**
@@ -201,57 +241,16 @@ public class MapsFragment extends Fragment
     }
 
     /**
-     * Animates the camera to the user's current location
-     *
-     * @param userCurrentLocation The user's current latitude and longitude
+     * Asks for the user's permission, double check just in case, don't want to ask the user a second time
      */
-    @Override
-    public void onInitialLocationReceived(LatLng userCurrentLocation) {
-        Log.d(TAG, "onInitialLocationReceived : initial location has been received");
-        ScreenAnimator screenAnimator = new ScreenAnimator();
-        if (googleMap != null) {
-            progressBar.setVisibility(View.GONE);
-            screenAnimator.doInBackground(userCurrentLocation);
-
+    private void requestPermission() {
+        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "requestPermission : Requesting Fine Location permission");
+            isRetrievingUserPermission = true;
+            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_REQUEST_CODE);
         }
-        else{
-            googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(userCurrentLocation , 18.0f) );
-        }
-
-
-    }
-
-
-    /**
-     * Updates the user's current location
-     *
-     * @param userCurrentLocation The user's current latitude and longitude
-     */
-    @Override
-    public void onLocationUpdated(LatLng userCurrentLocation) {
-
-        //clear the markers on the map
-        googleMap.clear();
-        //Place current location marker
-        LatLng latLng = new LatLng(userCurrentLocation.latitude, userCurrentLocation.longitude);
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-        googleMap.addMarker(markerOptions);
-
-        //move map camera
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        //googleMap.animateCamera(CameraUpdateFactory.zoomTo(30));
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        //Map is Ready, initialize map interface
-        MapsInitializer.initialize(getContext());
-
-        this.googleMap = googleMap;
-        this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
     }
 
 
@@ -264,6 +263,49 @@ public class MapsFragment extends Fragment
         return isRetrievingUserPermission;
     }
 
+    /**
+     * Checks if this is the first time that the Maps Fragment is updating
+     *
+     * @return True if it is the first time the user has started this Fragment, false otherwise
+     */
+    private boolean checkIsFirstTime() {
+        SharedPreferences sharedPreferences = getSharedPref();
+        return sharedPreferences.getBoolean(IS_FIRST_TIME, true);
+    }
 
+    /**
+     * Cache user location
+     */
+    private void cacheUserLocation() {
+        double latitude = userLocationClient.getCurrLocation().get(UserLocationClient.LATITUDE);
+        double longitude = userLocationClient.getCurrLocation().get(UserLocationClient.LONGITUDE);
+        //Store the values
+        SharedPreferences sharedPreferences = getSharedPref();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(LATITUDE_PREF, Double.toString(latitude));
+        editor.putString(LONGITUDE_PREF, Double.toString(longitude));
+        editor.apply();
+    }
 
+    /**
+     *
+     * @return Retrieve and return the cached user location
+     */
+    private LatLng retrieveCachedUserLocation() {
+        SharedPreferences sharedPreferences = getSharedPref();
+        double latitude = Double.parseDouble(sharedPreferences.getString(LATITUDE_PREF, ""));
+        double longitude = Double.parseDouble(sharedPreferences.getString(LONGITUDE_PREF, ""));
+        return new LatLng(latitude, longitude);
+    }
+
+    /**
+     * Retrieve's the fragment's shared preferences folder
+     *
+     * @return The Fragments shared preferences folder
+     */
+    public SharedPreferences getSharedPref() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(MAPS_FRAGMENT_PREF,
+                Context.MODE_PRIVATE);
+        return sharedPreferences;
+    }
 }

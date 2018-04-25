@@ -2,11 +2,12 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
     android:opacity="opaque">
     <item
-        android:drawable="@android:color/holo_blue_bright"/>
+        android:drawable="@android:drawable/dialog_holo_light_frame" />
     <item>
         <bitmap
-            android:gravity="center"
-            android:src="@drawable/phylo_logo"/>
+            android:gravity="fill"
+            android:src="@drawable/phylo" />
+
     </item>
 
 </layer-list>

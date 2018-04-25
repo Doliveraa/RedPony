@@ -1,5 +1,7 @@
 package edu.csulb.phylo;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,6 +28,8 @@ public class MainActivityContainer extends AppCompatActivity{
     PinnedFragment pinnedFragment;
     //Variables
     private User user;
+    private boolean mapFragmentFirstTime;
+    private boolean enteredMapFragment;
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -63,7 +67,6 @@ public class MainActivityContainer extends AppCompatActivity{
                             break;
 
                     }
-                    //fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     fragmentTransaction.commit();
                     return true;
                 }
@@ -73,6 +76,10 @@ public class MainActivityContainer extends AppCompatActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_container);
+
+        //Initialize Variables
+        mapFragmentFirstTime = true;
+        enteredMapFragment = false;
 
         //Instantiate user
         user = User.getInstance(this);
@@ -86,6 +93,10 @@ public class MainActivityContainer extends AppCompatActivity{
         pinnedFragment = PinnedFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
         userFragment = UserFragment.newInstance();
+
+        //Set that it is the first time the Maps Fragment is opening
+        setMapFragmentFirstTime();
+
     }
     
     @Override
@@ -113,5 +124,16 @@ public class MainActivityContainer extends AppCompatActivity{
         transaction.replace(R.id.container, HomeFragment.newInstance());
         //Commit changes transaction
         transaction.commit();
+    }
+
+    /**
+     * Sets that the first time we are opening the map fragment to true
+     */
+    private void setMapFragmentFirstTime() {
+        SharedPreferences sharedPreferences = this.getSharedPreferences(MapsFragment.MAPS_FRAGMENT_PREF,
+                Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(MapsFragment.IS_FIRST_TIME, true);
+        editor.commit();
     }
 }

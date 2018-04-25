@@ -72,6 +72,8 @@ import retrofit2.Callback;
  * Created by Danie on 1/24/2018.
  */
 
+//TODO: Do a get request when they log in with google or facebook
+
 public class LoginFragment extends Fragment
         implements View.OnClickListener {
     //Constants

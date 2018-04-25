@@ -6,6 +6,9 @@ import android.os.Handler;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 
@@ -16,70 +19,85 @@ import io.nlopez.smartlocation.SmartLocation;
  *
  */
 
-public class UserLocationClient {
-    //Variables
-    private double latitude;
-    private double longitude;
+public class UserLocationClient
+    implements OnLocationUpdatedListener{
+    //Constants
+    public final static String LATITUDE = "latitude";
+    public final static String LONGITUDE = "longitude";
+    //Class variables
     private Context context;
+    private Map<String, Double> userLocation;
     private Handler handler = new Handler();
-    private boolean initialLocationReceived;
     //Interface
-    public interface InitialLocationReceived{
-        void onInitialLocationReceived(LatLng userCurrentLocation);
+    public interface LocationUpdateListener{
+        void onLocationUpdated(LatLng location);
     }
-    public interface CurrLocationListener{
-        void onLocationUpdated(LatLng userCurrentLocation);
-    }
-    //Listener
-    private InitialLocationReceived initialLocationReceiveListener;
-    private CurrLocationListener currLocationListener;
+    private LocationUpdateListener locationUpdatedListener;
 
-    private OnLocationUpdatedListener locationListener = new OnLocationUpdatedListener() {
-        @Override
-        public void onLocationUpdated(Location location) {
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
-            handler.postDelayed(locationRunnable, 10000);
-            if(!initialLocationReceived) {
-                initialLocationReceiveListener.onInitialLocationReceived(new LatLng(latitude, longitude));
-                initialLocationReceived = true;
-            } else {
-                currLocationListener.onLocationUpdated(new LatLng(latitude, longitude));
-            }
-        }
-    };
-
-    //Initialization constructor
+    /**
+     * Initialization Constructor
+     *
+     * @param context The current context of the application
+     *
+     */
     public UserLocationClient(Context context) {
         this.context = context;
-        initialLocationReceived = false;
+        userLocation = new HashMap<String, Double>();
     }
 
-    //Begins tracking the user's location
+    /**
+     * Starts tracking the User's current location
+     */
     public void startUserLocationTracking() {
-        SmartLocation.with(context).location().start(locationListener);
+        SmartLocation.with(context).location().start(this);
     }
 
-    //Stops tracking the user's location
+    /**
+     * Stops tracking the User's current location
+     */
     public void stopUserLocationTracking() {
         SmartLocation.with(context).location().stop();
     }
 
-
-    //Sets the listener that keeps track of if the initial location has been received
-    public void setInitialLocationReceiveListener(InitialLocationReceived listener) {
-        initialLocationReceiveListener = listener;
+    /**
+     * Sets a listener for every time the location has updated
+     *
+     * @param listener The listener object
+     */
+    public void setLocationUpdatedListener(LocationUpdateListener listener) {
+        locationUpdatedListener = listener;
     }
 
-    public void setCurrLocationListener(CurrLocationListener listener) {
-        currLocationListener = listener;
+    /**
+     *
+     * @return The user's previously updated location
+     */
+    public Map<String, Double> getCurrLocation() {
+        return userLocation;
     }
 
-    //Runnable that constantly runs the same method depending on the timer
+    /**
+     * Update the user's current location now
+     *
+     * @param location The user's current location
+     */
+    @Override
+    public void onLocationUpdated(Location location) {
+        userLocation.put(LATITUDE, location.getLatitude());
+        userLocation.put(LONGITUDE, location.getLongitude());
+        final int LOCATION_UPDATE_DELAY = 1000;
+        handler.postDelayed(locationRunnable, LOCATION_UPDATE_DELAY);
+        LatLng currLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        locationUpdatedListener.onLocationUpdated(currLocation);
+    }
+
+    /**
+     * Runs every 10 seconds
+     */
     private Runnable locationRunnable = new Runnable() {
         @Override
         public void run() {
-            SmartLocation.with(context).location().start(locationListener);
+            startUserLocationTracking();
         }
     };
 }

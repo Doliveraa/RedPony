@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -146,6 +148,8 @@ public class CreateAccountFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+
+
         //Initalize Variables
         accountCreated = false;
         usernameAvailable = false;
@@ -166,6 +170,7 @@ public class CreateAccountFragment extends Fragment
         final TextView passwordFormatTextView = (TextView) getActivity().findViewById(R.id.text_view_password_format);
         xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability);
         checkmarkImage = getActivity().findViewById(R.id.checkmark_username_availability);
+        ImageButton backButton = getActivity().findViewById(R.id.back_button_create_account);
 
         //Add all of the EditText views in an array to check if they are empty later on
         listOfInputFields = new ArrayList<>();
@@ -176,8 +181,10 @@ public class CreateAccountFragment extends Fragment
         listOfInputFields.add(confirmPasswordEditText);
         listOfInputFields.add(usernameEditText);
 
+
         //Attach Listeners
         createAccountButton.setOnClickListener(this);
+        backButton.setOnClickListener(this);
         usernameEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             //Makes the username format hint appear if on focus and disappear otherwise
             @Override
@@ -415,6 +422,13 @@ public class CreateAccountFragment extends Fragment
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(currentlyFocusedView.getWindowToken(), 0);
 
+                break;
+            case R.id.back_button_create_account:
+                //Sends the user back to the Authentication Screen
+                Intent signoutIntent = new Intent(getActivity(), AuthenticationContainer.class);
+                signoutIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
+                startActivity(signoutIntent);
+                getActivity().finish();
                 break;
         }
     }

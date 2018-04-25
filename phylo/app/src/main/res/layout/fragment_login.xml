@@ -16,7 +16,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="36dp"
-        android:src="@drawable/phylo_logo"
+        android:src="@drawable/phylo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -93,7 +93,7 @@
         android:contentDescription="@string/create_new_account"
         android:focusable="true"
         android:text="@string/create_new_account"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="@+id/button_normal_login"
         app:layout_constraintTop_toBottomOf="@+id/button_normal_login"/>
@@ -108,7 +108,7 @@
         android:contentDescription="@string/forgot_password"
         android:focusable="true"
         android:text="@string/forgot_password"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="@+id/button_normal_login"
         app:layout_constraintTop_toBottomOf="@+id/button_normal_login" />
@@ -136,7 +136,7 @@
         android:layout_marginTop="48dp"
         android:background="@android:color/transparent"
         android:text="@string/or_sign_in_with"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

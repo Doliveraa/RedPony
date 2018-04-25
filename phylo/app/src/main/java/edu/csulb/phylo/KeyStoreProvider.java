@@ -81,7 +81,7 @@ public class KeyStoreProvider {
      * @throws InvalidAlgorithmParameterException if the paramters to the algorithm are invalid
      */
     @NonNull
-    private SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
+    private SecretKey genSecretKey(final String alias) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidAlgorithmParameterException {
 
         //Secret Key
@@ -135,7 +135,7 @@ public class KeyStoreProvider {
      * @throws KeyStoreException if there is no key store
      * @throws NoSuchAlgorithmException if there is no algorithm
      * @throws IOException if there is an IO exception
-     * @throws CertificateException if there is a certificatte exception
+     * @throws CertificateException if there is a certificate exception
      * @throws UnrecoverableEntryException if there an unrecoverable entry
      * @throws InvalidKeyException if there is a invalid key
      * @throws InvalidAlgorithmParameterException if there are invalid parameters to the aglorithm
@@ -165,5 +165,11 @@ public class KeyStoreProvider {
         final String unencryptedString = new String(decodedData, "UTF-8");
         return unencryptedString;
     }
+
+//    private void encryptAstralKey(){
+//        final String alias = "User";
+//        String astralKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.HcgYhZ2n2zQjAPLHJpcE5HKLiHIdLcksNJVOTOudO4Y";
+//        SecretKey secretKey = genSecretKey(alias);
+//    }
 
 }
