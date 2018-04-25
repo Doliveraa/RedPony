@@ -186,9 +186,9 @@ public class HomeFragment extends Fragment
         cancelPassword.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                lockRoomButton.setVisibility(View.VISIBLE);
                 setPassword.setVisibility(View.GONE);
                 cancelPassword.setVisibility(View.GONE);
+                lockRoomButton.setVisibility(View.VISIBLE);
             }
         });
         setButton.setOnClickListener(new View.OnClickListener(){
@@ -243,7 +243,7 @@ public class HomeFragment extends Fragment
         lockRoomButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(roomLockedChoice) {
+                if(lockRoomButton.getVisibility() == View.GONE) {
                     //User wants the room to have no password
                     roomLockedChoice = false;
                     //Remove the button
