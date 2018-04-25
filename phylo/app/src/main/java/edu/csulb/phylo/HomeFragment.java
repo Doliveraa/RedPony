@@ -30,11 +30,19 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import edu.csulb.phylo.Astral.Astral;
+import edu.csulb.phylo.Astral.AstralHttpInterface;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 
 /**
@@ -357,6 +365,27 @@ public class HomeFragment extends Fragment
                 }
             }
         }
+    }
+
+    private void createAstralFile(final String userToken){
+        //Astral
+        final Astral astral = new Astral(getString(R.string.astral_base_url));
+        //Intercept to add headers
+        astral.addRequestInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                //Add the app key to the request header
+                Request.Builder newRequest = request.newBuilder().header(
+                        Astral.APP_KEY_HEADER, getString(R.string.astral_key))
+                        .header("token", userToken);
+
+                //Continue the request
+                return chain.proceed(newRequest.build());
+            }
+        });;
+
+
     }
 
 }
