@@ -32,7 +32,7 @@ public class UserLocationClient
     public interface LocationUpdateListener{
         void onLocationUpdated(LatLng location);
     }
-    LocationUpdateListener locationUpdatedListener;
+    private LocationUpdateListener locationUpdatedListener;
 
     /**
      * Initialization Constructor
@@ -85,7 +85,7 @@ public class UserLocationClient
     public void onLocationUpdated(Location location) {
         userLocation.put(LATITUDE, location.getLatitude());
         userLocation.put(LONGITUDE, location.getLongitude());
-        final int LOCATION_UPDATE_DELAY = 10000;
+        final int LOCATION_UPDATE_DELAY = 1000;
         handler.postDelayed(locationRunnable, LOCATION_UPDATE_DELAY);
         LatLng currLocation = new LatLng(location.getLatitude(), location.getLongitude());
         locationUpdatedListener.onLocationUpdated(currLocation);

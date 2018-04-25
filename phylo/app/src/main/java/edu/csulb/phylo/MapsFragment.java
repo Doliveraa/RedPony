@@ -3,6 +3,7 @@ package edu.csulb.phylo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,6 +42,9 @@ public class MapsFragment extends Fragment
     private final int PERMISSION_REQUEST_CODE = 2035;
     public final static String MAPS_FRAGMENT_PREF = "Maps Fragment";
     public final static String IS_FIRST_TIME = "is first time";
+    private final String LATITUDE_PREF = "latitude";
+    private final String LONGITUDE_PREF = "longitude";
+    private final float DEFAULT_ZOOM = 18;
     //Class Variables
     private View fragmentView;
     private boolean isRetrievingUserPermission;
@@ -48,6 +52,7 @@ public class MapsFragment extends Fragment
     private boolean hasLocationPermission;
     private boolean isFirstTime;
     private Marker currMarker;
+    private LatLng onRestartCurrLocation;
     //Views
     private MapView mapView;
     private GoogleMap googleMap;
@@ -67,7 +72,7 @@ public class MapsFragment extends Fragment
         @Override
         protected Void doInBackground(LatLng... location) {
             currMarker = googleMap.addMarker(new MarkerOptions().position(location[0]));
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], 18f));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location[0], DEFAULT_ZOOM));
             return null;
         }
     }
@@ -87,6 +92,12 @@ public class MapsFragment extends Fragment
 
         this.googleMap = googleMap;
         this.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        if(onRestartCurrLocation != null) {
+            progressBar.setVisibility(View.GONE);
+            this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(onRestartCurrLocation, DEFAULT_ZOOM));
+            currMarker = this.googleMap.addMarker(new MarkerOptions().position(onRestartCurrLocation));
+        }
     }
 
     @Override
@@ -119,9 +130,13 @@ public class MapsFragment extends Fragment
     public void onStart() {
         super.onStart();
         isFirstTime = checkIsFirstTime();
-        if(hasLocationPermission) {
+
+        if(hasLocationPermission && isFirstTime) {
             userLocationClient.startUserLocationTracking();
-        } else {
+        } else if (hasLocationPermission && !isFirstTime) {
+            onRestartCurrLocation = retrieveCachedUserLocation();
+            userLocationClient.startUserLocationTracking();
+        }else {
             requestPermission();
         }
     }
@@ -134,6 +149,7 @@ public class MapsFragment extends Fragment
         super.onStop();
         Log.d(TAG, "onStop: Stopping user's location tracking");
         userLocationClient.stopUserLocationTracking();
+        cacheUserLocation();
     }
 
     /**
@@ -255,6 +271,31 @@ public class MapsFragment extends Fragment
     private boolean checkIsFirstTime() {
         SharedPreferences sharedPreferences = getSharedPref();
         return sharedPreferences.getBoolean(IS_FIRST_TIME, true);
+    }
+
+    /**
+     * Cache user location
+     */
+    private void cacheUserLocation() {
+        double latitude = userLocationClient.getCurrLocation().get(UserLocationClient.LATITUDE);
+        double longitude = userLocationClient.getCurrLocation().get(UserLocationClient.LONGITUDE);
+        //Store the values
+        SharedPreferences sharedPreferences = getSharedPref();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(LATITUDE_PREF, Double.toString(latitude));
+        editor.putString(LONGITUDE_PREF, Double.toString(longitude));
+        editor.apply();
+    }
+
+    /**
+     *
+     * @return Retrieve and return the cached user location
+     */
+    private LatLng retrieveCachedUserLocation() {
+        SharedPreferences sharedPreferences = getSharedPref();
+        double latitude = Double.parseDouble(sharedPreferences.getString(LATITUDE_PREF, ""));
+        double longitude = Double.parseDouble(sharedPreferences.getString(LONGITUDE_PREF, ""));
+        return new LatLng(latitude, longitude);
     }
 
     /**
