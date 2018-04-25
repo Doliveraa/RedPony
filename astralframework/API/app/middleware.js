@@ -1,7 +1,6 @@
 const User = require('./schemas/user');
 const File = require('./schemas/file');
 const App = require('./schemas/app');
-const HELPER = require('./helper');
 const jwt = require('jsonwebtoken');
 
 const fs = require('fs');
@@ -55,8 +54,7 @@ const findUser = function(appKey, token, restrictions, callback) {
 const getToken = function(appKey, email, password, callback) {
     findApp(appKey, function(err, app) {
         if (err) return callback(err, null);
-        User.authentication(app.name, email, password,
-                            function (error, user) {
+        User.authentication(app.name, email, password, function (error, user) {
             if (error || !user) {
                 let err = new Error('Wrong email or password');
                 err.status = 401;
@@ -115,8 +113,7 @@ const getUser = function(req, res) {
             }
             getToken(req.get("appKey"), req.get("email"), password, function(err, token) {
                 if (err) {
-                    res.status = 401;
-                    return res.json({message: err.message});
+                    return res.status(err.status).json({message: err.message});
                 }
                 return res.json({token: token});
             })
