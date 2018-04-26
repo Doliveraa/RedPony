@@ -148,6 +148,8 @@ public class CreateAccountFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+
+
         //Initalize Variables
         accountCreated = false;
         usernameAvailable = false;
