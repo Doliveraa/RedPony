@@ -27,6 +27,7 @@ public class Astral{
     public final static String ASTRAL_EMAIL = "email";
     public final static String ASTRAL_TOKEN = "token";
     public final static int OK = 200;
+    public final static int UNAUTHORIZED = 401;
     public final static int NOT_FOUND = 404;
     //Private Constants
     private final static String TAG = Astral.class.getSimpleName();

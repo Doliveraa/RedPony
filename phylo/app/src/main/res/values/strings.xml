@@ -88,7 +88,7 @@
 
     <!-- String related to Astral -->
     <string name="astral_key">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.HcgYhZ2n2zQjAPLHJpcE5HKLiHIdLcksNJVOTOudO4Y</string>
-    <string name="astral_base_url">ec2-54-183-196-55.us-west-1.compute.amazonaws.com</string>
+    <string name="astral_base_url">ec2-54-219-173-59.us-west-1.compute.amazonaws.com</string>
     <string name="enter_username">Enter Username</string>
     <string name="set_expiration_date">Set Expiration Date</string>
     <string name="room_name">Room Name</string>

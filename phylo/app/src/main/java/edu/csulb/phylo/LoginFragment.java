@@ -192,8 +192,10 @@ public class LoginFragment extends Fragment
                                 String email = object.getString("email");
                                 AuthHelper.cacheUserInformation(getActivity(), name, email);
 
-                                //Start the main activity
-                                startMainActivity();
+                                //Check if the User exists in the Astral Database and force them
+                                //to create a Username if they don't exist
+                                checkIfUserExists(getActivity(), name, email);
+
                             } catch (JSONException exception) {
                                 Log.d(TAG, "retrieveFacebookInformation: failure, response code: " + response.getError());
                                 exception.printStackTrace();
@@ -358,7 +360,8 @@ public class LoginFragment extends Fragment
             //Store the user's account information in cache
             AuthHelper.cacheUserInformation(getActivity(), account.getDisplayName(), account.getEmail());
 
-            startMainActivity();
+            //Check if the user exists in the Astral database
+            checkIfUserExists(getActivity(), account.getDisplayName(), account.getEmail());
         } catch (ApiException exception) {
             Log.w(TAG, "handleSignInResult: failed code=" + exception.getStatusCode());
             alertDialog = createErrorDialog("Google sign in error");
@@ -440,7 +443,7 @@ public class LoginFragment extends Fragment
                     }
                 } else {
                     //Check the error code
-                    if (response.code() == Astral.NOT_FOUND) {
+                    if (response.code() == Astral.UNAUTHORIZED) {
                         //Dismiss the currently showing Alert Dialog
                         alertDialog.dismiss();
 
@@ -669,19 +672,25 @@ public class LoginFragment extends Fragment
         final View alertDialogView = getActivity().getLayoutInflater().inflate(R.layout.alert_dialog_create_username, null);
 
         //Initialize Custom Alert Dialog Views
-        Button createUsername = (Button) alertDialogView.findViewById(R.id.button_create_username_adcu);
+        final Button createUsername = (Button) alertDialogView.findViewById(R.id.button_create_username_adcu);
         final EditText usernameEditText = (EditText) alertDialogView.findViewById(R.id.edit_text_create_username);
+        final Button checkUsernameButton = (Button) alertDialogView.findViewById(R.id.button_check_username_adcu);
+        final ImageView xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability_adcu);
+        final ImageView checkMarkImage = getActivity().findViewById(R.id.checkmark_username_availability_adcu);
 
         //Attach listeners
         createUsername.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Make the X Mark disappear from the input field
-                final ImageView xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability_adcu);
                 xMarkImage.setVisibility(View.GONE);
 
                 //Retrieve the user's username
                 final String username = usernameEditText.getText().toString();
+                //Check if the username is of the right format
+                if(!AuthHelper.isUsernameValid(username)) {
+                    xMarkImage.setVisibility();
+                }
 
                 //Start a GET request to check if the username is available
                 final Astral astral = new Astral(getString(R.string.astral_base_url));

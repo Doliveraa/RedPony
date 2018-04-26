@@ -16,6 +16,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralRoom;
 
@@ -237,6 +240,20 @@ public class AuthHelper {
         editor.remove(USER_SIGN_IN_PROVIDER);
         Astral.removeCachedAstralUsername(context);
         editor.apply();
+    }
+
+    /**
+     * Checks if the username matches the specified pattern
+     *
+     * @param username The user's username choice
+     * @return True if the username is valid and false otherwise
+     */
+    public static boolean isUsernameValid(String username) {
+        String expression = "(?:[a-zA-Z0-9._-]{3,12}$)";
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(username);
+
+        return matcher.matches();
     }
 }
 

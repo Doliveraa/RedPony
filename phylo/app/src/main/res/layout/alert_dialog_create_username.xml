@@ -16,15 +16,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/edit_text_create_username"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
-            android:ems="10"
-            android:hint="@string/enter_username" />
+            android:layout_height="50dp"
+            android:layout_marginTop= "10dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
+            <EditText
+                android:id="@+id/edit_text_create_username"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:ems="10"
+                android:hint="@string/enter_username" />
+            <Button
+                android:id="@+id/button_check_username_adcu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Check"/>
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_bar_username_availability_adcu"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical|right"
+            android:layout_marginRight="14dp"
+            android:indeterminateDrawable="@drawable/progress"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/checkmark_username_availability_adcu"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical|right"
+            android:layout_marginRight="14dp"
+            android:src="@drawable/check_mark"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/x_mark_username_availability_adcu"

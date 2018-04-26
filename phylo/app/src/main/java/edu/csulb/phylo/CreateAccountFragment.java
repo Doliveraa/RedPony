@@ -316,20 +316,6 @@ public class CreateAccountFragment extends Fragment
         return matcher.matches();
     }
 
-    /**
-     * Checks if the username matches the specified pattern
-     *
-     * @param username The user's username choice
-     * @return True if the username is valid and false otherwise
-     */
-    public boolean isUsernameValid(String username) {
-        String expression = "(?:[a-zA-Z0-9._-]{3,12}$)";
-        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(username);
-
-        return matcher.matches();
-    }
-
 
     /**
      * Creates and displays an Alert Dialog to the user in case of an error
@@ -371,7 +357,7 @@ public class CreateAccountFragment extends Fragment
 
                 //Check if username is valid and if the username is available
                 String username = usernameEditText.getText().toString();
-                if (!isUsernameValid(username)) {
+                if (!AuthHelper.isUsernameValid(username)) {
                     displayErrorMessage("Username must be 3-12 characters and only use" +
                             " the following: \n(a-z, A-Z, 0-9, dots, dashes, underlines");
                     return;
@@ -455,7 +441,7 @@ public class CreateAccountFragment extends Fragment
             final String username = usernameEditText.getText().toString();
 
             //First check if the username is of the right format
-            if(!isUsernameValid(username)) {
+            if(!AuthHelper.isUsernameValid(username)) {
                 //Show the user an error message and break out of the method
                 displayErrorMessage("Username does not meet format criteria");
                 return;
