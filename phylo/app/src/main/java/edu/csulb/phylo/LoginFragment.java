@@ -97,6 +97,12 @@ public class LoginFragment extends Fragment
     }
 
     private OnChangeFragmentListener onChangeFragmentListener;
+    private View.OnClickListener onCheckUsername = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+        }
+    };
     //======================================= Listener Variables ===================================
 
     //Cognito Authentication Handler
@@ -689,7 +695,7 @@ public class LoginFragment extends Fragment
                 final String username = usernameEditText.getText().toString();
                 //Check if the username is of the right format
                 if(!AuthHelper.isUsernameValid(username)) {
-                    xMarkImage.setVisibility();
+                    xMarkImage.setVisibility(View.VISIBLE);
                 }
 
                 //Start a GET request to check if the username is available
