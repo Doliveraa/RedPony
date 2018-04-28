@@ -125,7 +125,8 @@ public class VerifyCodeFragment extends Fragment
                         astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
                         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
                         //Create the POST request
-                        Call<AstralUser> request = astralHttpInterface.createUser(astralUser.toMap());
+                        Call<AstralUser> request = astralHttpInterface.createUser(astralUser.getUsername(),
+                                astralUser.getEmail(), null);
                         //Call the request asynchronously
                         request.enqueue(new Callback<AstralUser>() {
                             @Override

@@ -8,8 +8,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +59,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import edu.csulb.phylo.Astral.Astral;
@@ -76,6 +81,8 @@ import retrofit2.Callback;
 
 public class LoginFragment extends Fragment
         implements View.OnClickListener {
+    //Phone Hardware
+    private Vibrator vibrator;
     //Constants
     private final static int RC_SIGN_IN = 9001;
     private final static String TAG = LoginFragment.class.getSimpleName();
@@ -85,6 +92,7 @@ public class LoginFragment extends Fragment
     private CognitoUserPool cognitoUserPool;
     private CognitoUser cognitoUser;
     private boolean isSigningIn;
+    private HashSet<String> previouslySuccessfulUsernames;
     //Views
     private EditText emailEditText;
     private EditText passwordEditText;
@@ -97,12 +105,6 @@ public class LoginFragment extends Fragment
     }
 
     private OnChangeFragmentListener onChangeFragmentListener;
-    private View.OnClickListener onCheckUsername = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-
-        }
-    };
     //======================================= Listener Variables ===================================
 
     //Cognito Authentication Handler
@@ -120,20 +122,14 @@ public class LoginFragment extends Fragment
                     //Quit the Looper operation
                     Looper.myLooper().quitSafely();
 
-                    //Add that the current sign in provider is Cognito
-                    AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
-
                     //Retrieve user information
                     CognitoUserAttributes cognitoUserAttributes = cognitoUserDetails.getAttributes();
                     Map<String, String> userInfo = cognitoUserAttributes.getAttributes();
                     String name = userInfo.get("name");
                     String email = userInfo.get("email");
 
-                    //Store the user details inside of Shared Preferences
-                    AuthHelper.cacheUserInformation(getActivity(), name, email);
-
                     //Checks if the user exists in the Astral Database
-                    checkIfUserExists(getActivity(), name, email);
+                    checkIfUserExists(getActivity(), name, email, AuthHelper.COGNITO_PROVIDER);
                 }
 
                 @Override
@@ -179,9 +175,9 @@ public class LoginFragment extends Fragment
             AccessToken accessToken = loginResult.getAccessToken();
             Log.d(TAG, "FacebookCallback-> onSuccess: successfully logged in");
 
-            //Set the current sign in provider to Facebook
-            AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.FACEBOOK_PROVIDER);
-
+            //Show the Login Dialog
+            alertDialog = createLoginDialog();
+            alertDialog.show();
             //Retrieve the user's information
             AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
             Log.d(TAG, "retrieveFacebookInformation: userID = " + facebookAccessToken.getUserId());
@@ -196,17 +192,16 @@ public class LoginFragment extends Fragment
                                 //Store the user's information in storage
                                 String name = object.getString("name");
                                 String email = object.getString("email");
-                                AuthHelper.cacheUserInformation(getActivity(), name, email);
 
                                 //Check if the User exists in the Astral Database and force them
                                 //to create a Username if they don't exist
-                                checkIfUserExists(getActivity(), name, email);
+                                checkIfUserExists(getActivity(), name, email, AuthHelper.FACEBOOK_PROVIDER);
 
                             } catch (JSONException exception) {
-                                Log.d(TAG, "retrieveFacebookInformation: failure, response code: " + response.getError());
+                                Log.d(TAG, "retrieveFacebookInformation: JSON failure, response code: " + response.getError());
                                 exception.printStackTrace();
                             } catch (Exception exception) {
-                                Log.d(TAG, "retrieveFacebookInformation: failure, response code: " + response.getError());
+                                exception.printStackTrace();
                             }
                         }
                     }
@@ -298,6 +293,10 @@ public class LoginFragment extends Fragment
         //Initialize variables
         isSigningIn = false;
         cognitoUserPool = AuthHelper.getCognitoUserPool(getActivity());
+        previouslySuccessfulUsernames = new HashSet<String>();
+
+        //Initialize Hardware
+        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
         //Initialize all of the views
         Button normalLoginButton = getActivity().findViewById(R.id.button_normal_login);
@@ -360,14 +359,16 @@ public class LoginFragment extends Fragment
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Log.d(TAG, "Successfully signed in with Google");
 
-            //Set the current sign in provider
-            AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.GOOGLE_PROVIDER);
-
             //Store the user's account information in cache
             AuthHelper.cacheUserInformation(getActivity(), account.getDisplayName(), account.getEmail());
 
+            //Display the Login dialog
+            alertDialog = createLoginDialog();
+            alertDialog.show();
+
             //Check if the user exists in the Astral database
-            checkIfUserExists(getActivity(), account.getDisplayName(), account.getEmail());
+            checkIfUserExists(getActivity(), account.getDisplayName(), account.getEmail(), AuthHelper.GOOGLE_PROVIDER);
+
         } catch (ApiException exception) {
             Log.w(TAG, "handleSignInResult: failed code=" + exception.getStatusCode());
             alertDialog = createErrorDialog("Google sign in error");
@@ -409,7 +410,7 @@ public class LoginFragment extends Fragment
      *
      * @param context The application's current context
      */
-    private void checkIfUserExists(final Context context, final String name, final String email) {
+    private void checkIfUserExists(final Context context, final String name, final String email, final String signInProvider) {
         //First check if the user exists on the Server with a GET request
         final Astral astral = new Astral(getString(R.string.astral_base_url));
 
@@ -432,6 +433,7 @@ public class LoginFragment extends Fragment
         //Create the GET Request
         Call<AstralUser> request = astralHttpInterface.getUserToken();
 
+        Log.d(TAG, "Starting request to check user existence");
         //Call the request asynchronously
         request.enqueue(new Callback<AstralUser>() {
             @Override
@@ -440,21 +442,20 @@ public class LoginFragment extends Fragment
 
                 if (response.isSuccessful()) {
                     if (response.code() == Astral.OK) {
-                        //User exists, retrieve the user's username
+                        //User exists, retrieve the user's token
                         String token = response.body().getToken();
                         //Store the token
                         Astral.storeAstralUserToken(context, token);
                         //Retrieve the user's username using the token
-                        retrieveAstralUsername(token);
+                        retrieveAstralUsername(token, signInProvider);
                     }
                 } else {
                     //Check the error code
                     if (response.code() == Astral.UNAUTHORIZED) {
-                        //Dismiss the currently showing Alert Dialog
+                        //Dismiss the current Login dialog
                         alertDialog.dismiss();
-
                         //User does not exist in the database, begin method of creating Astral User
-                        alertDialog = createUsernameDialog(email);
+                        alertDialog = createUsernameDialog(name, email, signInProvider);
                         alertDialog.show();
                     }
                 }
@@ -467,7 +468,7 @@ public class LoginFragment extends Fragment
         });
     }
 
-    private void retrieveAstralUsername(final String userToken) {
+    private void retrieveAstralUsername(final String userToken, final String signInProvider) {
         final Astral astral = new Astral(getString(R.string.astral_base_url));
         //Intercept the request to add header items
         astral.addRequestInterceptor(new Interceptor() {
@@ -497,6 +498,9 @@ public class LoginFragment extends Fragment
                 if (response.code() == Astral.OK) {
                     String username = response.body().getUsername();
                     Log.d(TAG, "retrieveAstralUsername-> onResponse: signed in with " + username);
+
+                    //Add the current sign in provider
+                    AuthHelper.setCurrentSignInProvider(getActivity(), signInProvider);
                     //Store the received Username
                     Astral.storeAstralUsername(getActivity(), username);
 
@@ -523,10 +527,10 @@ public class LoginFragment extends Fragment
     /**
      * Creates an Astral User from the federated identities
      *
-     * @param email The user's email
+     * @param email    The user's email
      * @param username The user's chosen username
      */
-    private void createAstralUser(final String email, final String username) {
+    private void createAstralUser(final String name, final String email, final String username, final String signInProvider) {
         //Create an AstralUser object to send
         AstralUser astralUser = new AstralUser(username, email, null);
 
@@ -547,31 +551,37 @@ public class LoginFragment extends Fragment
         astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
         //Create the POST request
-        Call<AstralUser> request = astralHttpInterface.createUser(astralUser.toMap());
+        Call<AstralUser> request = astralHttpInterface.createUser(astralUser.getUsername(),
+                astralUser.getEmail(), null);
         //Call the request asynchronously
         request.enqueue(new Callback<AstralUser>() {
             @Override
             public void onResponse(Call<AstralUser> call, retrofit2.Response<AstralUser> response) {
-                if(response.code() == Astral.OK) {
-                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code());
+                if (response.code() == Astral.OK) {
+                    Log.d(TAG, "createAstralUser-> onClick-> onSuccess-> onResponse: Successful Response Code " + response.code());
 
                     //Retrieve the token received
                     String userToken = response.body().getToken();
 
+                    //Store the sign in provider
+                    AuthHelper.setCurrentSignInProvider(getActivity(), signInProvider);
                     //Store the User's token item
                     Astral.storeAstralUserToken(getActivity(), userToken);
+                    //Store the user details inside of Shared Preferences
+                    AuthHelper.cacheUserInformation(getActivity(), name, email);
 
                     //Create an Astral AstralUser account
                     startMainActivity();
                 } else {
-                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
+                    Log.d(TAG, "createAstralUser-> onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<AstralUser> call, Throwable t) {
                 //The request has unexpectedly failed
-                Log.d(TAG, "onCLick-> onSuccess-> onResponse: Unexpected request failure");
+                Log.d(TAG, "createAstralUser-> onClick-> onSuccess-> onResponse: Unexpected request failure");
+                t.printStackTrace();
             }
         });
     }
@@ -667,10 +677,9 @@ public class LoginFragment extends Fragment
      * Create an AlertDialog object to allow the user to create a username
      *
      * @param email The user's email
-     *
      * @return The AlertDialog object for the user to create their username
      */
-    private AlertDialog createUsernameDialog(final String email) {
+    private AlertDialog createUsernameDialog(final String name, final String email, final String signInProvider) {
         //Create an instance of the Alert Dialog
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
         //User cannot cancel
@@ -681,21 +690,50 @@ public class LoginFragment extends Fragment
         final Button createUsername = (Button) alertDialogView.findViewById(R.id.button_create_username_adcu);
         final EditText usernameEditText = (EditText) alertDialogView.findViewById(R.id.edit_text_create_username);
         final Button checkUsernameButton = (Button) alertDialogView.findViewById(R.id.button_check_username_adcu);
-        final ImageView xMarkImage = getActivity().findViewById(R.id.x_mark_username_availability_adcu);
-        final ImageView checkMarkImage = getActivity().findViewById(R.id.checkmark_username_availability_adcu);
+        final ImageView xMarkImage = (ImageView) alertDialogView.findViewById(R.id.x_mark_username_availability_adcu);
+        final ImageView checkMarkImage = (ImageView) alertDialogView.findViewById(R.id.checkmark_username_availability_adcu);
+        final ProgressBar usernamePb = (ProgressBar) alertDialogView.findViewById(R.id.progress_bar_username_availability_adcu);
 
         //Attach listeners
-        createUsername.setOnClickListener(new View.OnClickListener() {
+        usernameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Reset the check-marks and x-marks
+                xMarkImage.setVisibility(View.GONE);
+                checkMarkImage.setVisibility(View.GONE);
+                //Retrieve the user's username
+                String currUsername = s.toString();
+                //See if the username was previously successful
+                boolean prevSuccess = previouslySuccessfulUsernames.contains(currUsername);
+                if (prevSuccess) {
+                    checkMarkImage.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        checkUsernameButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Make the X Mark disappear from the input field
+                //Reset the views on the username input field
                 xMarkImage.setVisibility(View.GONE);
+                checkMarkImage.setVisibility(View.GONE);
 
                 //Retrieve the user's username
                 final String username = usernameEditText.getText().toString();
                 //Check if the username is of the right format
-                if(!AuthHelper.isUsernameValid(username)) {
+                if (!AuthHelper.isUsernameValid(username)) {
                     xMarkImage.setVisibility(View.VISIBLE);
+                    displayToast("Username Format Invalid", true);
+                    return;
                 }
 
                 //Start a GET request to check if the username is available
@@ -722,23 +760,20 @@ public class LoginFragment extends Fragment
                 request.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-
+                        usernamePb.setVisibility(View.GONE);
                         if (response.isSuccessful()) {
                             Log.d(TAG, "onFocusChange-> onResponse: Successful Response Code " + response.code());
                             if (response.code() == Astral.OK) {
-                                //The username is not available
-                                displayToast("Username not available");
                                 //Show an x_mark on the username
                                 xMarkImage.setVisibility(View.VISIBLE);
                             }
                         } else {
                             Log.d(TAG, "onFocusChange-> onResponse: Failure Response Code " + response.code());
                             if (response.code() == Astral.NOT_FOUND) {
-                                //We can use the username, it was not found
-                                displayToast("Username available!");
-
-                                //Now we have to Create a User
-                                createAstralUser(email, username);
+                                //Add it to the list of usernames that the user has tried
+                                previouslySuccessfulUsernames.add(username);
+                                //Show a check mart on the username box
+                                checkMarkImage.setVisibility(View.VISIBLE);
                             }
                         }
                     }
@@ -751,18 +786,24 @@ public class LoginFragment extends Fragment
             }
         });
 
+        createUsername.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkMarkImage.getVisibility() == View.VISIBLE) {
+                    String username = usernameEditText.getText().toString();
+                    createAstralUser(name, email, username, signInProvider);
+                } else if(xMarkImage.getVisibility() == View.GONE && checkMarkImage.getVisibility() == View.GONE){
+                    displayToast("Please check username availability", false);
+                } else {
+                    //Cannot use the username
+                    displayToast("Cannot use username", true);
+                }
+            }
+        });
+
         alertDialogBuilder.setView(alertDialogView);
 
         return alertDialogBuilder.create();
-    }
-
-    /**
-     * Displays a message to the user
-     *
-     * @param message The message to be displayed to the user
-     */
-    private void displayToast(String message) {
-        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -776,6 +817,21 @@ public class LoginFragment extends Fragment
         Intent startMainActivityIntent = new Intent(getActivity(), MainActivityContainer.class);
         startActivity(startMainActivityIntent);
         getActivity().finish();
+    }
+
+    /**
+     * Displays a message as a toast
+     *
+     * @param message      The message to be displayed
+     * @param vibratePhone If the phone should vibrate
+     */
+    private void displayToast(String message, boolean vibratePhone) {
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 50);
+        toast.show();
+        if (vibratePhone) {
+            vibrator.vibrate(500);
+        }
     }
 
 }

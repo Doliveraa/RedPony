@@ -9,7 +9,7 @@
     <string name="create_new_account">Create Account</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="or_sign_in_with">Or Sign in With</string>
-    <string name="create_username">Create Username</string>
+    <string name="create_username">Create</string>
 
     <!-- Strings related to Create Account -->
     <string name="first_name">First name</string>
@@ -87,8 +87,8 @@
     <string name="help_image">Question Mark Button</string>
 
     <!-- String related to Astral -->
-    <string name="astral_key">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjVhYzA0ODkzMGM3NjRmMDMxMDYxYTY5YSJ9.HcgYhZ2n2zQjAPLHJpcE5HKLiHIdLcksNJVOTOudO4Y</string>
-    <string name="astral_base_url">ec2-54-219-173-59.us-west-1.compute.amazonaws.com</string>
+    <string name="astral_key">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhZTBjOTNjYTdkOGY5MTExNTg1Y2EyMyJ9.dIQSyGWdatyfXtcVJ_29pGNv4ISSz6e9TCqGFnqn8k8</string>
+    <string name="astral_base_url">http://ec2-54-219-173-59.us-west-1.compute.amazonaws.com/</string>
     <string name="enter_username">Enter Username</string>
     <string name="set_expiration_date">Set Expiration Date</string>
     <string name="room_name">Room Name</string>

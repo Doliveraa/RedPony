@@ -11,27 +11,57 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/back_button_create_account"
-            style="?android:attr/borderlessButtonStyle"
-            android:tint="@color/black"
-            android:layout_width="wrap_content"
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/back_image"
-            android:src="@drawable/ic_back_button" />
+            android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="122dp"
-            android:layout_height="59dp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:src="@drawable/phylo" />
+            <ImageButton
+                android:id="@+id/back_button_create_account"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/back_image"
+                android:src="@drawable/ic_back_button"
+                android:tint="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="122dp"
+                android:layout_height="59dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/phylo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/create_account_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:textSize="18sp"
+                android:background="@android:color/transparent"
+                android:text="@string/create_account"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp">
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp">
 
             <EditText
                 android:id="@+id/first_name_edit_text"
@@ -158,14 +188,6 @@
             android:maxLines="1"
             android:inputType="textPassword|textNoSuggestions" />
 
-        <Button
-            android:id="@+id/create_account_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="5dp"
-            android:background="@android:color/transparent"
-            android:text="@string/create_account" />
     </LinearLayout>
 
     <RelativeLayout

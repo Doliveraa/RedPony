@@ -55,18 +55,20 @@ public class SplashActivity extends Activity {
      * @return True if the user is already signed in and false otherwise
      */
     private boolean userIsSignedIn() {
-        if (GoogleSignIn.getLastSignedInAccount(this) != null) {
-            GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
-            Log.d(TAG, "userIsSignedIn: Google sign in: " + googleSignInAccount.getEmail());
-            return true;
-        } else if (cognitoUserPool.getCurrentUser().getUserId() != null) {
-            CognitoUser cognitoUser = cognitoUserPool.getCurrentUser();
-            Log.d(TAG, "userIsSignedIn: Normal sign in: " + cognitoUser.getUserId());
-            return true;
-        } else if (AccessToken.getCurrentAccessToken() != null) {
-            AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
-            Log.d(TAG, "userIsSignedIn: Facebook sign in: " + facebookAccessToken.getUserId());
-            return true;
+        if(AuthHelper.getCurrentSignInProvider(this) != null) {
+            if (GoogleSignIn.getLastSignedInAccount(this) != null) {
+                GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
+                Log.d(TAG, "userIsSignedIn: Google sign in: " + googleSignInAccount.getEmail());
+                return true;
+            } else if (cognitoUserPool.getCurrentUser().getUserId() != null) {
+                CognitoUser cognitoUser = cognitoUserPool.getCurrentUser();
+                Log.d(TAG, "userIsSignedIn: Normal sign in: " + cognitoUser.getUserId());
+                return true;
+            } else if (AccessToken.getCurrentAccessToken() != null) {
+                AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
+                Log.d(TAG, "userIsSignedIn: Facebook sign in: " + facebookAccessToken.getUserId());
+                return true;
+            }
         }
 
         return false;

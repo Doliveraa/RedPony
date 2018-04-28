@@ -11,7 +11,9 @@ interface AstralHttpInterface {
      */
     @FormUrlEncoded
     @POST("users")
-    fun createUser(@FieldMap userInfoMap : Map<String, String>)
+    fun createUser(@Field("username") username: String,
+                   @Field("email") email: String,
+                   @Field("password") password: String?)
             : Call<AstralUser>
 
     /**
