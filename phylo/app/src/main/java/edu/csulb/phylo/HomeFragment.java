@@ -30,17 +30,21 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralHttpInterface;
 import edu.csulb.phylo.Astral.AstralRoom;
+import edu.csulb.phylo.Astral.RoomData;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -283,6 +287,7 @@ public class HomeFragment extends Fragment
                     displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
                 } else {
                     //Check if the room name already exists
+                    createAstralRoom(roomName, -118.2019, 33.7542, "2019-04-23T18:25:43.511Z");
 
                 }
             }
@@ -413,23 +418,82 @@ public class HomeFragment extends Fragment
         }
     }
 
-    private void createAstralFile(final String userToken){
-        //Astral
+    /**
+     * Creates an astral room given the parameters
+     * @param roomName the name of the room
+     * @param longit  the longitude of the location of the room
+     * @param lat the latitude of the location of the room
+     * @param expiration when the room expires
+     */
+    private void createAstralRoom(final String roomName, final double longit, final double lat,
+                                  String expiration){
+
+        //Put the longitude and the latitude into a double arraylist
+        ArrayList<Double> location = new ArrayList<>();
+        location.add(longit); //longit
+        location.add(lat); //lat
+
+        //Creating Astral Room to send
+        final AstralRoom astralRoom = new AstralRoom();
+        astralRoom.setOwner(user.getName());//owner
+        astralRoom.setName(roomName);//roomName
+        astralRoom.setLocation(location);//location
+        astralRoom.setLongitude(longit);//long
+        astralRoom.setLatitude(lat);//lat
+        astralRoom.setExpirationDate(expiration);//expiration
+        astralRoom.setRoomData(null);
+        Log.d(TAG, "Set all data");
+
+        //Astral Start POST Request
         final Astral astral = new Astral(getString(R.string.astral_base_url));
-        //Intercept to add headers
+        //Intercept the request to add a header item
         astral.addRequestInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request request = chain.request();
-                //Add the app key to the request header
+                //Add the app key and token to the request header
                 Request.Builder newRequest = request.newBuilder().header(
                         Astral.APP_KEY_HEADER, getString(R.string.astral_key))
-                        .header("token", userToken);
-
+                        .header("token", user.getUserAstralTokens());
                 //Continue the request
                 return chain.proceed(newRequest.build());
             }
         });
+        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+        Log.d(TAG, "Interface");
+        //Create the POST request
+        Call<ResponseBody> request = astralHttpInterface.createRoom(astralRoom.getName(), astralRoom.getLatitude(),
+                astralRoom.getLongitude(), astralRoom.getExpirationDate(), astralRoom.getRoomData());
+        Log.d(TAG, "Create Post request");
+
+        //Call the request asynchronously
+        request.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                if (response.code() == Astral.OK) {
+                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code());
+
+                    //If the room was created successfully
+
+                    //Display Room in home fragment
+                } else {
+                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                //The request has unexpectedly failed
+                Log.d(TAG, "createAstralRoom-> onClick-> onSuccess-> onResponse: Unexpected request failure");
+                t.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * Displays a room
+     */
+    private void displayRoom(){
 
     }
 
