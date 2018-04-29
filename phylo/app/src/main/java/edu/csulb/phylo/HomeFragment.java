@@ -311,8 +311,8 @@ public class HomeFragment extends Fragment
         //Create the GET request
         Call< List<AstralRoom> > request = astralHttpInterface.getRooms(
                 getString(R.string.astral_key),
-                33.7542,
-                -118.2019,
+                currUserLocation.latitude,
+                currUserLocation.longitude,
                 10,
                 user.getUserAstralTokens()
         );
