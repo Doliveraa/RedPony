@@ -1,6 +1,7 @@
 package edu.csulb.phylo;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.Serializable;
 
@@ -89,6 +90,15 @@ public class User implements Serializable {
         return signInProvider;
     }
 
+    /**
+     * The user's astral tokens
+     *
+     * @return The User's Astral token to access Astral services
+     */
+    public String getUserAstralTokens() {
+        return userAstralTokens;
+    }
+
 
     private static void retrieveUserInformation(final Context context) {
         //Retrieves the current sign in provider
@@ -103,6 +113,7 @@ public class User implements Serializable {
             name = AuthHelper.getCachedUserName(context);
             email = AuthHelper.getCachedUserEmail(context);
             astralUsername = Astral.getCachedAstralUsername(context);
+            userAstralTokens = Astral.getCachedAstralTokens(context);
         } else {
             throw new RuntimeException("Attempt to retrieve null user information");
         }

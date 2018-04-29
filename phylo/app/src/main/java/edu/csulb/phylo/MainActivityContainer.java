@@ -81,14 +81,12 @@ public class MainActivityContainer extends AppCompatActivity{
         mapFragmentFirstTime = true;
         enteredMapFragment = false;
 
-        //Instantiate user
-        user = User.getInstance(this);
-
         //create bottom navigation bar
         createBottomNavigationView();
 
         //Instantiate fragments
         homeFragment = HomeFragment.newInstance();
+        homeFragment.setAstralUser(user);
         mapsFragment = MapsFragment.newInstance();
         pinnedFragment = PinnedFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
@@ -106,7 +104,11 @@ public class MainActivityContainer extends AppCompatActivity{
         if (mapsFragment.isRetrievingLocPermission()) {
             Log.d(TAG, "onActivityResult: Back from receiving AstralUser Permission");
             mapsFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        } else {
+        } else if(homeFragment.isRetrievingLocPermission()){
+            Log.d(TAG, "onActrivityResult: Back from receiving AstralUser Permission");
+            homeFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+        else{
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }

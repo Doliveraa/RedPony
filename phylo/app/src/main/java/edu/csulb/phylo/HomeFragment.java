@@ -3,9 +3,6 @@ package edu.csulb.phylo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +11,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,8 +21,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -32,17 +31,19 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralHttpInterface;
+import edu.csulb.phylo.Astral.AstralRoom;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 
 /**
@@ -50,7 +51,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
  */
 
 public class HomeFragment extends Fragment
-        implements View.OnClickListener{
+        implements View.OnClickListener, UserLocationClient.LocationListener{
 
     //Permissions
     private final int PERMISSION_REQUEST_CODE = 2035;
@@ -59,14 +60,17 @@ public class HomeFragment extends Fragment
     //Constants
     private final String TAG = HomeFragment.class.getSimpleName();
     //Views
-    FloatingActionButton fabCreateRoom;
-    //Variables
-    private boolean roomLockedChoice;
+    private FloatingActionButton fabCreateRoom;
+    private ProgressBar progressBar;
+    private User user;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
     //Location Permissions Variables
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
     private UserLocationClient userLocationClient;
-    private LocationManager locationManager;
+
 
     public static HomeFragment newInstance(){
         HomeFragment fragment = new HomeFragment();
@@ -89,21 +93,31 @@ public class HomeFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
 
         //Initialize Variables
-        roomLockedChoice = false;
+        userLocationClient = new UserLocationClient(getActivity());
 
         //Initialize Hardware
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
         //Initialize Views
         fabCreateRoom = getActivity().findViewById(R.id.fab_create_room);
+        progressBar = getActivity().findViewById(R.id.progress_bar_home);
+        recyclerView = getActivity().findViewById(R.id.recycler_view_home);
+
+        //Set that the recycler view has a fixed size to increase performance
+        recyclerView.setHasFixedSize(true);
+
+        //Use a linear layout manager
+        layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+
+        progressBar.setVisibility(View.VISIBLE);
 
         //Set listeners
         fabCreateRoom.setOnClickListener(this);
+        userLocationClient.setLocationUpdatedListener(this);
 
-        userLocationClient = new UserLocationClient(getActivity());
+        user = User.getInstance(getActivity());
 
-        //Get last known location
-//        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         //Check to see if we have the user's permission
         hasLocationPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.LOCATION_PERMISSION);
     }
@@ -117,6 +131,7 @@ public class HomeFragment extends Fragment
         super.onStart();
         //If we have the user's permission to receive their location, start the location tracking
         if (hasLocationPermission) {
+            userLocationClient.singleLocationRetrieval(getActivity());
         } else {
             //We do not have permission to receive the user's location, ask for permission
             requestPermission();
@@ -163,10 +178,6 @@ public class HomeFragment extends Fragment
         final EditText roomNameEditText = (EditText) alertDialogView.findViewById(R.id.edit_text_room_name);
         final EditText setPassword = (EditText) alertDialogView.findViewById(R.id.password_edit_text_set);
         final Button cancelPassword = (Button) alertDialogView.findViewById(R.id.button_cancel_password);
-
-        //Set these buttons to invisible
-        setPassword.setVisibility(View.GONE);
-        cancelPassword.setVisibility(View.GONE);
 
         //Set Listeners
         setExpirationDateButton.setOnClickListener(new View.OnClickListener() {
@@ -245,7 +256,6 @@ public class HomeFragment extends Fragment
             public void onClick(View v) {
                 if(lockRoomButton.getVisibility() == View.GONE) {
                     //User wants the room to have no password
-                    roomLockedChoice = false;
                     //Remove the button
                     lockRoomButton.setVisibility(View.VISIBLE);
                     //The cancel button is gone
@@ -253,7 +263,6 @@ public class HomeFragment extends Fragment
                     cancelPassword.setVisibility(View.GONE);
                 } else {
                     //User wants the room to have a password
-                    roomLockedChoice = true;
                     //Remove the button
                     lockRoomButton.setVisibility(View.GONE);
                     //Allow the cancel button to appear
@@ -267,8 +276,6 @@ public class HomeFragment extends Fragment
             public void onClick(View v) {
                 String roomName = roomNameEditText.getText().toString();
 
-
-
                 //Check if the Room name is in the correct format
                 if(roomName.isEmpty()) {
                     displayToast("Room name cannot be empty", true);
@@ -276,6 +283,7 @@ public class HomeFragment extends Fragment
                     displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
                 } else {
                     //Check if the room name already exists
+
                 }
             }
         });
@@ -288,6 +296,44 @@ public class HomeFragment extends Fragment
 
 
         return alertDialogBuilder.create();
+    }
+
+    /**
+     * Retrieves all if the rooms around the area
+     */
+    private void retrieveRooms(final LatLng currUserLocation){
+        //Start a GET request to retrieve all of the rooms in the area
+        final Astral astral = new Astral(getActivity().getString(R.string.astral_base_url));
+        //Add logging interceptor
+        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+
+        //Create the GET request
+        Call< List<AstralRoom> > request = astralHttpInterface.getRooms(
+                getString(R.string.astral_key),
+                33.7542,
+                -118.2019,
+                10,
+                user.getUserAstralTokens()
+        );
+
+        request.enqueue(new Callback< List<AstralRoom> >() {
+            @Override
+            public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
+                if(response.code() == Astral.OK) {
+                    Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
+                    //Progress bar must dissapear, we have loaded all the rooms
+                    progressBar.setVisibility(View.GONE);
+                    adapter = new RoomAdapter(response.body());
+                    recyclerView.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call< List<AstralRoom> > call, Throwable t) {
+
+            }
+        });
     }
 
     /**
@@ -356,7 +402,7 @@ public class HomeFragment extends Fragment
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Permission has been granted, we can now start tracking the user's location
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has accepted location permissions");
-                    userLocationClient.startUserLocationTracking();
+                    userLocationClient.startUserLocationTracking(10000);
                     hasLocationPermission = true;
                 } else {
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has denied location permissions");
@@ -383,9 +429,38 @@ public class HomeFragment extends Fragment
                 //Continue the request
                 return chain.proceed(newRequest.build());
             }
-        });;
+        });
 
+    }
 
+    /**
+     * Sets the current user to be used in this fragment
+     *
+     * @param user The currently signed in  user
+     */
+    public void setAstralUser(final User user) {
+        this.user = user;
+    }
+
+    /**
+     * Listens for the user's updated locations
+     *
+     * @param location The user's current location
+     */
+    @Override
+    public void onLocationUpdated(LatLng location) {
+
+    }
+
+    /**
+     * Retrieve single location update
+     *
+     * @param location The user's current location
+     */
+    @Override
+    public void onSingleLocationReceived(LatLng location) {
+        Log.d(TAG, "onActivityCreated-> onSingleLocationReceived: Attempting to retrieve rooms");
+        retrieveRooms(location);
     }
 
 }

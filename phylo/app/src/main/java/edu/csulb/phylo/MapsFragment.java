@@ -36,7 +36,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 
 public class MapsFragment extends Fragment
-        implements OnMapReadyCallback, UserLocationClient.LocationUpdateListener {
+        implements OnMapReadyCallback, UserLocationClient.LocationListener {
     //Constants
     private final String TAG = MapsFragment.class.getSimpleName();
     private final int PERMISSION_REQUEST_CODE = 2035;
@@ -57,6 +57,7 @@ public class MapsFragment extends Fragment
     private MapView mapView;
     private GoogleMap googleMap;
     private ProgressBar progressBar;
+
 
     /**
      * Instantiates an instance of UserFragment
@@ -132,10 +133,10 @@ public class MapsFragment extends Fragment
         isFirstTime = checkIsFirstTime();
 
         if(hasLocationPermission && isFirstTime) {
-            userLocationClient.startUserLocationTracking();
+            userLocationClient.startUserLocationTracking(1000);
         } else if (hasLocationPermission && !isFirstTime) {
             onRestartCurrLocation = retrieveCachedUserLocation();
-            userLocationClient.startUserLocationTracking();
+            userLocationClient.startUserLocationTracking(1000);
         }else {
             requestPermission();
         }
@@ -165,6 +166,11 @@ public class MapsFragment extends Fragment
             animateMarkerToNewLoc(currMarker, new LatLng(userCurrentLocation.latitude, userCurrentLocation.longitude),
                     new LatLngInterpolator.LinearFixed());
         }
+    }
+
+    @Override
+    public void onSingleLocationReceived(LatLng location) {
+
     }
 
     /**
@@ -229,7 +235,7 @@ public class MapsFragment extends Fragment
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Permission has been granted, we can now start tracking the user's location
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has accepted location permissions");
-                    userLocationClient.startUserLocationTracking();
+                    userLocationClient.startUserLocationTracking(1000);
                     hasLocationPermission = true;
                 } else {
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has denied location permissions");

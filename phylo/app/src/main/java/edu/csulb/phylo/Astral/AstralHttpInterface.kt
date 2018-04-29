@@ -43,9 +43,14 @@ interface AstralHttpInterface {
      */
     @FormUrlEncoded
     @POST("files")
-    fun createRoom(@Field("name") roomName: String,
-                   @Field("latitude") latitude: Float,
-                   @Field("longitude") longitude: Float,
-                   @Field("expirationDate") expirationDate: Long)
-            :Call<ResponseBody>
+    fun createRoom(@Body astralRoom: AstralRoom)
+            : Call<ResponseBody>
+
+    @GET("files")
+    fun getRooms(@Header("appKey") appKey: String,
+                 @Header("latitude") latitude: Double,
+                 @Header("longitude") longitude: Double,
+                 @Header("radius") radius: Int,
+                 @Header("token") token: String)
+            : Call< List<AstralRoom> >
 }

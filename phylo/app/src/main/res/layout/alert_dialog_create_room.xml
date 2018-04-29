@@ -136,14 +136,17 @@
         android:layout_marginTop="10dp"
         android:background="@null"
         android:hint="@string/password"
-        android:inputType="textPassword" />
+        android:gravity="center"
+        android:inputType="textPassword"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/button_cancel_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/cancel"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/button_create_room"
@@ -151,6 +154,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/create_room" />
 
 </LinearLayout>

@@ -1,19 +1,11 @@
 package edu.csulb.phylo.Astral
 
-import java.util.*
+import java.util.ArrayList
 
-class AstralRoom(val roomName: String, val longitude: Float, val latitude: Float,
-                val expiration: Long) {
-    var roomKey : String?
-
-    init{
-        roomKey = null
-    }
-
-    //Create and return a key to lock a room or folder inside of a room
-    fun lockRoom() : String? {
-        roomKey = UUID.randomUUID().toString()
-        //Generate a UUID object which is Cryptographically Secure
-        return roomKey
-    }
+class AstralRoom {
+    var owner: String? = null
+    var name: String? = null
+    var location: ArrayList<Double>? = null
+    var expirationDate: String? = null
+    var roomData: RoomData? = null
 }

@@ -119,6 +119,12 @@ public class Astral{
         return sharedPreferences.getString(Astral.ASTRAL_USERNAME, null);
     }
 
+    public static String getCachedAstralTokens(final Context context) {
+        //Open the folder containing Astral's information
+        SharedPreferences sharedPreferences = getAstralSharedPreferences(context);
+        return sharedPreferences.getString(Astral.ASTRAL_TOKEN, null);
+    }
+
     /**
      * Stores the User's tokens to perform any other transactions later
      *
@@ -152,6 +158,7 @@ public class Astral{
         SharedPreferences sharedPreferences = getAstralSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(ASTRAL_USERNAME);
+        editor.remove(ASTRAL_TOKEN);
         editor.apply();
     }
 

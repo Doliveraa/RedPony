@@ -1,11 +1,17 @@
 package edu.csulb.phylo;
 
 import android.content.Context;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Handler;
+import android.util.Log;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,15 +30,18 @@ public class UserLocationClient
     //Constants
     public final static String LATITUDE = "latitude";
     public final static String LONGITUDE = "longitude";
+    public final static String TAG = UserLocationClient.class.getSimpleName();
     //Class variables
     private Context context;
     private Map<String, Double> userLocation;
     private Handler handler = new Handler();
+    private int updateTime;
     //Interface
-    public interface LocationUpdateListener{
+    public interface LocationListener{
         void onLocationUpdated(LatLng location);
+        void onSingleLocationReceived(LatLng location);
     }
-    private LocationUpdateListener locationUpdatedListener;
+    private LocationListener locationUpdatedListener;
 
     /**
      * Initialization Constructor
@@ -48,8 +57,32 @@ public class UserLocationClient
     /**
      * Starts tracking the User's current location
      */
-    public void startUserLocationTracking() {
+    public void startUserLocationTracking(int updateTime) {
+        this.updateTime = updateTime;
         SmartLocation.with(context).location().start(this);
+    }
+
+    /**
+     * Retrieves a LatLng object
+     *
+     * @param context The current context of the application
+     */
+    public void singleLocationRetrieval(final Context context){
+        FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        try{
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if(location != null) {
+                        double longitude = location.getLongitude();
+                        double latitude = location.getLatitude();
+                        locationUpdatedListener.onSingleLocationReceived(new LatLng(latitude, longitude));
+                    }
+                }
+            });
+        }catch(SecurityException exception) {
+            Log.d(TAG, "Application does not contain location permission");
+        }
     }
 
     /**
@@ -64,7 +97,7 @@ public class UserLocationClient
      *
      * @param listener The listener object
      */
-    public void setLocationUpdatedListener(LocationUpdateListener listener) {
+    public void setLocationUpdatedListener(LocationListener listener) {
         locationUpdatedListener = listener;
     }
 
@@ -85,8 +118,7 @@ public class UserLocationClient
     public void onLocationUpdated(Location location) {
         userLocation.put(LATITUDE, location.getLatitude());
         userLocation.put(LONGITUDE, location.getLongitude());
-        final int LOCATION_UPDATE_DELAY = 1000;
-        handler.postDelayed(locationRunnable, LOCATION_UPDATE_DELAY);
+        handler.postDelayed(locationRunnable, updateTime);
         LatLng currLocation = new LatLng(location.getLatitude(), location.getLongitude());
         locationUpdatedListener.onLocationUpdated(currLocation);
     }
@@ -97,7 +129,7 @@ public class UserLocationClient
     private Runnable locationRunnable = new Runnable() {
         @Override
         public void run() {
-            startUserLocationTracking();
+            startUserLocationTracking(updateTime);
         }
     };
 }
