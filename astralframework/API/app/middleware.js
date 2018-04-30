@@ -181,7 +181,7 @@ const createFile = function(req, res) {
                         req.body.longitude,
                         req.body.latitude
                     ],
-                    expirationDate: req.body.expirationDate,
+                    expireAt: req.body.expirationDate,
                     data: req.body.data
                 };
 
@@ -306,7 +306,7 @@ const updateFile = function(req, res) {
                 if (req.body.name) file.name = req.body.name;
                 if (req.body.longitude) file.location[0] = Number(req.body.longitude);
                 if (req.body.latitude) file.location[1] = Number(req.body.latitude);
-                if (req.body.expirationDate) file.expirationDate = req.body.expirationDate;
+                if (req.body.expirationDate) file.expireAt = req.body.expirationDate;
                 if (req.body.data) file.data = req.body.data;
 
                 file.save(function(err) {

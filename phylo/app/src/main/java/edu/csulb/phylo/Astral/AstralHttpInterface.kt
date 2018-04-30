@@ -52,7 +52,7 @@ interface AstralHttpInterface {
                    @Field ("latitude") latitude: Double,
                    @Field ("longitude") longitude: Double,
                    @Field ("expiration") expiration: String,
-                   @Field ("roomData") roomData: RoomData)
+                   @Field ("roomKey") roomKey: RoomKey)
             : Call<ResponseBody>
 
     @GET("files")

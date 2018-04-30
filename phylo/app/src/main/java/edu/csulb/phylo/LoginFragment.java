@@ -119,9 +119,6 @@ public class LoginFragment extends Fragment
                 public void onSuccess(CognitoUserDetails cognitoUserDetails) {
                     Log.d(TAG, "getDetailsInBackground-> onSuccess: Retrieving Cognito information");
 
-                    //Quit the Looper operation
-                    Looper.myLooper().quitSafely();
-
                     //Retrieve user information
                     CognitoUserAttributes cognitoUserAttributes = cognitoUserDetails.getAttributes();
                     Map<String, String> userInfo = cognitoUserAttributes.getAttributes();
@@ -247,7 +244,6 @@ public class LoginFragment extends Fragment
             cognitoUser = cognitoUserPool.getUser(userEmail);
 
             Looper.prepare();
-            Looper.loop();
 
             Runnable authRunnable = cognitoUser.initiateUserAuthentication(authDetails, authHandler, true);
             authRunnable.run();
@@ -314,6 +310,9 @@ public class LoginFragment extends Fragment
         createAccountText.setOnClickListener(this);
         forgotPasswordText.setOnClickListener(this);
 
+        emailEditText.setText("vietle8362@gmail.com");
+        passwordEditText.setText("Trxcjo19");
+
         //Initialize Google Sign In
         googleSignInClient = AuthHelper.getGoogleSignInClient(getActivity());
 
@@ -358,9 +357,6 @@ public class LoginFragment extends Fragment
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Log.d(TAG, "Successfully signed in with Google");
-
-            //Store the user's account information in cache
-            AuthHelper.cacheUserInformation(getActivity(), account.getDisplayName(), account.getEmail());
 
             //Display the Login dialog
             alertDialog = createLoginDialog();
@@ -447,7 +443,7 @@ public class LoginFragment extends Fragment
                         //Store the token
                         Astral.storeAstralUserToken(context, token);
                         //Retrieve the user's username using the token
-                        retrieveAstralUsername(token, signInProvider);
+                        retrieveAstralUsername(token, signInProvider, name, email);
                     }
                 } else {
                     //Check the error code
@@ -468,7 +464,8 @@ public class LoginFragment extends Fragment
         });
     }
 
-    private void retrieveAstralUsername(final String userToken, final String signInProvider) {
+    private void retrieveAstralUsername(final String userToken, final String signInProvider,
+                                        final String name, final String email) {
         final Astral astral = new Astral(getString(R.string.astral_base_url));
         //Intercept the request to add header items
         astral.addRequestInterceptor(new Interceptor() {
@@ -498,6 +495,9 @@ public class LoginFragment extends Fragment
                 if (response.code() == Astral.OK) {
                     String username = response.body().getUsername();
                     Log.d(TAG, "retrieveAstralUsername-> onResponse: signed in with " + username);
+
+                    //Store the user's account information in cache
+                    AuthHelper.cacheUserInformation(getActivity(), name, email);
 
                     //Add the current sign in provider
                     AuthHelper.setCurrentSignInProvider(getActivity(), signInProvider);

@@ -56,10 +56,10 @@ public class UserFragment extends Fragment
         Button downloadedButton = getActivity().findViewById(R.id.downloaded_files);
         Button settingsB = getActivity().findViewById(R.id.settings);
         Button logoutButton = getActivity().findViewById(R.id.logout_button);
-        final TextView emailTextView = getActivity().findViewById(R.id.email_text_view);
+        final TextView usernameTextView = getActivity().findViewById(R.id.username_text_view);
 
         //Put user's email into the text view
-        emailTextView.setText(user.getEmail());
+        usernameTextView.setText(user.getUsername());
 
         //Attach listeners to buttons
         uploadedButton.setOnClickListener(this);
