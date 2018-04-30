@@ -49,6 +49,8 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 
+import static android.widget.ListPopupWindow.WRAP_CONTENT;
+
 
 /**
  * Created by vietl on 2/25/2018.
@@ -61,6 +63,8 @@ public class HomeFragment extends Fragment
     private final int PERMISSION_REQUEST_CODE = 2035;
     //Phone Hardware
     private Vibrator vibrator;
+    //Variables
+    private boolean creatingRoom;
     //Constants
     private final String TAG = HomeFragment.class.getSimpleName();
     //Views
@@ -74,6 +78,8 @@ public class HomeFragment extends Fragment
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
     private UserLocationClient userLocationClient;
+    private String roomName;
+    private String expiration;
 
 
     public static HomeFragment newInstance(){
@@ -98,6 +104,7 @@ public class HomeFragment extends Fragment
 
         //Initialize Variables
         userLocationClient = new UserLocationClient(getActivity());
+        creatingRoom = false;
 
         //Initialize Hardware
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
@@ -287,7 +294,8 @@ public class HomeFragment extends Fragment
                     displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
                 } else {
                     //Check if the room name already exists
-                    createAstralRoom(roomName, -118.2019, 33.7542, "2019-04-23T18:25:43.511Z");
+                    creatingRoom = true;
+                    userLocationClient.singleLocationRetrieval(getActivity());
 
                 }
             }
@@ -421,12 +429,13 @@ public class HomeFragment extends Fragment
     /**
      * Creates an astral room given the parameters
      * @param roomName the name of the room
-     * @param longit  the longitude of the location of the room
-     * @param lat the latitude of the location of the room
+     * @param currLocation The current location
      * @param expiration when the room expires
      */
-    private void createAstralRoom(final String roomName, final double longit, final double lat,
+    private void createAstralRoom(final String roomName, final LatLng currLocation,
                                   String expiration){
+        final double longit = currLocation.longitude;
+        final double lat = currLocation.latitude;
 
         //Put the longitude and the latitude into a double arraylist
         ArrayList<Double> location = new ArrayList<>();
@@ -477,6 +486,8 @@ public class HomeFragment extends Fragment
                     //If the room was created successfully
 
                     //Display Room in home fragment
+                    displayRoom(astralRoom.getName());
+
                 } else {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
                 }
@@ -493,7 +504,7 @@ public class HomeFragment extends Fragment
     /**
      * Displays a room
      */
-    private void displayRoom(){
+    private void displayRoom(String roomName){
 
     }
 
@@ -524,7 +535,11 @@ public class HomeFragment extends Fragment
     @Override
     public void onSingleLocationReceived(LatLng location) {
         Log.d(TAG, "onActivityCreated-> onSingleLocationReceived: Attempting to retrieve rooms");
-        retrieveRooms(location);
+        if(!creatingRoom) {
+            retrieveRooms(location);
+        } else {
+            createAstralRoom(roomName, location, "2019-04-23T18:25:43.511Z");
+        }
     }
 
 }
