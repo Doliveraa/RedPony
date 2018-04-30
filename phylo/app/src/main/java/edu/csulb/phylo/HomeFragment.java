@@ -30,19 +30,17 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralHttpInterface;
 import edu.csulb.phylo.Astral.AstralRoom;
-import edu.csulb.phylo.Astral.RoomData;
+import edu.csulb.phylo.Astral.RoomKey;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -50,8 +48,6 @@ import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
-
-import static android.widget.ListPopupWindow.WRAP_CONTENT;
 
 
 /**
@@ -460,7 +456,8 @@ public class HomeFragment extends Fragment
         astralRoom.setLongitude(longit);//long
         astralRoom.setLatitude(lat);//lat
         astralRoom.setExpirationDate(expiration);//expiration
-        astralRoom.setRoomData(null);
+        RoomKey roomKey = new RoomKey(null);
+        astralRoom.setRoomKey(null);
         Log.d(TAG, "Set all data");
 
         //Astral Start POST Request
@@ -483,7 +480,7 @@ public class HomeFragment extends Fragment
         Log.d(TAG, "Interface");
         //Create the POST request
         Call<ResponseBody> request = astralHttpInterface.createRoom(astralRoom.getName(), astralRoom.getLatitude(),
-                astralRoom.getLongitude(), astralRoom.getExpirationDate(), astralRoom.getRoomData());
+                astralRoom.getLongitude(), astralRoom.getExpirationDate(), astralRoom.getRoomKey());
         Log.d(TAG, "Create Post request");
 
         //Call the request asynchronously
