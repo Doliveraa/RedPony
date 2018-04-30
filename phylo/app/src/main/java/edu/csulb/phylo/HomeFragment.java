@@ -80,10 +80,11 @@ public class HomeFragment extends Fragment
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
     private boolean hasExpiration;
+    private boolean hasPasswordKey;
     private UserLocationClient userLocationClient;
     private String roomName;
     private String expiration;
-    private Date date;
+    private String passwordKey;
 
     public static HomeFragment newInstance(){
         HomeFragment fragment = new HomeFragment();
@@ -109,6 +110,7 @@ public class HomeFragment extends Fragment
         userLocationClient = new UserLocationClient(getActivity());
         creatingRoom = false;
         hasExpiration = false;
+        hasPasswordKey = false;
 
         //Initialize Hardware
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
@@ -213,6 +215,7 @@ public class HomeFragment extends Fragment
         cancelPassword.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
+                hasPasswordKey = false;
                 setPassword.setVisibility(View.GONE);
                 cancelPassword.setVisibility(View.GONE);
                 lockRoomButton.setVisibility(View.VISIBLE);
@@ -276,6 +279,7 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 if(lockRoomButton.getVisibility() == View.GONE) {
+                    hasPasswordKey = false;
                     //User wants the room to have no password
                     //Remove the button
                     lockRoomButton.setVisibility(View.VISIBLE);
@@ -283,6 +287,7 @@ public class HomeFragment extends Fragment
                     setPassword.setVisibility(View.GONE);
                     cancelPassword.setVisibility(View.GONE);
                 } else {
+                    hasPasswordKey = true;
                     //User wants the room to have a password
                     //Remove the button
                     lockRoomButton.setVisibility(View.GONE);
@@ -296,6 +301,7 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 roomName = roomNameEditText.getText().toString();
+                passwordKey = setPassword.getText().toString();
 
                 //Check if the Room name is in the correct format
                 if(roomName.isEmpty()) {
@@ -443,7 +449,7 @@ public class HomeFragment extends Fragment
      * @param expiration when the room expires
      */
     private void createAstralRoom(final String roomName, final LatLng currLocation,
-                                  String expiration){
+                                  final String expiration){
         final double longit = currLocation.longitude;
         final double lat = currLocation.latitude;
 
@@ -460,7 +466,7 @@ public class HomeFragment extends Fragment
         astralRoom.setLongitude(longit);//long
         astralRoom.setLatitude(lat);//lat
         astralRoom.setExpirationDate(expiration);//expiration
-        astralRoom.setRoomData(null);
+
         Log.d(TAG, "Set all data");
 
         //Astral Start POST Request
