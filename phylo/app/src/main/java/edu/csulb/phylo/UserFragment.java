@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import edu.csulb.phylo.Astral.Astral;
 
@@ -22,7 +23,6 @@ public class UserFragment extends Fragment
     implements View.OnClickListener{
     //AstralUser Variable
     private User user;
-
     //Fragment Variables
     UploadedFilesFragment uploadedFilesFragment;
     DownloadedFilesFragment downloadedFilesFragment;
@@ -48,11 +48,18 @@ public class UserFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        //Generate user
+        user = User.getInstance(getActivity());
+
         //Initiate Views
         Button uploadedButton = getActivity().findViewById(R.id.user_files);
         Button downloadedButton = getActivity().findViewById(R.id.downloaded_files);
         Button settingsB = getActivity().findViewById(R.id.settings);
         Button logoutButton = getActivity().findViewById(R.id.logout_button);
+        final TextView emailTextView = getActivity().findViewById(R.id.email_text_view);
+
+        //Put user's email into the text view
+        emailTextView.setText(user.getEmail());
 
         //Attach listeners to buttons
         uploadedButton.setOnClickListener(this);
@@ -103,12 +110,5 @@ public class UserFragment extends Fragment
 
     }
 
-    /**
-     * Sets the current user object for this fragment
-     *
-     * @param currUser The current user on the application
-     */
-    public void setCurrentUser(User currUser) {
-        user = currUser;
-    }
+
 }
