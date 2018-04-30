@@ -14,15 +14,17 @@ const FileSchema = mongoose.Schema({
         index: '2dsphere',
         required: true
     },
-    expirationDate: {
+    expireAt: {
         type: Date,
-        required: true
-    },
+        expires: true
+    }
     data: {
         type: Object,
         required: true
     }
 });
+
+FileSchema.index({ expireAt: 1 }, { expireAfterSeconds : 0 });
 
 FileSchema.statics.getNearby = function(coordinates, meters, callback) {
     let today = new Date();
