@@ -30,8 +30,10 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -77,10 +79,11 @@ public class HomeFragment extends Fragment
     //Location Permissions Variables
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
+    private boolean hasExpiration;
     private UserLocationClient userLocationClient;
     private String roomName;
     private String expiration;
-
+    private Date date;
 
     public static HomeFragment newInstance(){
         HomeFragment fragment = new HomeFragment();
@@ -105,6 +108,7 @@ public class HomeFragment extends Fragment
         //Initialize Variables
         userLocationClient = new UserLocationClient(getActivity());
         creatingRoom = false;
+        hasExpiration = false;
 
         //Initialize Hardware
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
@@ -201,6 +205,7 @@ public class HomeFragment extends Fragment
         cancelSetDateButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                hasExpiration = false;
                 setDateLinear.setVisibility(View.GONE);
                 setExpirationDateButton.setVisibility(View.VISIBLE);
             }
@@ -217,10 +222,12 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 if(dateSpinner.getVisibility() == View.VISIBLE) {
+                    hasExpiration = true;
                     //Get the date values
                     int month = dateSpinner.getMonth();
                     int day = dateSpinner.getDayOfMonth();
                     int year = dateSpinner.getYear();
+                    expiration = year + "-" + month + "-" + day + "T";
                     String expDate = month + "/" + day + "/" + year;
                     //Display the chosen expiration date
                     expirationDateText.setText(expDate);
@@ -230,9 +237,11 @@ public class HomeFragment extends Fragment
                     timeSpinner.setVisibility(View.VISIBLE);
                 } else {
                     //Get the time values
+                    hasExpiration = true;
                     int hour = timeSpinner.getHour();
                     int minutes = timeSpinner.getMinute();
                     String dayTime = "AM";
+                    expiration = expiration + hour + ":" + minutes + ":" + "00.000" + "Z";
                     if(hour > 12) {
                         dayTime = "PM";
                         hour -= 12;
@@ -249,6 +258,7 @@ public class HomeFragment extends Fragment
         expirationDateText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hasExpiration = true;
                 expirationDateText.setVisibility(View.GONE);
                 dateSpinner.setVisibility(View.VISIBLE);
                 setButton.setVisibility(View.VISIBLE);
@@ -285,7 +295,7 @@ public class HomeFragment extends Fragment
         createRoom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String roomName = roomNameEditText.getText().toString();
+                roomName = roomNameEditText.getText().toString();
 
                 //Check if the Room name is in the correct format
                 if(roomName.isEmpty()) {
@@ -538,7 +548,13 @@ public class HomeFragment extends Fragment
         if(!creatingRoom) {
             retrieveRooms(location);
         } else {
-            createAstralRoom(roomName, location, "2019-04-23T18:25:43.511Z");
+            if (hasExpiration){
+                createAstralRoom(roomName, location, expiration);
+            }
+            else{
+                createAstralRoom(roomName, location, "2100-01-00T00:00:00.000Z");
+            }
+
         }
     }
 

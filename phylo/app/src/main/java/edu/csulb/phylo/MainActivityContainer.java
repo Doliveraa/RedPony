@@ -61,8 +61,6 @@ public class MainActivityContainer extends AppCompatActivity{
                             break;
 
                         case R.id.user_account:
-                            //go to user account
-                            userFragment.setCurrentUser(user);
                             fragmentTransaction.replace(R.id.main_activity_container, userFragment);
                             break;
 
