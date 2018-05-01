@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -80,10 +81,9 @@ public class HomeFragment extends Fragment
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
     private boolean hasExpiration;
-    private boolean hasPasswordKey;
     private UserLocationClient userLocationClient;
     private String roomName;
-    private String expiration;
+    private StringBuilder expiration;
     private String passwordKey;
 
     public static HomeFragment newInstance(){
@@ -111,6 +111,7 @@ public class HomeFragment extends Fragment
         creatingRoom = false;
         hasExpiration = false;
         passwordKey = "";
+        expiration = new StringBuilder();
 
         //Initialize Hardware
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
@@ -215,7 +216,6 @@ public class HomeFragment extends Fragment
         cancelPassword.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                hasPasswordKey = false;
                 setPassword.setVisibility(View.GONE);
                 cancelPassword.setVisibility(View.GONE);
                 lockRoomButton.setVisibility(View.VISIBLE);
@@ -227,11 +227,13 @@ public class HomeFragment extends Fragment
                 if(dateSpinner.getVisibility() == View.VISIBLE) {
                     hasExpiration = true;
                     //Get the date values
-                    int month = dateSpinner.getMonth();
+                    int month = dateSpinner.getMonth() + 1;
                     int day = dateSpinner.getDayOfMonth();
                     int year = dateSpinner.getYear();
-                    expiration = year + "-" + month + "-" + day + "T";
-                    String expDate = month + "/" + day + "/" + year;
+                    String day00 = (day < 10 ? "0" : "") + day;
+                    String month00 = (month < 10 ? "0" : "") + month;
+                    expiration.append(year + "-" + month00 + "-" + day00 + "T");
+                    String expDate = month00 + "/" + day00 + "/" + year;
                     //Display the chosen expiration date
                     expirationDateText.setText(expDate);
                     dateSpinner.setVisibility(View.GONE);
@@ -240,16 +242,18 @@ public class HomeFragment extends Fragment
                     timeSpinner.setVisibility(View.VISIBLE);
                 } else {
                     //Get the time values
-                    hasExpiration = true;
                     int hour = timeSpinner.getHour();
                     int minutes = timeSpinner.getMinute();
+                    String hour00 = (hour < 10 ? "0" : "") + hour;
+                    String minutes00 = (minutes < 10 ? "0" : "") + minutes;
                     String dayTime = "AM";
-                    expiration = expiration + hour + ":" + minutes + ":43.511Z";
+                    expiration.append(hour00 + ":" + minutes00 + ":43.511Z");
                     if(hour > 12) {
                         dayTime = "PM";
                         hour -= 12;
+                        hour00 = (hour < 10 ? "0" : "") + hour;
                     }
-                    String time = hour + ":" + minutes + " " + dayTime;
+                    String time = hour00 + ":" + minutes00 + " " + dayTime;
                     //Display the time to the user
                     expirationTimeText.setText(time);
                     setButton.setVisibility(View.GONE);
@@ -279,7 +283,6 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 if(lockRoomButton.getVisibility() == View.GONE) {
-                    hasPasswordKey = false;
                     //User wants the room to have no password
                     //Remove the button
                     lockRoomButton.setVisibility(View.VISIBLE);
@@ -287,7 +290,6 @@ public class HomeFragment extends Fragment
                     setPassword.setVisibility(View.GONE);
                     cancelPassword.setVisibility(View.GONE);
                 } else {
-                    hasPasswordKey = true;
                     //User wants the room to have a password
                     //Remove the button
                     lockRoomButton.setVisibility(View.GONE);
@@ -581,7 +583,8 @@ public class HomeFragment extends Fragment
             retrieveRooms(location);
         } else {
             if (hasExpiration){
-                createAstralRoom(roomName, location, expiration);
+                createAstralRoom(roomName, location, expiration.toString());
+                expiration.setLength(0);
             }
             else{
                 createAstralRoom(roomName, location, "2100-04-23T18:25:43.511Z");
