@@ -59,7 +59,15 @@
        * User's password
      * `data`
        * JSON object
-
+    * Error Codes
+      * `500`
+        * Unable to verify appKey
+        * App not found
+      * `1100`
+        * Mongoose error creating user
+      * `401`
+        * Invalid Parameters
+        
 <a name="login-user"></a>
 ### Retrieve a user's JSON Web Token
 * Route: __GET__ https://api.domain.com/users
@@ -72,6 +80,15 @@
       * User's email address
     * `password`
       * User's password
+  * Error Codes
+      * `500`
+        * Unable to verify appKey
+        * App not found
+      * `1100`
+        * Mongoose error creating user
+      * `401`
+        * No appKey provided
+        * No user authentication information provided
      
 <a name="get-user"></a>
 ### Retrieve a users info
