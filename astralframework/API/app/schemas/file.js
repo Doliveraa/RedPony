@@ -37,9 +37,6 @@ FileSchema.statics.getNearby = function(coordinates, meters, callback) {
                 },
                 $maxDistance: meters
             }
-        },
-        expirationDate: {
-            $gt: today
         }
     }).exec(function(err, files) {
         if (err) {
