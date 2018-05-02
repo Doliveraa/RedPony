@@ -17,7 +17,7 @@ const FileSchema = mongoose.Schema({
     expireAt: {
         type: Date,
         expires: true
-    }
+    },
     data: {
         type: Object,
         required: true
