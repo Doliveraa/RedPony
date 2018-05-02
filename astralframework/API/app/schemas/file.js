@@ -46,7 +46,7 @@ FileSchema.statics.getNearby = function(coordinates, meters, callback) {
             return callback(err);
         } else if (!files) {
             err = new Error("File not found");
-            err.status = 500;
+            err.status = 404;
             return callback(err);
         }
         return callback(null, files);

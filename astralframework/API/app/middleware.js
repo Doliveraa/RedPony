@@ -33,7 +33,7 @@ const findUser = function(appKey, token, restrictions, callback) {
         jwt.verify(token, config.secret, function(err, decoded) {
             if (err) {
                 err = new Error('Unable to verify user token');
-                err.status = 500;
+                err.status = 401;
                 return callback(err, null);
             }
 
@@ -56,7 +56,7 @@ const getToken = function(appKey, email, password, callback) {
         if (err) return callback(err, null);
         User.authentication(app.name, email, password, function (error, user) {
             if (error || !user) {
-                let err = new Error('Wrong email or password');
+                let err = new Error('Authentication Error: Incorrect email or password');
                 err.status = 401;
                 return callback(err, null);
             } else {
@@ -121,16 +121,16 @@ const getUser = function(req, res) {
             findUser(req.get("appKey"), req.get("token"), {password:0}, function(err, user) {
                 if (err) {
                     res.status = 401;
-                    return res.json({message: "Could not verify user"});
+                    return res.json({message: "Could not authenticate user"});
                 }
                 return res.json(user);
             })
         } else {
-            res.status = 401;
+            res.status = 406;
             return res.json({message: "No user authentication information provided"})
         }
     } else {
-        res.status = 401;
+        res.status = 406;
         return res.json({message: "No appKey provided"});
     }
 };
@@ -168,7 +168,7 @@ const createFile = function(req, res) {
         findUser(req.get('appKey'), req.get('token'), {}, function(err, user) {
             if (err) {
                 res.status = 401;
-                return res.json({message: "Unable to verify user"});
+                return res.json({message: "Could not authenticate user"});
             }
 
             if (req.body.name && req.body.latitude && req.body.longitude &&
@@ -187,13 +187,13 @@ const createFile = function(req, res) {
 
                 // TODO: if username is changed, user's files must also be updated
                 File.findOne({username: fileData.username, name: fileData.name }, function(err, file){
-                    if (err) return res.status(404).json({message: "Error: error checking pre-existing file"});
+                    if (err) return res.status(500).json({message: "Error: error checking pre-existing file"});
                     if (file) return res.status(409).json({message: "File already Exists"});
                     if (!file) {
                         File.create(fileData, function(err) {
                             if (err) {
                                 console.log(err);
-                                return res.status(401).json({message: "Error creating file"});
+                                return res.status(500).json({message: "Error creating file"});
                             }
                             else return res.json({message:"File created successfully"});
                         });
@@ -201,12 +201,12 @@ const createFile = function(req, res) {
                 });
             } else {
                 let err = new Error("Invalid parameters");
-                err.status = 401;
+                err.status = 400;
                 return res.json({message: err.message});
             }
         });
     } else {
-        res.status = 401;
+        res.status = 406;
         return res.json({message: "No appKey or token provided"});
     }
 };
@@ -221,7 +221,7 @@ const checkUserAvailability = function(req, res) {
         findApp(appKey, function (err, decoded) {
             if (err) return err;
             let appDecoded = decoded;
-            if (appDecoded == null) return res.status(400).json({message: "Appkey error"});
+            if (appDecoded == null) return res.status(401).json({message: "AppKey Error: Could not authenticate "});
             //check if query is empty
             if (req.query !== {}) {
                 User.findOne({username: usernameReq, app: appDecoded.name }, function(err, user) {
@@ -245,7 +245,7 @@ const checkUserAvailability = function(req, res) {
             }
         })
     } else {
-        return res.status(401).json({message: "No appKey provided"});
+        return res.status(406).json({message: "No appKey provided"});
     }
 };
 
@@ -254,7 +254,7 @@ const getFiles = function(req, res) {
         if (req.get("latitude") && req.get("longitude") && req.get("radius")) {
             findUser(req.get("appKey"), req.get("token"), {}, function(err, user) {
                 if (err) {
-                    res.status = 401;
+                    res.status = 500;
                     return res.json({message: "Error finding user"});
                 }
 
@@ -263,8 +263,7 @@ const getFiles = function(req, res) {
                 File.getNearby(coordinates, radius, function(err, files) {
                     if (err) {
                         console.log(err);
-                        res.status = 401;
-                        return res.json({message: "Error retrieving files"});
+                        return res.status(err.status).json({message: err.message});
                     }
                     return res.json(files);
                 })
@@ -272,20 +271,21 @@ const getFiles = function(req, res) {
         } else {
             findUser(req.get("appKey"), req.get("token"), {}, function(err, user) {
                 if (err) {
-                    res.status = 401;
-                    return res.json({message: "Could not find User"});
+                    return res.status(err.status).json({message: err.message });
                 }
                 File.find({owner: user.username}, function(err, files) {
                     if (err) {
-                        res.status = 401;
-                        return res.json({message: "Error retreiving files"});
+                        res.status = 500;
+                        return res.json({message: "Error retrieving files"});
                     }
+                    if(!files) return res.status(404).json({message: "File not found"});
+
                     return res.json(files);
                 })
             })
         }
     } else {
-        res.status = 401;
+        res.status = 406;
         return res.json({message: "No appKey or token provided"});
     }
 };
@@ -294,13 +294,14 @@ const updateFile = function(req, res) {
     if (req.get("appKey") && req.get("token")) {
         findUser(req.get("appKey"), req.get("token"), {}, function(err, user) {
             if (!req.body._id) {
-                res.status = 401;
-                return res.json({message: "No file id provided"});
+                return res.status(400).json({message: "No file id provided"});
             }
             File.findById(req.body._id, function(err, file) {
-                if (err || !file) {
-                    res.status = 401;
-                    return res.json({message: "Error retreiving files"});
+                if (err ) {
+                    return res.status(500).json({message: "Error retrieving files"});
+                }
+                if (!file ) {
+                    return res.status(404).json({message: "File not found"});
                 }
 
                 if (req.body.name) file.name = req.body.name;
@@ -311,15 +312,14 @@ const updateFile = function(req, res) {
 
                 file.save(function(err) {
                    if (err) {
-                       res.status = 401;
-                       return res.json({message: "Unable to update file"});
+                       return res.status(500).json({message: "Unable to update file"});
                    }
                    return res.status(200).send('File updated successfully');
                 });
             })
         })
     } else {
-        res.status = 401;
+        res.status = 406;
         return res.json({message: "No appKey or token provided"});
     }
 };
