@@ -17,7 +17,7 @@ const FileSchema = mongoose.Schema({
     expireAt: {
         type: Date,
         expires: true
-    }
+    },
     data: {
         type: Object,
         required: true
@@ -37,16 +37,13 @@ FileSchema.statics.getNearby = function(coordinates, meters, callback) {
                 },
                 $maxDistance: meters
             }
-        },
-        expirationDate: {
-            $gt: today
         }
     }).exec(function(err, files) {
         if (err) {
             return callback(err);
         } else if (!files) {
             err = new Error("File not found");
-            err.status = 500;
+            err.status = 404;
             return callback(err);
         }
         return callback(null, files);
