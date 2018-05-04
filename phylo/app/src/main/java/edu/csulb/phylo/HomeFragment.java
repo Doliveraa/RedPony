@@ -28,9 +28,16 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,9 +45,11 @@ import java.util.regex.Pattern;
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralHttpInterface;
 import edu.csulb.phylo.Astral.AstralRoom;
+import edu.csulb.phylo.Astral.RoomKey;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,6 +66,8 @@ public class HomeFragment extends Fragment
     private final int PERMISSION_REQUEST_CODE = 2035;
     //Phone Hardware
     private Vibrator vibrator;
+    //Variables
+    private boolean creatingRoom;
     //Constants
     private final String TAG = HomeFragment.class.getSimpleName();
     //Views
@@ -70,8 +81,11 @@ public class HomeFragment extends Fragment
     //Location Permissions Variables
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
+    private boolean hasExpiration;
     private UserLocationClient userLocationClient;
-
+    private String roomName;
+    private StringBuilder expiration;
+    private String passwordKey;
 
     public static HomeFragment newInstance(){
         HomeFragment fragment = new HomeFragment();
@@ -95,6 +109,10 @@ public class HomeFragment extends Fragment
 
         //Initialize Variables
         userLocationClient = new UserLocationClient(getActivity());
+        creatingRoom = false;
+        hasExpiration = false;
+        passwordKey = "";
+        expiration = new StringBuilder();
 
         //Initialize Hardware
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
@@ -191,6 +209,7 @@ public class HomeFragment extends Fragment
         cancelSetDateButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                hasExpiration = false;
                 setDateLinear.setVisibility(View.GONE);
                 setExpirationDateButton.setVisibility(View.VISIBLE);
             }
@@ -207,11 +226,15 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 if(dateSpinner.getVisibility() == View.VISIBLE) {
+                    hasExpiration = true;
                     //Get the date values
-                    int month = dateSpinner.getMonth();
+                    int month = dateSpinner.getMonth() + 1;
                     int day = dateSpinner.getDayOfMonth();
                     int year = dateSpinner.getYear();
-                    String expDate = month + "/" + day + "/" + year;
+                    String day00 = (day < 10 ? "0" : "") + day;
+                    String month00 = (month < 10 ? "0" : "") + month;
+                    expiration.append(year + "-" + month00 + "-" + day00 + "T");
+                    String expDate = month00 + "/" + day00 + "/" + year;
                     //Display the chosen expiration date
                     expirationDateText.setText(expDate);
                     dateSpinner.setVisibility(View.GONE);
@@ -222,12 +245,16 @@ public class HomeFragment extends Fragment
                     //Get the time values
                     int hour = timeSpinner.getHour();
                     int minutes = timeSpinner.getMinute();
+                    String hour00 = (hour < 10 ? "0" : "") + hour;
+                    String minutes00 = (minutes < 10 ? "0" : "") + minutes;
                     String dayTime = "AM";
+                    expiration.append(hour00 + ":" + minutes00 + ":43.511Z");
                     if(hour > 12) {
                         dayTime = "PM";
                         hour -= 12;
+                        hour00 = (hour < 10 ? "0" : "") + hour;
                     }
-                    String time = hour + ":" + minutes + " " + dayTime;
+                    String time = hour00 + ":" + minutes00 + " " + dayTime;
                     //Display the time to the user
                     expirationTimeText.setText(time);
                     setButton.setVisibility(View.GONE);
@@ -239,6 +266,7 @@ public class HomeFragment extends Fragment
         expirationDateText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hasExpiration = true;
                 expirationDateText.setVisibility(View.GONE);
                 dateSpinner.setVisibility(View.VISIBLE);
                 setButton.setVisibility(View.VISIBLE);
@@ -275,7 +303,8 @@ public class HomeFragment extends Fragment
         createRoom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String roomName = roomNameEditText.getText().toString();
+                roomName = roomNameEditText.getText().toString();
+                passwordKey = setPassword.getText().toString();
 
                 //Check if the Room name is in the correct format
                 if(roomName.isEmpty()) {
@@ -284,7 +313,8 @@ public class HomeFragment extends Fragment
                     displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
                 } else {
                     //Check if the room name already exists
-
+                    creatingRoom = true;
+                    userLocationClient.singleLocationRetrieval(getActivity());
                 }
             }
         });
@@ -327,6 +357,44 @@ public class HomeFragment extends Fragment
                     //Progress bar must dissapear, we have loaded all the rooms
                     progressBar.setVisibility(View.GONE);
                     adapter = new RoomAdapter(astralRoomList);
+                    recyclerView.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call< List<AstralRoom> > call, Throwable t) {
+
+            }
+        });
+    }
+
+    /**
+     * Retrieves all of the files around the area
+     */
+    private void retrieveFiles(final LatLng currUserLocation){
+        //Start a GET request to retrieve all of the rooms in the area
+        final Astral astral = new Astral(getActivity().getString(R.string.astral_base_url));
+        //Add logging interceptor
+        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+
+        //Create the GET request
+        Call< List<AstralRoom> > request = astralHttpInterface.getRooms(
+                getString(R.string.astral_key),
+                null,
+                null,
+                null,
+                user.getUserAstralTokens()
+        );
+
+        request.enqueue(new Callback< List<AstralRoom> >() {
+            @Override
+            public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
+                if(response.code() == Astral.OK) {
+                    Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
+                    //Progress bar must dissapear, we have loaded all the rooms
+                    progressBar.setVisibility(View.GONE);
+                    adapter = new RoomAdapter(response.body());
                     recyclerView.setAdapter(adapter);
                 }
             }
@@ -415,24 +483,75 @@ public class HomeFragment extends Fragment
         }
     }
 
-    private void createAstralFile(final String userToken){
-        //Astral
+    /**
+     * Creates an astral room given the parameters
+     * @param roomName the name of the room
+     * @param currLocation The current location
+     * @param expiration when the room expires
+     */
+    private void createAstralRoom(final String roomName, final LatLng currLocation,
+                                  final String expiration){
+        final double longit = currLocation.longitude;
+        final double lat = currLocation.latitude;
+
+        //Put the longitude and the latitude into a double arraylist
+        final ArrayList<Double> location = new ArrayList<>();
+        location.add(longit); //longit
+        location.add(lat); //lat
+
+        //Creating Astral Room to send
+        final AstralRoom astralRoom = new AstralRoom();
+        astralRoom.setOwner(user.getName());//owner
+        astralRoom.setName(roomName);//roomName
+        astralRoom.setLocation(location);//location
+        astralRoom.setLongitude(longit);//long
+        astralRoom.setLatitude(lat);//lat
+        astralRoom.setExpirationDate(expiration);//expiration
+        RoomKey roomKey = new RoomKey(passwordKey);
+        Gson gson = new Gson();
+        String string = gson.toJson(roomKey);
+
+        //Astral Start POST Request
         final Astral astral = new Astral(getString(R.string.astral_base_url));
-        //Intercept to add headers
+        //Intercept the request to add a header item
         astral.addRequestInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request request = chain.request();
-                //Add the app key to the request header
+                //Add the app key and token to the request header
                 Request.Builder newRequest = request.newBuilder().header(
                         Astral.APP_KEY_HEADER, getString(R.string.astral_key))
-                        .header("token", userToken);
-
+                        .header("token", user.getUserAstralTokens());
                 //Continue the request
                 return chain.proceed(newRequest.build());
             }
         });
+        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+        Log.d(TAG, "Interface");
+        //Create the POST request
+        Call<ResponseBody> request = astralHttpInterface.createRoom(astralRoom.getName(), astralRoom.getLatitude(),
+                astralRoom.getLongitude(), astralRoom.getExpirationDate(), roomKey);
+        Log.d(TAG, "Create Post request");
 
+        //Call the request asynchronously
+        request.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                if (response.code() == Astral.OK) {
+                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code() +
+                        " File Created Successfully");
+                } else {
+                    Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                //The request has unexpectedly failed
+                Log.d(TAG, "createAstralRoom-> onClick-> onSuccess-> onResponse: Unexpected request failure");
+                t.printStackTrace();
+            }
+        });
     }
 
     /**
@@ -462,7 +581,18 @@ public class HomeFragment extends Fragment
     @Override
     public void onSingleLocationReceived(LatLng location) {
         Log.d(TAG, "onActivityCreated-> onSingleLocationReceived: Attempting to retrieve rooms");
-        retrieveRooms(location);
+        if(!creatingRoom) {
+            retrieveRooms(location);
+        } else {
+            if (hasExpiration){
+                createAstralRoom(roomName, location, expiration.toString());
+                expiration.setLength(0);
+            }
+            else{
+                createAstralRoom(roomName, location, "2100-04-23T18:25:43.511Z");
+            }
+
+        }
     }
 
 }

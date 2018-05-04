@@ -1,5 +1,6 @@
 package edu.csulb.phylo.Astral
 
+import com.google.gson.JsonObject
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -41,16 +42,25 @@ interface AstralHttpInterface {
     /**
      * Creates a Room with certain specifications
      */
+//    @FormUrlEncoded
+//    @POST("files")
+//    fun createRoom(@Body astralRoom: AstralRoom)
+//            : Call<ResponseBody>
+
     @FormUrlEncoded
     @POST("files")
-    fun createRoom(@Body astralRoom: AstralRoom)
+    fun createRoom(@Field ("name") name: String,
+                   @Field ("latitude") latitude: Double,
+                   @Field ("longitude") longitude: Double,
+                   @Field ("expirationDate") expiration: String,
+                   @Field ("data") roomKey: RoomKey)
             : Call<ResponseBody>
 
     @GET("files")
     fun getRooms(@Header("appKey") appKey: String,
-                 @Header("latitude") latitude: Double,
-                 @Header("longitude") longitude: Double,
-                 @Header("radius") radius: Int,
+                 @Header("latitude") latitude: Double?,
+                 @Header("longitude") longitude: Double?,
+                 @Header("radius") radius: Int?,
                  @Header("token") token: String)
             : Call< List<AstralRoom> >
 }

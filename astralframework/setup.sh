@@ -107,7 +107,7 @@ fi
 if $SSL; then
     OPTIONS=$OPTIONS" --ssl"
 fi
-astral setup-api $OPTIONS
+astral gen-configs $OPTIONS
 
 # Install node packages
 printf "${WHITE}Installing Astral API Dependencies${NC}\n"

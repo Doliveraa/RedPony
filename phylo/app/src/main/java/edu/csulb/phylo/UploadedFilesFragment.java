@@ -6,10 +6,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * Created by vietl on 3/28/2018.
@@ -17,6 +22,11 @@ import android.widget.ImageButton;
 
 public class UploadedFilesFragment extends Fragment
     implements View.OnClickListener{
+
+    //Views
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     UserFragment userFragment;
 
@@ -40,9 +50,14 @@ public class UploadedFilesFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        //Initiate Variables
+        layoutManager = new LinearLayoutManager(getActivity());
+
         //Initiate Views
         ImageButton backButton = getActivity().findViewById(R.id.back_button_uploaded);
         ImageButton helpButton = getActivity().findViewById(R.id.help_button_uploaded);
+        recyclerView = getActivity().findViewById(R.id.recycler_view_upload_files);
+        recyclerView.setLayoutManager(layoutManager);
 
         //Attach listeners to buttons
         backButton.setOnClickListener(this);

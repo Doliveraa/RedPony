@@ -14,15 +14,17 @@ const FileSchema = mongoose.Schema({
         index: '2dsphere',
         required: true
     },
-    expirationDate: {
+    expireAt: {
         type: Date,
-        required: true
+        expires: true
     },
     data: {
         type: Object,
         required: true
     }
 });
+
+FileSchema.index({ expireAt: 1 }, { expireAfterSeconds : 0 });
 
 FileSchema.statics.getNearby = function(coordinates, meters, callback) {
     let today = new Date();
@@ -35,16 +37,13 @@ FileSchema.statics.getNearby = function(coordinates, meters, callback) {
                 },
                 $maxDistance: meters
             }
-        },
-        expirationDate: {
-            $gt: today
         }
     }).exec(function(err, files) {
         if (err) {
             return callback(err);
         } else if (!files) {
             err = new Error("File not found");
-            err.status = 500;
+            err.status = 404;
             return callback(err);
         }
         return callback(null, files);

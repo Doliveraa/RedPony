@@ -59,7 +59,16 @@
        * User's password
      * `data`
        * JSON object
-
+  * Error Codes
+    * `500`
+      * App not found
+    * `1100`
+      * Mongoose error creating user
+    * `401`
+      * Unable to verify appKey
+    * `406`
+      * Invalid Parameters
+        
 <a name="login-user"></a>
 ### Retrieve a user's JSON Web Token
 * Route: __GET__ https://api.domain.com/users
@@ -72,7 +81,14 @@
       * User's email address
     * `password`
       * User's password
-     
+* Error Codes
+    * `406`
+      * No appKey provided
+      * No user authentication information provided
+    * `401`
+      * Could not authenticate user
+      * Authentication Error: Incorrect email or password
+
 <a name="get-user"></a>
 ### Retrieve a users info
 * Route: __GET__ https://api.domain.com/users
@@ -83,6 +99,13 @@
      * JSON Web Token for application
    * `token`
      * JSON Web Token for user
+ * Error Codes
+    * `406`
+      * No appKey provided
+      * No user authentication information provided
+    * `401`
+      * Could not authenticate user
+      * Authentication Error: Incorrect email or password
      
 <a name="get-user-check"></a>
 ### Check if a username exists
@@ -96,6 +119,16 @@
  * Request header
    * `appKey`
      * JSON Web Token for application
+* Error Codes
+  * `406`
+    * No appKey provided
+  * `400`
+    * Bad Request: No username parameter
+  * `404`
+    * Not Found: User not found
+  * `401`
+    * AppKey Error: Could not authenticate 
+      
   
 <a name="post-file"></a>
 ### Create a file
@@ -120,6 +153,19 @@
       * Lowest value possible is 0 (January 1st, 1970, 12:00 AM UTC)
     * `data`
       * JSON Object
+* Error Codes
+    * `400`
+      * Invalid Parameters
+    * `406`
+      * No appKey or token provided
+    * `401`
+      * Could not authenticate user
+      * Authentication Error: Incorrect email or password
+    * `500`
+      * Error creating file
+      * Error checking pre-existing file
+    * `409`
+      * File already Exists
 
 <a name="get-created-files"></a>
 ### Retrieve a users created files
@@ -131,6 +177,17 @@
      * JSON Web Token for application
    * `token`
      * JSON Web Token for user
+* Error Codes
+    * `400`
+      * Invalid Parameters
+    * `404`
+      * File not found
+    * `406`
+      * No appKey or token provided
+    * `401`
+      * Unable to verify user token
+    * `500`
+      * Error finding user
 
 <a name="get-files-by-location"></a>
 ### Retrieve files within some distance from a given location
@@ -148,6 +205,17 @@
       * File latitude
     * `radius`
       * Radius from latitude and longitude to get files
+* Error Codes
+    * `400`
+      * Invalid Parameters
+    * `404`
+      * File not found
+    * `406`
+      * No appKey or token provided
+    * `401`
+      * Unable to verify user token
+    * `500`
+      * Error finding user
 
 <a name="update-file"></a>
 ### Update a users file
@@ -179,3 +247,13 @@
     * `data`
       * Optional
       * New JSON Object
+* Error Codes
+  * `400`
+    * Invalid Parameters
+    * No file id provided
+  * `404`
+    * File not found
+  * `406`
+    * No appKey or token provided
+  * `500`
+    * Unable to update file
