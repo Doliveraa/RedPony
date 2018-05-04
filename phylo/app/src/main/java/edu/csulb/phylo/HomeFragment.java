@@ -66,6 +66,7 @@ public class HomeFragment extends Fragment
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private List<AstralRoom> astralRoomList;
     //Location Permissions Variables
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
@@ -322,9 +323,10 @@ public class HomeFragment extends Fragment
             public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
                 if(response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
+                    astralRoomList = response.body();
                     //Progress bar must dissapear, we have loaded all the rooms
                     progressBar.setVisibility(View.GONE);
-                    adapter = new RoomAdapter(response.body());
+                    adapter = new RoomAdapter(astralRoomList);
                     recyclerView.setAdapter(adapter);
                 }
             }
