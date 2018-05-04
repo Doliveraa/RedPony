@@ -23,10 +23,11 @@ public class UserFragment extends Fragment
     implements View.OnClickListener{
     //AstralUser Variable
     private User user;
-    //Fragment Variables
-    UploadedFilesFragment uploadedFilesFragment;
-    DownloadedFilesFragment downloadedFilesFragment;
-    SettingsFragment settingsFragment;
+    //Listener that tells the MainActivity to start a new fragment
+    public interface StartNewFragmentListener{
+        void onStartNewFragment(int itemId);
+    }
+    private StartNewFragmentListener startNewFragmentListener;
 
     /**
      * Instantiates an instance of UserFragment
@@ -36,6 +37,10 @@ public class UserFragment extends Fragment
     public static UserFragment newInstance(){
         UserFragment fragment = new UserFragment();
         return fragment;
+    }
+
+    public void setStartNewFragmentListener(StartNewFragmentListener startNewFragmentListener){
+        this.startNewFragmentListener = startNewFragmentListener;
     }
 
     @Nullable
@@ -68,9 +73,7 @@ public class UserFragment extends Fragment
         logoutButton.setOnClickListener(this);
 
         //Instantiate Fragments
-        uploadedFilesFragment = uploadedFilesFragment.newInstance();
-        downloadedFilesFragment = downloadedFilesFragment.newInstance();
-        settingsFragment = settingsFragment.newInstance();
+
     }
 
     /**
@@ -80,34 +83,20 @@ public class UserFragment extends Fragment
      */
     @Override
     public void onClick(View v) {
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        if(v.getId() == R.id.logout_button) {
+            AuthHelper.signOutUser(getActivity(), user);
 
-        switch(v.getId()) {
-            case R.id.user_files:
-                fragmentTransaction.replace(R.id.main_activity_container, uploadedFilesFragment);
-                break;
-            case R.id.downloaded_files:
-                fragmentTransaction.replace(R.id.main_activity_container, downloadedFilesFragment);
-                break;
-            case R.id.settings:
-                fragmentTransaction.replace(R.id.main_activity_container, settingsFragment);
-                break;
-            case R.id.logout_button:
-                AuthHelper.signOutUser(getActivity(), user);
+            //Removes the user's astral token from cache
+            Astral.removeAstralToken(getActivity());
 
-                //Removes the user's astral token from cache
-                Astral.removeAstralToken(getActivity());
-
-                //Sends the user back to the Authentication Screen
-                Intent signoutIntent = new Intent(getActivity(), AuthenticationContainer.class);
-                signoutIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
-                startActivity(signoutIntent);
-                getActivity().finish();
-                break;
+            //Sends the user back to the Authentication Screen
+            Intent signoutIntent = new Intent(getActivity(), AuthenticationContainer.class);
+            signoutIntent.setAction(AuthenticationContainer.START_LOGIN_ACTION);
+            startActivity(signoutIntent);
+            getActivity().finish();
+        } else {
+            startNewFragmentListener.onStartNewFragment(v.getId());
         }
-   //   fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        fragmentTransaction.commit();
-
     }
 
 

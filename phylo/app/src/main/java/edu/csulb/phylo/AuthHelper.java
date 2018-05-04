@@ -28,14 +28,14 @@ import edu.csulb.phylo.Astral.Astral;
 public class AuthHelper {
 
     //Authentication Constants
-    public final static String USER_INFO = "user_info";
-    public final static String USER_EMAIL = "cognito email";
-    public final static String USER_NAME = "users_name";
-    public final static String USER_SIGN_IN_PROVIDER = "sign_in_provider";
+    private final static String USER_INFO = "user_info";
+    private final static String USER_EMAIL = "cognito email";
+    private final static String USER_NAME = "users_name";
+    private final static String USER_SIGN_IN_PROVIDER = "sign_in_provider";
     public final static String GOOGLE_PROVIDER  = "google";
     public final static String FACEBOOK_PROVIDER = "facebook";
     public final static String COGNITO_PROVIDER = "cognito";
-    public final static String CONTAINS_INFO = "contains_info";
+    private final static String CONTAINS_INFO = "contains_info";
     //Private Authentication Constants
     private final static String TAG = AuthHelper.class.getSimpleName();
     private final static String LAST_USER_CACHE = "CognitoIdentityProviderCache";
@@ -48,15 +48,13 @@ public class AuthHelper {
     }
 
     public static CognitoUserPool getCognitoUserPool(Context context) {
-        CognitoUserPool cognitoUserPool = new CognitoUserPool(
+        return new CognitoUserPool(
                 context,
                 context.getResources().getString(R.string.cognito_pool_id),
                 context.getResources().getString(R.string.application_client_id),
                 context.getResources().getString(R.string.application_client_secret),
                 Regions.US_WEST_2
         );
-
-        return cognitoUserPool;
     }
 
 
@@ -110,7 +108,7 @@ public class AuthHelper {
         SharedPreferences sharedPreferences = getAuthPreferences(context);
         SharedPreferences.Editor spEditor = sharedPreferences.edit();
         spEditor.putString(USER_SIGN_IN_PROVIDER, provider);
-        spEditor.commit();
+        spEditor.apply();
     }
 
 
@@ -123,8 +121,7 @@ public class AuthHelper {
      */
     public static String getCurrentSignInProvider(final Context context) {
         SharedPreferences sharedPreferences = getAuthPreferences(context);
-        String signInProvider = sharedPreferences.getString(USER_SIGN_IN_PROVIDER, null);
-        return signInProvider;
+        return sharedPreferences.getString(USER_SIGN_IN_PROVIDER, null);
     }
 
     /**
@@ -175,8 +172,7 @@ public class AuthHelper {
             case GOOGLE_PROVIDER: {
                 Log.d(TAG, "Attempting to sign out from Google");
                 GoogleSignInClient googleSignInClient = getGoogleSignInClient(context);
-                Task task = googleSignInClient.signOut();
-                task.addOnCompleteListener(new OnCompleteListener<Void>() {
+                googleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                     }
@@ -222,8 +218,7 @@ public class AuthHelper {
      * @return A shared preferences object
      */
     private static SharedPreferences getAuthPreferences(final Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);
-        return sharedPreferences;
+       return context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);
     }
 
     /**
