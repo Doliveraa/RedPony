@@ -15,6 +15,8 @@
    * [Retrieve a users created files](#get-created-files)
    * [Retrieve files at location](#get-files-by-location)
    * [Update a file](#update-file)
+   * [Delete a file](#delete-file)
+   * [Delete a user](#delete-user)
 
 <a name="requirements"></a>
 ## Requirements
