@@ -309,11 +309,13 @@ public class HomeFragment extends Fragment
                     displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
                 } else {
                     //Check if the room name already exists
-                    for (AstralRoom astralRoom : astralRoomList) {
-                        if (astralRoom.getName().equals(roomName)) {
-                            //Room with the same name exists nearby, display error message
-                            displayToast("Room name with the same name \nalready exists nearby", true);
-                            return;
+                    if (astralRoomList != null){
+                        for (AstralRoom astralRoom : astralRoomList) {
+                            if (astralRoom.getName().equals(roomName)) {
+                                //Room with the same name exists nearby, display error message
+                                displayToast("Room name with the same name \nalready exists nearby", true);
+                                return;
+                            }
                         }
                     }
                     creatingRoom = true;
