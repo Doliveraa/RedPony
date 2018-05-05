@@ -43,11 +43,6 @@ interface AstralHttpInterface {
     /**
      * Creates a Room with certain specifications
      */
-//    @FormUrlEncoded
-//    @POST("files")
-//    fun createRoom(@Body astralRoom: AstralRoom)
-//            : Call<ResponseBody>
-
     @FormUrlEncoded
     @POST("files")
     fun createRoom(@Field ("name") name: String,

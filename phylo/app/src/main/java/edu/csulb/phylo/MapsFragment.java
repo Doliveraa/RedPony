@@ -81,7 +81,9 @@ public class MapsFragment extends Fragment
     private List<AstralRoom> astralRoomList;
     private boolean heatmapActive;
     private boolean removeActiveHeatmap;
-    TileOverlay mOverLay;
+    private TileOverlay mOverLay;
+    private HeatmapTileProvider heatmapTileProvider;
+    List<LatLng> list;
     //Views
     private MapView mapView;
     private GoogleMap googleMap;
@@ -140,7 +142,9 @@ public class MapsFragment extends Fragment
         heatmapActive = false;
         removeActiveHeatmap = false;
         mOverLay = null;
-        astralRoomList = null;
+        astralRoomList = new ArrayList<>();
+        heatmapTileProvider = null;
+        list = null;
 
         //Initiate Views
         Button heatmapButton = getActivity().findViewById(R.id.heatmap);
@@ -401,7 +405,7 @@ public class MapsFragment extends Fragment
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
 
         //Create the GET request
-        Call< List<AstralRoom> > request = astralHttpInterface.getRooms(
+        Call<List<AstralRoom>> request = astralHttpInterface.getRooms(
                 getString(R.string.astral_key),
                 currUserLocation.latitude,
                 currUserLocation.longitude,
@@ -409,25 +413,19 @@ public class MapsFragment extends Fragment
                 user.getUserAstralTokens()
         );
 
-        request.enqueue(new Callback< List<AstralRoom> >() {
+        request.enqueue(new Callback<List<AstralRoom>>() {
             @Override
-            public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
+            public void onResponse(Call<List<AstralRoom>> call, retrofit2.Response<List<AstralRoom>> response) {
                 Log.d(TAG, "retrieveRooms-> onResponse: ");
-                if(response.code() == Astral.OK) {
+                if (response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
                     astralRoomList = response.body();
-                    Log.d(TAG, "List created of Astral Rooms");
                     //Progress bar must dissapear, we have loaded all the rooms
-//                    for (int i = 0; i < astralRoomList.size(); i++){
-//                        AstralRoom astralRoom = astralRoomList.get(i);
-//                        astralRoom.getLatitude();
-//                        astralRoom.getLongitude();
-//                    }
                 }
             }
 
             @Override
-            public void onFailure(Call< List<AstralRoom> > call, Throwable t) {
+            public void onFailure(Call<List<AstralRoom>> call, Throwable t) {
                 Log.w(TAG, "retrieveRooms-> onFailure");
                 t.printStackTrace();
             }
@@ -435,16 +433,18 @@ public class MapsFragment extends Fragment
     }
 
     private void addHeatMap() {
-        List<LatLng> list = null;
+        //List<LatLng> list = null;
         Log.d(TAG, "retrieveRooms-> Heatmap created from data set ");
         // Get the latitude/longitude positions of files : GET Request
         list = readItems();//Read the list of current rooms
         // Create a heat map tile provider, passing it the latlngs of the police stations.
-        HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder()
-                .data(list)
-                .build();
+        if (list != null && !list.isEmpty()) {
+            heatmapTileProvider = new HeatmapTileProvider.Builder()
+                    .data(list)
+                    .build();
+            mOverLay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatmapTileProvider));
+        }
         // Add a tile overlay to the map, using the heat map tile provider.
-        mOverLay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
     }
 
     /**
@@ -453,12 +453,17 @@ public class MapsFragment extends Fragment
      * @return the list of locations for the heatmap
      */
     private ArrayList<LatLng> readItems() {
-        ArrayList<LatLng> list = new ArrayList<LatLng>();
-        for (int i = 0; i < astralRoomList.size(); i++){
-            AstralRoom astralRoom = astralRoomList.get(i);
-            list.add(new LatLng(astralRoom.getLatitude(),astralRoom.getLongitude()));
+        ArrayList<LatLng> list2 = new ArrayList<LatLng>();
+        if (astralRoomList != null){
+            for (int i = 0; i < astralRoomList.size(); i++){
+                AstralRoom astralRoom = astralRoomList.get(i);
+                list2.add(new LatLng(astralRoom.getLatitude(),astralRoom.getLongitude()));
+            }
         }
-//        list.add(new LatLng(33.7206914, -117.9826018));//the first number is the latitude, the second number is the long
+        else{
+            list2.add(new LatLng(0,0));//Display some random coordinate
+        }
+//        list.add(new LatLng(33.7206914, -117.9826018));//test Data
 //        list.add(new LatLng(33.7206914, -117.9826019));
 //        list.add(new LatLng(33.7206914, -117.9826017));
 //        list.add(new LatLng(33.7206914, -117.9826016));
@@ -468,7 +473,7 @@ public class MapsFragment extends Fragment
 //        list.add(new LatLng(33.7206914, -117.9826021));
 //        list.add(new LatLng(33.7206914, -117.9826022));
 //        list.add(new LatLng(33.7206914, -117.9826023));
-        return list;
+        return list2;
     }
 
     /**
@@ -477,6 +482,9 @@ public class MapsFragment extends Fragment
      */
     private void removeHeatMap(TileOverlay mOverlay){
         Log.d(TAG, "Removing Active HeatMap ");
-        mOverlay.remove();
+        if((list != null && !list.isEmpty())){
+            mOverlay.remove();
+            mOverlay.clearTileCache();
+        }
     }
 }

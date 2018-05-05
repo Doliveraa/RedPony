@@ -55,7 +55,7 @@ import retrofit2.Callback;
  */
 
 public class HomeFragment extends Fragment
-        implements View.OnClickListener, UserLocationClient.LocationListener{
+        implements View.OnClickListener, UserLocationClient.LocationListener {
 
     //Permissions
     private final int PERMISSION_REQUEST_CODE = 2035;
@@ -82,7 +82,7 @@ public class HomeFragment extends Fragment
     private StringBuilder expiration;
     private String passwordKey;
 
-    public static HomeFragment newInstance(){
+    public static HomeFragment newInstance() {
         HomeFragment fragment = new HomeFragment();
         return fragment;
     }
@@ -99,7 +99,7 @@ public class HomeFragment extends Fragment
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) throws SecurityException{
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) throws SecurityException {
         super.onActivityCreated(savedInstanceState);
 
         //Initialize Variables
@@ -154,7 +154,7 @@ public class HomeFragment extends Fragment
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
+        switch (v.getId()) {
             case R.id.fab_create_room: {
                 Log.d(TAG, "User clicked on Create Room FAB");
                 //Start Alert Dialog to create a Room
@@ -168,6 +168,7 @@ public class HomeFragment extends Fragment
 
     /**
      * Create an AlertDialog object to allow the user to create
+     *
      * @return
      */
     private AlertDialog createRoomDialog() {
@@ -200,25 +201,25 @@ public class HomeFragment extends Fragment
                 setDateLinear.setVisibility(View.VISIBLE);
             }
         });
-        cancelSetDateButton.setOnClickListener(new View.OnClickListener(){
+        cancelSetDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setDateLinear.setVisibility(View.GONE);
                 setExpirationDateButton.setVisibility(View.VISIBLE);
             }
         });
-        cancelPassword.setOnClickListener(new View.OnClickListener(){
+        cancelPassword.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 setPassword.setVisibility(View.GONE);
                 cancelPassword.setVisibility(View.GONE);
                 lockRoomButton.setVisibility(View.VISIBLE);
             }
         });
-        setButton.setOnClickListener(new View.OnClickListener(){
+        setButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(dateSpinner.getVisibility() == View.VISIBLE) {
+                if (dateSpinner.getVisibility() == View.VISIBLE) {
                     //Get the date values
                     int month = dateSpinner.getMonth() + 1;
                     int day = dateSpinner.getDayOfMonth();
@@ -241,7 +242,7 @@ public class HomeFragment extends Fragment
                     String minutes00 = (minutes < 10 ? "0" : "") + minutes;
                     String dayTime = "AM";
                     expiration.append(hour00 + ":" + minutes00 + ":43.511Z");
-                    if(hour > 12) {
+                    if (hour > 12) {
                         dayTime = "PM";
                         hour -= 12;
                         hour00 = (hour < 10 ? "0" : "") + hour;
@@ -263,7 +264,7 @@ public class HomeFragment extends Fragment
                 setButton.setVisibility(View.VISIBLE);
             }
         });
-        expirationTimeText.setOnClickListener(new View.OnClickListener(){
+        expirationTimeText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 expirationTimeText.setVisibility(View.GONE);
@@ -274,7 +275,7 @@ public class HomeFragment extends Fragment
         lockRoomButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(lockRoomButton.getVisibility() == View.GONE) {
+                if (lockRoomButton.getVisibility() == View.GONE) {
                     //User wants the room to have no password
                     //Remove the button
                     lockRoomButton.setVisibility(View.VISIBLE);
@@ -298,14 +299,14 @@ public class HomeFragment extends Fragment
                 passwordKey = setPassword.getText().toString();
 
                 //Check if the Room name is in the correct format
-                if(roomName.isEmpty()) {
+                if (roomName.isEmpty()) {
                     displayToast("Room name cannot be empty", true);
                 } else if (!roomNameIsValid(roomName)) {
                     displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
                 } else {
                     //Check if the room name already exists
-                    for(AstralRoom astralRoom : astralRoomList) {
-                        if(astralRoom.getName().equals(roomName)) {
+                    for (AstralRoom astralRoom : astralRoomList) {
+                        if (astralRoom.getName().equals(roomName)) {
                             //Room with the same name exists nearby, display error message
                             displayToast("Room name with the same name \nalready exists nearby", true);
                             return;
@@ -331,7 +332,7 @@ public class HomeFragment extends Fragment
     /**
      * Retrieves all if the rooms around the area
      */
-    private void retrieveRooms(final LatLng currUserLocation){
+    private void retrieveRooms(final LatLng currUserLocation) {
         //Start a GET request to retrieve all of the rooms in the area
         final Astral astral = new Astral(getActivity().getString(R.string.astral_base_url));
         //Add logging interceptor
@@ -339,7 +340,7 @@ public class HomeFragment extends Fragment
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
 
         //Create the GET request
-        Call< List<AstralRoom> > request = astralHttpInterface.getRooms(
+        Call<List<AstralRoom>> request = astralHttpInterface.getRooms(
                 getString(R.string.astral_key),
                 currUserLocation.latitude,
                 currUserLocation.longitude,
@@ -347,11 +348,11 @@ public class HomeFragment extends Fragment
                 user.getUserAstralTokens()
         );
 
-        request.enqueue(new Callback< List<AstralRoom> >() {
+        request.enqueue(new Callback<List<AstralRoom>>() {
             @Override
-            public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
+            public void onResponse(Call<List<AstralRoom>> call, retrofit2.Response<List<AstralRoom>> response) {
                 Log.d(TAG, "retrieveRooms-> onResponse: ");
-                if(response.code() == Astral.OK) {
+                if (response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
                     astralRoomList = response.body();
                     //Progress bar must dissapear, we have loaded all the rooms
@@ -363,7 +364,7 @@ public class HomeFragment extends Fragment
             }
 
             @Override
-            public void onFailure(Call< List<AstralRoom> > call, Throwable t) {
+            public void onFailure(Call<List<AstralRoom>> call, Throwable t) {
                 Log.w(TAG, "retrieveRooms-> onFailure");
                 t.printStackTrace();
             }
@@ -373,14 +374,15 @@ public class HomeFragment extends Fragment
 
     /**
      * Displays a message as a toast
-     * @param message The message to be displayed
+     *
+     * @param message      The message to be displayed
      * @param vibratePhone If the phone should vibrate
      */
     private void displayToast(String message, boolean vibratePhone) {
         Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 50);
         toast.show();
-        if(vibratePhone) {
+        if (vibratePhone) {
             vibrator.vibrate(500);
         }
     }
@@ -389,7 +391,6 @@ public class HomeFragment extends Fragment
      * Checks if the room name contains the proper format
      *
      * @param roomName The room name
-     *
      * @return True if the room name is valid
      */
     private boolean roomNameIsValid(String roomName) {
@@ -450,12 +451,13 @@ public class HomeFragment extends Fragment
 
     /**
      * Creates an astral room given the parameters
-     * @param roomName the name of the room
+     *
+     * @param roomName     the name of the room
      * @param currLocation The current location
-     * @param expiration when the room expires
+     * @param expiration   when the room expires
      */
     private void createAstralRoom(final String roomName, final LatLng currLocation,
-                                  final String expiration){
+                                  final String expiration) {
         final double longit = currLocation.longitude;
         final double lat = currLocation.latitude;
 
@@ -505,16 +507,17 @@ public class HomeFragment extends Fragment
             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                 if (response.code() == Astral.OK) {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code() +
-                        " File Created Successfully");
+                            " File Created Successfully");
                     userLocationClient.singleLocationRetrieval(getActivity());
                     roomCreationDialog.dismiss();
-                } else if(response.code() == Astral.FILE_NAME_CONFLICT){
+                } else if (response.code() == Astral.FILE_NAME_CONFLICT) {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: File name already exists.");
                     displayToast("Room name already exists.", true);
                 } else {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
                 }
             }
+
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 //The request has unexpectedly failed
@@ -551,10 +554,11 @@ public class HomeFragment extends Fragment
     @Override
     public void onSingleLocationReceived(LatLng location) {
         Log.d(TAG, "onActivityCreated-> onSingleLocationReceived: Attempting to retrieve rooms");
-        if(!creatingRoom) {
+        if (!creatingRoom) {
             retrieveRooms(location);
         } else {
             createAstralRoom(roomName, location, expiration.toString());
-    }
+        }
 
+    }
 }
