@@ -310,8 +310,8 @@ public class LoginFragment extends Fragment
         createAccountText.setOnClickListener(this);
         forgotPasswordText.setOnClickListener(this);
 
-        emailEditText.setText("vietle8362@gmail.com");
-        passwordEditText.setText("Trxcjo19");
+        //emailEditText.setText("vietle8362@gmail.com");
+        //passwordEditText.setText("Trxcjo19");
 
         //Initialize Google Sign In
         googleSignInClient = AuthHelper.getGoogleSignInClient(getActivity());
@@ -666,7 +666,7 @@ public class LoginFragment extends Fragment
      */
     private AlertDialog createLoginDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setTitle("PetSit SignIn");
+        alertDialogBuilder.setTitle("Astral SignIn");
         //Animate this later on
         alertDialogBuilder.setMessage("Logging AstralUser In...");
         alertDialogBuilder.setCancelable(false);
