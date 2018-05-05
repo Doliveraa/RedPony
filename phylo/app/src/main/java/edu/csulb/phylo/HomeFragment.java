@@ -63,6 +63,7 @@ public class HomeFragment extends Fragment
     private Vibrator vibrator;
     //Variables
     private boolean creatingRoom;
+    private boolean updateRoomList;
     //Constants
     private final String TAG = HomeFragment.class.getSimpleName();
     //Views
@@ -70,7 +71,7 @@ public class HomeFragment extends Fragment
     private ProgressBar progressBar;
     private User user;
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
+    private RoomAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private List<AstralRoom> astralRoomList;
     private AlertDialog roomCreationDialog;
@@ -106,7 +107,9 @@ public class HomeFragment extends Fragment
         userLocationClient = new UserLocationClient(getActivity());
         creatingRoom = false;
         passwordKey = "";
+        updateRoomList = false;
         expiration = new StringBuilder();
+        expiration.setLength(0);
 
         //Initialize Hardware
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
@@ -145,6 +148,7 @@ public class HomeFragment extends Fragment
         //If we have the user's permission to receive their location, start the location tracking
         if (hasLocationPermission) {
             userLocationClient.singleLocationRetrieval(getActivity());
+            userLocationClient.startUserLocationTracking(5000);
         } else {
             //We do not have permission to receive the user's location, ask for permission
             requestPermission();
@@ -332,7 +336,7 @@ public class HomeFragment extends Fragment
     /**
      * Retrieves all if the rooms around the area
      */
-    private void retrieveRooms(final LatLng currUserLocation) {
+    private void retrieveRooms(final LatLng currUserLocation, final boolean toUpdate) {
         //Start a GET request to retrieve all of the rooms in the area
         final Astral astral = new Astral(getActivity().getString(R.string.astral_base_url));
         //Add logging interceptor
@@ -355,11 +359,16 @@ public class HomeFragment extends Fragment
                 if (response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
                     astralRoomList = response.body();
-                    //Progress bar must dissapear, we have loaded all the rooms
-
-                    progressBar.setVisibility(View.GONE);
-                    adapter = new RoomAdapter(response.body());
-                    recyclerView.setAdapter(adapter);
+                    //Progress bar must disappear, we have loaded all the rooms
+                    if(!toUpdate) {
+                        progressBar.setVisibility(View.GONE);
+                        adapter = new RoomAdapter(astralRoomList);
+                        recyclerView.setAdapter(adapter);
+                        updateRoomList = true;
+                    } else {
+                        //We are updating the set of rooms
+                        adapter.changeData(astralRoomList);
+                    }
                 }
             }
 
@@ -438,7 +447,7 @@ public class HomeFragment extends Fragment
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Permission has been granted, we can now start tracking the user's location
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has accepted location permissions");
-                    userLocationClient.startUserLocationTracking(10000);
+                    userLocationClient.singleLocationRetrieval(getActivity());
                     hasLocationPermission = true;
                 } else {
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has denied location permissions");
@@ -457,9 +466,13 @@ public class HomeFragment extends Fragment
      * @param expiration   when the room expires
      */
     private void createAstralRoom(final String roomName, final LatLng currLocation,
-                                  final String expiration) {
+                                  String expiration) {
         final double longit = currLocation.longitude;
         final double lat = currLocation.latitude;
+        //Checks if the user has set an expiration date
+        if(expiration.length() == 0) {
+            expiration = "2100-04-23T18:25:43.511Z";
+        }
 
         //Put the longitude and the latitude into a double arraylist
         final ArrayList<Double> location = new ArrayList<>();
@@ -508,6 +521,8 @@ public class HomeFragment extends Fragment
                 if (response.code() == Astral.OK) {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code() +
                             " File Created Successfully");
+                    //We have finished creating the room, update the view
+                    creatingRoom = false;
                     userLocationClient.singleLocationRetrieval(getActivity());
                     roomCreationDialog.dismiss();
                 } else if (response.code() == Astral.FILE_NAME_CONFLICT) {
@@ -543,7 +558,7 @@ public class HomeFragment extends Fragment
      */
     @Override
     public void onLocationUpdated(LatLng location) {
-
+        retrieveRooms(location, updateRoomList);
     }
 
     /**
@@ -555,10 +570,9 @@ public class HomeFragment extends Fragment
     public void onSingleLocationReceived(LatLng location) {
         Log.d(TAG, "onActivityCreated-> onSingleLocationReceived: Attempting to retrieve rooms");
         if (!creatingRoom) {
-            retrieveRooms(location);
+            retrieveRooms(location, updateRoomList);
         } else {
             createAstralRoom(roomName, location, expiration.toString());
         }
-
     }
 }

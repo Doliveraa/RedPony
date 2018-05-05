@@ -58,4 +58,14 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     public int getItemCount() {
         return astralRoomList.size();
     }
+
+    /**
+     * Changes the data to be displayed to the user
+     *
+     * @param astralRoomList The list of rooms available
+     */
+    public void changeData(List<AstralRoom> astralRoomList) {
+        this.astralRoomList = astralRoomList;
+        this.notifyDataSetChanged();
+    }
 }
