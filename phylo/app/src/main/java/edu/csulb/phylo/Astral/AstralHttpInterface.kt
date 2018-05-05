@@ -29,7 +29,8 @@ interface AstralHttpInterface {
      * Retrieve user token
      */
     @GET("users")
-    fun getUserToken()
+    fun getUserToken(@Header("appKey") appKey: String,
+                     @Header("email") email: String)
             : Call<AstralUser>
 
     /**
@@ -53,7 +54,7 @@ interface AstralHttpInterface {
                    @Field ("latitude") latitude: Double,
                    @Field ("longitude") longitude: Double,
                    @Field ("expirationDate") expiration: String,
-                   @Field ("data") roomKey: RoomKey)
+                   @Field ("data") roomKey: String)
             : Call<ResponseBody>
 
     @GET("files")

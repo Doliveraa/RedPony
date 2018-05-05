@@ -5,9 +5,11 @@ import java.io.Serializable
 data class AstralUser(val username: String, val email: String,
                       val password: String?) : Serializable {
     val token: String?
+    var name: String?
 
     init{
         token = null
+        name = null
     }
 
     /**

@@ -3,13 +3,13 @@ package edu.csulb.phylo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,14 +30,9 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
-import org.json.JSONObject;
-import org.json.JSONStringer;
-
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,10 +73,10 @@ public class HomeFragment extends Fragment
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private List<AstralRoom> astralRoomList;
+    private AlertDialog roomCreationDialog;
     //Location Permissions Variables
     private boolean hasLocationPermission;
     private boolean isRetrievingUserPermission;
-    private boolean hasExpiration;
     private UserLocationClient userLocationClient;
     private String roomName;
     private StringBuilder expiration;
@@ -110,7 +105,6 @@ public class HomeFragment extends Fragment
         //Initialize Variables
         userLocationClient = new UserLocationClient(getActivity());
         creatingRoom = false;
-        hasExpiration = false;
         passwordKey = "";
         expiration = new StringBuilder();
 
@@ -164,7 +158,7 @@ public class HomeFragment extends Fragment
             case R.id.fab_create_room: {
                 Log.d(TAG, "User clicked on Create Room FAB");
                 //Start Alert Dialog to create a Room
-                AlertDialog roomCreationDialog = createRoomDialog();
+                roomCreationDialog = createRoomDialog();
                 //Show the Alert Dialog
                 roomCreationDialog.show();
             }
@@ -209,7 +203,6 @@ public class HomeFragment extends Fragment
         cancelSetDateButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                hasExpiration = false;
                 setDateLinear.setVisibility(View.GONE);
                 setExpirationDateButton.setVisibility(View.VISIBLE);
             }
@@ -226,7 +219,6 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View v) {
                 if(dateSpinner.getVisibility() == View.VISIBLE) {
-                    hasExpiration = true;
                     //Get the date values
                     int month = dateSpinner.getMonth() + 1;
                     int day = dateSpinner.getDayOfMonth();
@@ -266,7 +258,6 @@ public class HomeFragment extends Fragment
         expirationDateText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hasExpiration = true;
                 expirationDateText.setVisibility(View.GONE);
                 dateSpinner.setVisibility(View.VISIBLE);
                 setButton.setVisibility(View.VISIBLE);
@@ -313,7 +304,15 @@ public class HomeFragment extends Fragment
                     displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
                 } else {
                     //Check if the room name already exists
+                    for(AstralRoom astralRoom : astralRoomList) {
+                        if(astralRoom.getName().equals(roomName)) {
+                            //Room with the same name exists nearby, display error message
+                            displayToast("Room name with the same name \nalready exists nearby", true);
+                            return;
+                        }
+                    }
                     creatingRoom = true;
+                    //No rooms nearby that have the same name, create the room
                     userLocationClient.singleLocationRetrieval(getActivity());
                 }
             }
@@ -351,60 +350,30 @@ public class HomeFragment extends Fragment
         request.enqueue(new Callback< List<AstralRoom> >() {
             @Override
             public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
+                Log.d(TAG, "retrieveRooms-> onResponse: ");
                 if(response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
                     astralRoomList = response.body();
                     //Progress bar must dissapear, we have loaded all the rooms
-                    progressBar.setVisibility(View.GONE);
-                    adapter = new RoomAdapter(astralRoomList);
-                    recyclerView.setAdapter(adapter);
+                    if(!creatingRoom) {
+                        progressBar.setVisibility(View.GONE);
+                        adapter = new RoomAdapter(astralRoomList);
+                        recyclerView.setAdapter(adapter);
+                    } else {
+                        creatingRoom = false;
+                        adapter.notifyDataSetChanged();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call< List<AstralRoom> > call, Throwable t) {
-
+                Log.w(TAG, "retrieveRooms-> onFailure");
+                t.printStackTrace();
             }
         });
     }
 
-    /**
-     * Retrieves all of the files around the area
-     */
-    private void retrieveFiles(final LatLng currUserLocation){
-        //Start a GET request to retrieve all of the rooms in the area
-        final Astral astral = new Astral(getActivity().getString(R.string.astral_base_url));
-        //Add logging interceptor
-        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
-        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
-
-        //Create the GET request
-        Call< List<AstralRoom> > request = astralHttpInterface.getRooms(
-                getString(R.string.astral_key),
-                null,
-                null,
-                null,
-                user.getUserAstralTokens()
-        );
-
-        request.enqueue(new Callback< List<AstralRoom> >() {
-            @Override
-            public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
-                if(response.code() == Astral.OK) {
-                    Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
-                    //Progress bar must dissapear, we have loaded all the rooms
-                    progressBar.setVisibility(View.GONE);
-                    adapter = new RoomAdapter(response.body());
-                    recyclerView.setAdapter(adapter);
-                }
-            }
-
-            @Override
-            public void onFailure(Call< List<AstralRoom> > call, Throwable t) {
-
-            }
-        });
-    }
 
     /**
      * Displays a message as a toast
@@ -509,7 +478,7 @@ public class HomeFragment extends Fragment
         astralRoom.setExpirationDate(expiration);//expiration
         RoomKey roomKey = new RoomKey(passwordKey);
         Gson gson = new Gson();
-        String string = gson.toJson(roomKey);
+        String roomString = gson.toJson(roomKey);
 
         //Astral Start POST Request
         final Astral astral = new Astral(getString(R.string.astral_base_url));
@@ -531,7 +500,7 @@ public class HomeFragment extends Fragment
         Log.d(TAG, "Interface");
         //Create the POST request
         Call<ResponseBody> request = astralHttpInterface.createRoom(astralRoom.getName(), astralRoom.getLatitude(),
-                astralRoom.getLongitude(), astralRoom.getExpirationDate(), roomKey);
+                astralRoom.getLongitude(), astralRoom.getExpirationDate(), roomString);
         Log.d(TAG, "Create Post request");
 
         //Call the request asynchronously
@@ -541,6 +510,11 @@ public class HomeFragment extends Fragment
                 if (response.code() == Astral.OK) {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Successful Response Code " + response.code() +
                         " File Created Successfully");
+                    userLocationClient.singleLocationRetrieval(getActivity());
+                    roomCreationDialog.dismiss();
+                } else if(response.code() == Astral.FILE_NAME_CONFLICT){
+                    Log.d(TAG, "onClick-> onSuccess-> onResponse: File name already exists.");
+                    displayToast("Room name already exists.", true);
                 } else {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
                 }
@@ -584,15 +558,7 @@ public class HomeFragment extends Fragment
         if(!creatingRoom) {
             retrieveRooms(location);
         } else {
-            if (hasExpiration){
-                createAstralRoom(roomName, location, expiration.toString());
-                expiration.setLength(0);
-            }
-            else{
-                createAstralRoom(roomName, location, "2100-04-23T18:25:43.511Z");
-            }
-
-        }
+            createAstralRoom(roomName, location, expiration.toString());
     }
 
 }

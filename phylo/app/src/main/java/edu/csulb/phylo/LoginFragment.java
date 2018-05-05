@@ -310,9 +310,6 @@ public class LoginFragment extends Fragment
         createAccountText.setOnClickListener(this);
         forgotPasswordText.setOnClickListener(this);
 
-        emailEditText.setText("vietle8362@gmail.com");
-        passwordEditText.setText("Trxcjo19");
-
         //Initialize Google Sign In
         googleSignInClient = AuthHelper.getGoogleSignInClient(getActivity());
 
@@ -410,24 +407,12 @@ public class LoginFragment extends Fragment
         //First check if the user exists on the Server with a GET request
         final Astral astral = new Astral(getString(R.string.astral_base_url));
 
-        //Intercept the request to add header items
-        astral.addRequestInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                //Add the app key to the request header
-                Request.Builder newRequest = request.newBuilder().header(
-                        Astral.APP_KEY_HEADER, getString(R.string.astral_key))
-                        .header(Astral.ASTRAL_EMAIL, email);
-                //Continue the request
-                return chain.proceed(newRequest.build());
-            }
-        });
         astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
 
         //Create the GET Request
-        Call<AstralUser> request = astralHttpInterface.getUserToken();
+        Call<AstralUser> request = astralHttpInterface.getUserToken(getString(R.string.astral_key),
+                email);
 
         Log.d(TAG, "Starting request to check user existence");
         //Call the request asynchronously

@@ -29,6 +29,7 @@ public class Astral{
     public final static int OK = 200;
     public final static int UNAUTHORIZED = 401;
     public final static int NOT_FOUND = 404;
+    public final static int FILE_NAME_CONFLICT = 409;
     //Private Constants
     private final static String TAG = Astral.class.getSimpleName();
     //REST Api items

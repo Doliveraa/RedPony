@@ -106,6 +106,7 @@ public class VerifyCodeFragment extends Fragment
                         //Set that the user has authenticated with Cognito
                         AuthHelper.setCurrentSignInProvider(getActivity(), AuthHelper.COGNITO_PROVIDER);
                         AuthHelper.cacheCurrentCognitoSignedInUser(getActivity(), cognitoUser.getUserId());
+                        AuthHelper.cacheUserInformation(getActivity(), astralUser.getName(), astralUser.getEmail());
                         Astral.storeAstralUsername(getActivity(), astralUser.getUsername());
 
                         //Start at POST request to create the user in the Astral Framework

@@ -9,5 +9,5 @@ class AstralRoom {
     var longitude: Double? = null
     var location: ArrayList<Double>? = null
     var expirationDate: String? = null
-    var data: RoomKey? = null
+    var data: String? = null
 }

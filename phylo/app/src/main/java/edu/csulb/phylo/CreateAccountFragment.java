@@ -99,7 +99,9 @@ public class CreateAccountFragment extends Fragment
                 //Create an AstralUser object to send to the VerifyCodeFragment for its POST request
                 String userEmail = cognitoUser.getUserId();
                 String username = usernameEditText.getText().toString();
+                String name = firstNameEditText.getText().toString() + " " + lastNameEditText.getText().toString();
                 AstralUser astralUser = new AstralUser(username, userEmail, null);
+                astralUser.setName(name);
 
                 //Send CognitoUser object to the container to hold it
                 onAccountCreatedListener.onAccountCreated(cognitoUser, astralUser);
@@ -214,6 +216,7 @@ public class CreateAccountFragment extends Fragment
                     boolean prevSuccess = previouslySuccessfulUsernames.contains(currUsername);
                     if(prevSuccess) {
                         checkmarkImage.setVisibility(View.VISIBLE);
+                        usernameAvailable = true;
                     } else {
                         usernameAvailable = false;
                     }
@@ -266,17 +269,15 @@ public class CreateAccountFragment extends Fragment
 
     /**
      * Calls the CognitoUserPool API to create a user account
-     *
-     * @param firstName    The user's first name
-     * @param lastName     The user's last name
+     * @param name The user's name
      * @param emailAddress The user's email address
      * @param password     The user's password
      */
-    private void createUserAccount(String firstName, String lastName, String emailAddress, String password) {
+    private void createUserAccount(String name, String emailAddress, String password) {
         CognitoUserAttributes userAttributes = new CognitoUserAttributes();
 
         //Add required user attributes
-        userAttributes.addAttribute("name", firstName + " " + lastName);
+        userAttributes.addAttribute("name", name);
         userAttributes.addAttribute("email", emailAddress);
 
         //Call the sign-up API
@@ -397,8 +398,9 @@ public class CreateAccountFragment extends Fragment
                 String firstName = firstNameEditText.getText().toString();
                 String lastName = lastNameEditText.getText().toString();
 
-                //Everything is ok, begin creating the user account
-                createUserAccount(firstName, lastName, emailAddress, password);
+                //Everything is ok, check to see if we can use the email that the user has given
+                checkEmailAvailability(emailAddress, firstName + " " + lastName,
+                        password);
 
                 //Make the progress bar appear to show that the application is still working
                 //but is in the process of completing a task
@@ -523,4 +525,48 @@ public class CreateAccountFragment extends Fragment
     public void setOnAccountCreatedListener(OnAccountCreatedListener onAccountCreatedListener) {
         this.onAccountCreatedListener = onAccountCreatedListener;
     }
+
+    /**
+     * Check to see if we can use the user's email to sign up in Astral
+     */
+    private void checkEmailAvailability(final String email, final String name, final String password) {
+        //First check if the user exists on the Server with a GET request
+        final Astral astral = new Astral(getString(R.string.astral_base_url));
+
+        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+
+        //Create the GET Request
+        Call<AstralUser> request = astralHttpInterface.getUserToken(getString(R.string.astral_key),
+                email);
+
+        Log.d(TAG, "Starting request to check user existence");
+        //Call the request asynchronously
+        request.enqueue(new Callback<AstralUser>() {
+            @Override
+            public void onResponse(Call<AstralUser> call, retrofit2.Response<AstralUser> response) {
+                Log.d(TAG, "retrieveAstralUsername-> onResponse: Code = " + response.code());
+
+                if (response.isSuccessful()) {
+                    if (response.code() == Astral.OK) {
+                        //User already exists, do not allow to use the email
+                        displayErrorMessage("Email has been taken.\nUser may have logged in with Facebook or Google");
+                        progressBar.setVisibility(View.GONE);
+                    }
+                } else {
+                    //Check the error code
+                    if (response.code() == Astral.UNAUTHORIZED) {
+                        //User does not exist, allow them to use the email
+                        createUserAccount(name, email, password);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AstralUser> call, Throwable t) {
+                Log.w(TAG, "checkIfUserExists-> onFailure");
+            }
+        });
+    }
+
 }
