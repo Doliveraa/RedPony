@@ -651,7 +651,7 @@ public class LoginFragment extends Fragment
      */
     private AlertDialog createLoginDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setTitle("PetSit SignIn");
+        alertDialogBuilder.setTitle("Astral SignIn");
         //Animate this later on
         alertDialogBuilder.setMessage("Logging AstralUser In...");
         alertDialogBuilder.setCancelable(false);

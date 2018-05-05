@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -30,13 +32,35 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Tile;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import edu.csulb.phylo.Astral.Astral;
+import edu.csulb.phylo.Astral.AstralHttpInterface;
+import edu.csulb.phylo.Astral.AstralRoom;
+import okhttp3.HttpUrl;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * Created by vietl on 2/25/2018.
  */
 
 public class MapsFragment extends Fragment
-        implements OnMapReadyCallback, UserLocationClient.LocationListener {
+        implements OnMapReadyCallback, UserLocationClient.LocationListener, View.OnClickListener {
     //Constants
     private final String TAG = MapsFragment.class.getSimpleName();
     private final int PERMISSION_REQUEST_CODE = 2035;
@@ -53,6 +77,11 @@ public class MapsFragment extends Fragment
     private boolean isFirstTime;
     private Marker currMarker;
     private LatLng onRestartCurrLocation;
+    private User user;
+    private List<AstralRoom> astralRoomList;
+    private boolean heatmapActive;
+    private boolean removeActiveHeatmap;
+    TileOverlay mOverLay;
     //Views
     private MapView mapView;
     private GoogleMap googleMap;
@@ -108,11 +137,23 @@ public class MapsFragment extends Fragment
         isRetrievingUserPermission = false;
         userLocationClient = new UserLocationClient(getActivity());
         isFirstTime = true;
+        heatmapActive = false;
+        removeActiveHeatmap = false;
+        mOverLay = null;
+        astralRoomList = null;
+
+        //Initiate Views
+        Button heatmapButton = getActivity().findViewById(R.id.heatmap);
+
+        //Set on click listener for the heatmap button
+        heatmapButton.setOnClickListener(this);
 
         //Initialize the map view item
         mapView = fragmentView.findViewById(R.id.map);
         progressBar = fragmentView.findViewById(R.id.map_progress_bar);
         progressBar.setVisibility(View.VISIBLE);
+
+        user = User.getInstance(getActivity());
 
         //MapView
         if(mapView != null) {
@@ -125,6 +166,28 @@ public class MapsFragment extends Fragment
         //Check if we have location permission
         hasLocationPermission = UserPermission.checkUserPermission(getActivity(),
                 UserPermission.Permission.LOCATION_PERMISSION);
+    }
+
+    /**
+     * Provides a way for screen items to react to user events
+     *
+     * @param v the View item that the user has interacted with
+     */
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.heatmap:
+                //If the user clicks the heat map, toggle it on/off.
+                if (!heatmapActive){
+                    heatmapActive = true;
+                    userLocationClient.singleLocationRetrieval(getActivity());
+                }
+                else{
+                    heatmapActive = false;
+                    userLocationClient.singleLocationRetrieval(getActivity());
+                }
+                break;
+        }
     }
 
     @Override
@@ -170,7 +233,17 @@ public class MapsFragment extends Fragment
 
     @Override
     public void onSingleLocationReceived(LatLng location) {
-
+        if (heatmapActive){
+            createHeatMap(location);
+            addHeatMap(); //create the heatmap given the list
+            removeActiveHeatmap = true;
+        }
+        else{
+            if(removeActiveHeatmap){
+                removeActiveHeatmap = false;
+                removeHeatMap(mOverLay);
+            }
+        }
     }
 
     /**
@@ -283,14 +356,16 @@ public class MapsFragment extends Fragment
      * Cache user location
      */
     private void cacheUserLocation() {
-        double latitude = userLocationClient.getCurrLocation().get(UserLocationClient.LATITUDE);
-        double longitude = userLocationClient.getCurrLocation().get(UserLocationClient.LONGITUDE);
-        //Store the values
-        SharedPreferences sharedPreferences = getSharedPref();
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(LATITUDE_PREF, Double.toString(latitude));
-        editor.putString(LONGITUDE_PREF, Double.toString(longitude));
-        editor.apply();
+        if(userLocationClient.getCurrLocation().get(UserLocationClient.LATITUDE) != null){
+            double latitude = userLocationClient.getCurrLocation().get(UserLocationClient.LATITUDE);
+            double longitude = userLocationClient.getCurrLocation().get(UserLocationClient.LONGITUDE);
+            //Store the values
+            SharedPreferences sharedPreferences = getSharedPref();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(LATITUDE_PREF, Double.toString(latitude));
+            editor.putString(LONGITUDE_PREF, Double.toString(longitude));
+            editor.apply();
+        }
     }
 
     /**
@@ -313,5 +388,95 @@ public class MapsFragment extends Fragment
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(MAPS_FRAGMENT_PREF,
                 Context.MODE_PRIVATE);
         return sharedPreferences;
+    }
+
+    /**
+     * Retrieves all if the rooms around the area
+     */
+    private void createHeatMap(final LatLng currUserLocation){
+        //Start a GET request to retrieve all of the rooms in the area
+        final Astral astral = new Astral(getActivity().getString(R.string.astral_base_url));
+        //Add logging interceptor
+        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+
+        //Create the GET request
+        Call< List<AstralRoom> > request = astralHttpInterface.getRooms(
+                getString(R.string.astral_key),
+                currUserLocation.latitude,
+                currUserLocation.longitude,
+                10,
+                user.getUserAstralTokens()
+        );
+
+        request.enqueue(new Callback< List<AstralRoom> >() {
+            @Override
+            public void onResponse(Call< List<AstralRoom> > call, retrofit2.Response< List<AstralRoom> > response) {
+                Log.d(TAG, "retrieveRooms-> onResponse: ");
+                if(response.code() == Astral.OK) {
+                    Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
+                    astralRoomList = response.body();
+                    Log.d(TAG, "List created of Astral Rooms");
+                    //Progress bar must dissapear, we have loaded all the rooms
+//                    for (int i = 0; i < astralRoomList.size(); i++){
+//                        AstralRoom astralRoom = astralRoomList.get(i);
+//                        astralRoom.getLatitude();
+//                        astralRoom.getLongitude();
+//                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call< List<AstralRoom> > call, Throwable t) {
+                Log.w(TAG, "retrieveRooms-> onFailure");
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private void addHeatMap() {
+        List<LatLng> list = null;
+        Log.d(TAG, "retrieveRooms-> Heatmap created from data set ");
+        // Get the latitude/longitude positions of files : GET Request
+        list = readItems();//Read the list of current rooms
+        // Create a heat map tile provider, passing it the latlngs of the police stations.
+        HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder()
+                .data(list)
+                .build();
+        // Add a tile overlay to the map, using the heat map tile provider.
+        mOverLay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+    }
+
+    /**
+     * From the list of given rooms, return the lat and long of each one and add it
+     * to the list for GoogleMaps
+     * @return the list of locations for the heatmap
+     */
+    private ArrayList<LatLng> readItems() {
+        ArrayList<LatLng> list = new ArrayList<LatLng>();
+        for (int i = 0; i < astralRoomList.size(); i++){
+            AstralRoom astralRoom = astralRoomList.get(i);
+            list.add(new LatLng(astralRoom.getLatitude(),astralRoom.getLongitude()));
+        }
+//        list.add(new LatLng(33.7206914, -117.9826018));//the first number is the latitude, the second number is the long
+//        list.add(new LatLng(33.7206914, -117.9826019));
+//        list.add(new LatLng(33.7206914, -117.9826017));
+//        list.add(new LatLng(33.7206914, -117.9826016));
+//        list.add(new LatLng(33.7206914, -117.9826015));
+//        list.add(new LatLng(33.7206914, -117.9826014));
+//        list.add(new LatLng(33.7206914, -117.9826020));
+//        list.add(new LatLng(33.7206914, -117.9826021));
+//        list.add(new LatLng(33.7206914, -117.9826022));
+//        list.add(new LatLng(33.7206914, -117.9826023));
+        return list;
+    }
+
+    /**
+     * removes the HeatMap created
+     * @param mOverlay the overlay of the heatmap to be removed
+     */
+    private void removeHeatMap(TileOverlay mOverlay){
+        Log.d(TAG, "Removing Active HeatMap ");
+        mOverlay.remove();
     }
 }

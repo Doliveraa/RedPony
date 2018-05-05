@@ -355,14 +355,10 @@ public class HomeFragment extends Fragment
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
                     astralRoomList = response.body();
                     //Progress bar must dissapear, we have loaded all the rooms
-                    if(!creatingRoom) {
-                        progressBar.setVisibility(View.GONE);
-                        adapter = new RoomAdapter(astralRoomList);
-                        recyclerView.setAdapter(adapter);
-                    } else {
-                        creatingRoom = false;
-                        adapter.notifyDataSetChanged();
-                    }
+
+                    progressBar.setVisibility(View.GONE);
+                    adapter = new RoomAdapter(response.body());
+                    recyclerView.setAdapter(adapter);
                 }
             }
 
@@ -465,8 +461,8 @@ public class HomeFragment extends Fragment
 
         //Put the longitude and the latitude into a double arraylist
         final ArrayList<Double> location = new ArrayList<>();
-        location.add(longit); //longit
         location.add(lat); //lat
+        location.add(longit); //longit
 
         //Creating Astral Room to send
         final AstralRoom astralRoom = new AstralRoom();

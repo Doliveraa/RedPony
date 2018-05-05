@@ -18,4 +18,14 @@
         android:visibility="gone"
         android:indeterminate="true"
         android:indeterminateDrawable="@drawable/progress"/>
+
+    <Button
+        android:id="@+id/heatmap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Heat Map"
+        android:background="@color/navy"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        />
 </FrameLayout>
