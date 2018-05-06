@@ -403,7 +403,7 @@ public class MapsFragment extends Fragment
                 getString(R.string.astral_key),
                 currUserLocation.latitude,
                 currUserLocation.longitude,
-                500,
+                20000,
                 user.getUserAstralTokens()
         );
 
