@@ -31,8 +31,6 @@ public class MainActivityContainer extends AppCompatActivity
     private UploadedFilesFragment uploadedFilesFragment;
     private DownloadedFilesFragment downloadedFilesFragment;
     private SettingsFragment settingsFragment;
-    //Variables
-    private User user;
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -96,15 +94,11 @@ public class MainActivityContainer extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_container);
 
-        //Instantiate User object
-        user = User.getInstance(this);
-
         //create bottom navigation bar
         createBottomNavigationView();
 
         //Instantiate fragments
         homeFragment = HomeFragment.newInstance();
-        homeFragment.setAstralUser(user);
         mapsFragment = MapsFragment.newInstance();
         pinnedFragment = PinnedFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
@@ -118,21 +112,6 @@ public class MainActivityContainer extends AppCompatActivity
         //Set that it is the first time the Maps Fragment is opening
         setMapFragmentFirstTime();
 
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //If MapFragment is currently receiving permission on the user's location,
-        //Send the result back to MapFragment
-        if (mapsFragment.isRetrievingLocPermission()) {
-            Log.d(TAG, "onActivityResult: Back from receiving AstralUser Permission");
-            mapsFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        } else if (homeFragment.isRetrievingLocPermission()) {
-            Log.d(TAG, "onActrivityResult: Back from receiving AstralUser Permission");
-            homeFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package edu.csulb.phylo;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -204,7 +205,8 @@ public class MapsFragment extends Fragment
             onRestartCurrLocation = retrieveCachedUserLocation();
             userLocationClient.startUserLocationTracking(1000);
         }else {
-            requestPermission();
+            //We do not have permission to receive the user's location, ask for permission
+            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION}, UserPermission.PERM_CODE);
         }
     }
 
@@ -317,28 +319,6 @@ public class MapsFragment extends Fragment
         }
     }
 
-    /**
-     * Asks for the user's permission, double check just in case, don't want to ask the user a second time
-     */
-    private void requestPermission() {
-        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "requestPermission : Requesting Fine Location permission");
-            isRetrievingUserPermission = true;
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_REQUEST_CODE);
-        }
-    }
-
-
-    /**
-     * Used to check if the fragment is currently retrieving the user's permissions
-     *
-     * @return True if the fragment is currently retrieving the user's location, False otherwise
-     */
-    public boolean isRetrievingLocPermission() {
-        return isRetrievingUserPermission;
-    }
 
     /**
      * Checks if this is the first time that the Maps Fragment is updating
