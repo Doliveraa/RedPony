@@ -346,7 +346,8 @@ public class CreateAccountFragment extends Fragment
             case R.id.create_account_button:
                 //Check if there are any empty fields
                 for (EditText inputField : listOfInputFields) {
-                    if (inputField.getText().toString().isEmpty()) {
+                    String text = inputField.getText().toString();
+                    if (text.isEmpty()) {
                         displayErrorMessage("All fields must not be empty.");
                         return;
                     }
