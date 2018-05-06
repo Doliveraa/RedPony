@@ -15,6 +15,8 @@
    * [Retrieve a users created files](#get-created-files)
    * [Retrieve files at location](#get-files-by-location)
    * [Update a file](#update-file)
+   * [Delete a file](#delete-file)
+   * [Delete a user](#delete-user)
 
 <a name="requirements"></a>
 ## Requirements
@@ -257,3 +259,50 @@
     * No appKey or token provided
   * `500`
     * Unable to update file
+    
+<a name="delete-file"></a>
+### delete a users file
+* Route: __DELETE__ https://api.domain.com/files/delete
+* Purpose: Delete a users file
+* Required parameters
+  * Request header
+    * `appKey`
+      * JSON Web Token for application
+    * `token`
+      * JSON Web Token for user
+  * Request body
+    * '\_id'
+      * File ID (MongoDB id)
+* Error Codes
+    * `400`
+      * Invalid Parameters
+    * `404`
+      * File not found
+    * `406`
+      * No appKey or token provided
+    * `401`
+      * Unable to verify user token
+    * `500`
+      * Error finding user
+      
+<a name="delete-user"></a>
+### delete a user
+* Route: __DELETE__ https://api.domain.com/users/delete
+* Purpose: Delete a user
+* Required parameters
+  * Request header
+    * `appKey`
+      * JSON Web Token for application
+    * `token`
+      * JSON Web Token for user
+* Error Codes
+    * `400`
+      * Invalid Parameters
+    * `404`
+      * File not found
+    * `406`
+      * No appKey or token provided
+    * `401`
+      * Unable to verify user token
+    * `500`
+      * Error finding user
