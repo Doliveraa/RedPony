@@ -1,17 +1,23 @@
 package edu.csulb.phylo;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 /**
  * Created by vietl on 3/28/2018.
@@ -20,9 +26,16 @@ import android.widget.ImageButton;
 public class UploadedFilesFragment extends Fragment
     implements View.OnClickListener{
 
+    //Constants
+    private final String TAG = UploadedFilesFragment.class.getSimpleName();
+    //Variables
+    private boolean hasLocationPermission;
+    private UserLocationClient userLocationClient;
+    private boolean isRetrievingUserPermission;
+    private User user;
     //Views
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
+    private RoomAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
     UserFragment userFragment;
@@ -49,6 +62,10 @@ public class UploadedFilesFragment extends Fragment
 
         //Initiate Variables
         layoutManager = new LinearLayoutManager(getActivity());
+        hasLocationPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.LOCATION_PERMISSION);
+        userLocationClient = new UserLocationClient(getActivity());
+        isRetrievingUserPermission = false;
+        user = User.getInstance(getActivity());
 
         //Initiate Views
         ImageButton backButton = getActivity().findViewById(R.id.back_button_uploaded);
@@ -64,6 +81,51 @@ public class UploadedFilesFragment extends Fragment
         userFragment = UserFragment.newInstance();
 
     }
+
+    /**
+     * Begins tracking the user's location if they have permission
+     * If they don't have any permissions, this methods asks them for the permissions
+     */
+    @Override
+    public void onStart() {
+        super.onStart();
+        //If we have the user's permission to receive their location, start the location tracking
+        if (hasLocationPermission) {
+            userLocationClient.singleLocationRetrieval(getActivity());
+        } else {
+            //We do not have permission to receive the user's location, ask for permission
+            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION}, UserPermission.PERM_CODE);
+        }
+    }
+
+
+
+    /**
+     * Requests user permission to track their current location
+     *
+     * @param requestCode  The request code received back from asking permission
+     * @param permissions  The permissions asked
+     * @param grantResults The granted results
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case UserPermission.PERM_CODE: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //Permission has been granted, we can now start tracking the user's location
+                    Log.d(TAG, "onRequestPermissionResult : AstralUser has accepted location permissions");
+                    userLocationClient.singleLocationRetrieval(getActivity());
+                    hasLocationPermission = true;
+                } else {
+                    Log.d(TAG, "onRequestPermissionResult : AstralUser has denied location permissions");
+                    //Permission Denied
+                    Toast.makeText(getActivity(), "Location Permission Denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
 
     /**
      * Provides a way for screen items to react to user events

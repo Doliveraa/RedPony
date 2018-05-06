@@ -1,5 +1,6 @@
 package edu.csulb.phylo;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -56,11 +57,6 @@ import retrofit2.Callback;
 
 public class HomeFragment extends Fragment
         implements View.OnClickListener, UserLocationClient.LocationListener {
-
-    //Permissions
-    private final int PERMISSION_REQUEST_CODE = 2035;
-    //Phone Hardware
-    private Vibrator vibrator;
     //Variables
     private boolean creatingRoom;
     private boolean updateRoomList;
@@ -74,10 +70,9 @@ public class HomeFragment extends Fragment
     private RoomAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private List<AstralRoom> astralRoomList;
-    private AlertDialog roomCreationDialog;
+    private AlertDialog alertDialog;
     //Location Permissions Variables
     private boolean hasLocationPermission;
-    private boolean isRetrievingUserPermission;
     private UserLocationClient userLocationClient;
     private String roomName;
     private StringBuilder expiration;
@@ -110,9 +105,6 @@ public class HomeFragment extends Fragment
         updateRoomList = false;
         expiration = new StringBuilder();
         expiration.setLength(0);
-
-        //Initialize Hardware
-        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
         //Initialize Views
         fabCreateRoom = getActivity().findViewById(R.id.fab_create_room);
@@ -151,7 +143,7 @@ public class HomeFragment extends Fragment
             userLocationClient.startUserLocationTracking(5000);
         } else {
             //We do not have permission to receive the user's location, ask for permission
-            requestPermission();
+            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION}, UserPermission.PERM_CODE);
         }
     }
 
@@ -162,9 +154,9 @@ public class HomeFragment extends Fragment
             case R.id.fab_create_room: {
                 Log.d(TAG, "User clicked on Create Room FAB");
                 //Start Alert Dialog to create a Room
-                roomCreationDialog = createRoomDialog();
+                alertDialog = createRoomDialog();
                 //Show the Alert Dialog
-                roomCreationDialog.show();
+                alertDialog.show();
             }
             break;
         }
@@ -281,16 +273,16 @@ public class HomeFragment extends Fragment
             public void onClick(View v) {
                 if (lockRoomButton.getVisibility() == View.GONE) {
                     //User wants the room to have no password
-                    //Remove the button
+                    //Remove the button_room
                     lockRoomButton.setVisibility(View.VISIBLE);
-                    //The cancel button is gone
+                    //The cancel button_room is gone
                     setPassword.setVisibility(View.GONE);
                     cancelPassword.setVisibility(View.GONE);
                 } else {
                     //User wants the room to have a password
-                    //Remove the button
+                    //Remove the button_room
                     lockRoomButton.setVisibility(View.GONE);
-                    //Allow the cancel button to appear
+                    //Allow the cancel button_room to appear
                     setPassword.setVisibility(View.VISIBLE);
                     cancelPassword.setVisibility(View.VISIBLE);
                 }
@@ -304,15 +296,24 @@ public class HomeFragment extends Fragment
 
                 //Check if the Room name is in the correct format
                 if (roomName.isEmpty()) {
-                    displayToast("Room name cannot be empty", true);
+                    UserNotification.displayToast(
+                            getActivity(),
+                            "Room name cannot be empty",
+                            true);
                 } else if (!roomNameIsValid(roomName)) {
-                    displayToast("Room name\n3-12 Characters\na-z, A-Z, 0-9", true);
+                    UserNotification.displayToast(
+                            getActivity(),
+                            "Room name\n3-12 Characters\na-z, A-Z, 0-9",
+                            true);
                 } else {
                     //Check if the room name already exists
                     for (AstralRoom astralRoom : astralRoomList) {
                         if (astralRoom.getName().equals(roomName)) {
                             //Room with the same name exists nearby, display error message
-                            displayToast("Room name with the same name \nalready exists nearby", true);
+                            UserNotification.displayToast(
+                                    getActivity(),
+                                    "Room name with the same name \nalready exists nearby",
+                                    true);
                             return;
                         }
                     }
@@ -355,14 +356,23 @@ public class HomeFragment extends Fragment
         request.enqueue(new Callback<List<AstralRoom>>() {
             @Override
             public void onResponse(Call<List<AstralRoom>> call, retrofit2.Response<List<AstralRoom>> response) {
-                Log.d(TAG, "retrieveRooms-> onResponse: ");
                 if (response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
                     astralRoomList = response.body();
                     //Progress bar must disappear, we have loaded all the rooms
                     if(!toUpdate) {
                         progressBar.setVisibility(View.GONE);
-                        adapter = new RoomAdapter(astralRoomList);
+                        adapter = new RoomAdapter(astralRoomList, new RoomAdapter.OnRoomClickedListener() {
+                            @Override
+                            public void onRoomClick(String roomPassword) {
+                                if(!roomPassword.isEmpty()) {
+                                    alertDialog = createInputPasswordDialog(roomPassword);
+                                    alertDialog.show();
+                                } else{
+                                    //Enter room
+                                }
+                            }
+                        });
                         recyclerView.setAdapter(adapter);
                         updateRoomList = true;
                     } else {
@@ -373,28 +383,12 @@ public class HomeFragment extends Fragment
             }
 
             @Override
-            public void onFailure(Call<List<AstralRoom>> call, Throwable t) {
+            public void onFailure(Call<List<AstralRoom>> call, Throwable throwable) {
                 Log.w(TAG, "retrieveRooms-> onFailure");
-                t.printStackTrace();
             }
         });
     }
 
-
-    /**
-     * Displays a message as a toast
-     *
-     * @param message      The message to be displayed
-     * @param vibratePhone If the phone should vibrate
-     */
-    private void displayToast(String message, boolean vibratePhone) {
-        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 50);
-        toast.show();
-        if (vibratePhone) {
-            vibrator.vibrate(500);
-        }
-    }
 
     /**
      * Checks if the room name contains the proper format
@@ -411,28 +405,6 @@ public class HomeFragment extends Fragment
     }
 
     /**
-     * Used to check if the fragment is currently retrieving the user's permissions
-     *
-     * @return True if the fragment is currently retrieving the user's location, False otherwise
-     */
-    public boolean isRetrievingLocPermission() {
-        return isRetrievingUserPermission;
-    }
-
-    /**
-     * Asks for the user's permission, double check just in case, don't want to ask the user a second time
-     */
-    private void requestPermission() {
-        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "requestPermission : Requesting Fine Location permission");
-            isRetrievingUserPermission = true;
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_REQUEST_CODE);
-        }
-    }
-
-    /**
      * Requests user permission to track their current location
      *
      * @param requestCode  The request code received back from asking permission
@@ -443,12 +415,14 @@ public class HomeFragment extends Fragment
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case PERMISSION_REQUEST_CODE: {
+            case UserPermission.PERM_CODE: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Permission has been granted, we can now start tracking the user's location
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has accepted location permissions");
-                    userLocationClient.singleLocationRetrieval(getActivity());
                     hasLocationPermission = true;
+                    //The user has given us their Location Permissions
+                    userLocationClient.singleLocationRetrieval(getActivity());
+                    userLocationClient.startUserLocationTracking(5000);
                 } else {
                     Log.d(TAG, "onRequestPermissionResult : AstralUser has denied location permissions");
                     //Permission Denied
@@ -524,10 +498,12 @@ public class HomeFragment extends Fragment
                     //We have finished creating the room, update the view
                     creatingRoom = false;
                     userLocationClient.singleLocationRetrieval(getActivity());
-                    roomCreationDialog.dismiss();
+                    alertDialog.dismiss();
                 } else if (response.code() == Astral.FILE_NAME_CONFLICT) {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: File name already exists.");
-                    displayToast("Room name already exists.", true);
+                    UserNotification.displayToast(
+                            getActivity(),
+                            "Room name already exists.", true);
                 } else {
                     Log.d(TAG, "onClick-> onSuccess-> onResponse: Failed response Code " + response.code());
                 }
@@ -540,15 +516,6 @@ public class HomeFragment extends Fragment
                 t.printStackTrace();
             }
         });
-    }
-
-    /**
-     * Sets the current user to be used in this fragment
-     *
-     * @param user The currently signed in  user
-     */
-    public void setAstralUser(final User user) {
-        this.user = user;
     }
 
     /**
@@ -574,5 +541,39 @@ public class HomeFragment extends Fragment
         } else {
             createAstralRoom(roomName, location, expiration.toString());
         }
+    }
+
+
+    /**
+     * Creates and shows a dialog for the user to input a password to enter the room
+     *
+     * @param password The room's password
+     *
+     * @return An alert dialog
+     */
+    public AlertDialog createInputPasswordDialog(final String password) {
+        //Create an instance of the Alert Dialog
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        //Set the view of the Alert Dialog
+        final View alertDialogView = LayoutInflater.from(getActivity()).inflate(R.layout.alert_dialog_get_room_password, null);
+        alertDialogBuilder.setView(alertDialogView);
+
+        //Initialize Views within the fragment
+        final EditText passwordInput = alertDialogView.findViewById(R.id.edit_text_room_password_input);
+        final Button enterButton = alertDialogView.findViewById(R.id.button_enter_room_password);
+
+        enterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userInput = passwordInput.getText().toString();
+                if(!userInput.equals(password)) {
+                    UserNotification.displayToast(getActivity(), "Wrong Password", false);
+                } else {
+                    //Let the user enter the room
+                }
+            }
+        });
+
+        return alertDialogBuilder.create();
     }
 }

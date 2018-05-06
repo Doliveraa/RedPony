@@ -592,21 +592,21 @@ public class LoginFragment extends Fragment
             }
             break;
             case R.id.google_login_button: {
-                Log.d(TAG, "onClick: google login button clicked.");
+                Log.d(TAG, "onClick: google login button_room clicked.");
                 isSigningIn = true;
                 Intent googleSignInIntent = googleSignInClient.getSignInIntent();
                 startActivityForResult(googleSignInIntent, 9001);
             }
             break;
             case R.id.facebook_login_button: {
-                Log.d(TAG, "onClick: facebook login button clicked.");
+                Log.d(TAG, "onClick: facebook login button_room clicked.");
                 isSigningIn = true;
                 LoginManager.getInstance().logInWithReadPermissions(getActivity(),
                         Arrays.asList("public_profile", "email"));
             }
             break;
             case R.id.button_normal_login: {
-                Log.d(TAG, "onClick: normal login button clicked.");
+                Log.d(TAG, "onClick: normal login button_room clicked.");
                 isSigningIn = true;
                 startNormalLogin();
             }

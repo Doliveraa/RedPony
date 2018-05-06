@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
  */
 
 public class UserPermission {
+    public final static int PERM_CODE = 2035;
     public enum Permission{
         READ_PERMISSION,
         LOCATION_PERMISSION
