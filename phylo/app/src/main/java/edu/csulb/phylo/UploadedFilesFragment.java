@@ -94,7 +94,7 @@ public class UploadedFilesFragment extends Fragment
             userLocationClient.singleLocationRetrieval(getActivity());
         } else {
             //We do not have permission to receive the user's location, ask for permission
-            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION}, UserPermission.PERM_CODE);
+//            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION}, UserPermission.PERM_CODE);
         }
     }
 
@@ -136,16 +136,15 @@ public class UploadedFilesFragment extends Fragment
     public void onClick(View v) {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
-        switch(v.getId()) {
-            case R.id.back_button_uploaded:
-                fragmentTransaction.replace(R.id.main_activity_container, userFragment);
-                break;
-            case R.id.help_button_uploaded:
-                //Pop out for help for upload page
-                break;
-        }
+//        switch(v.getId()) {
+//            case R.id.back_button_uploaded:
+//                fragmentTransaction.replace(R.id.main_activity_container, userFragment);
+//                break;
+//            case R.id.help_button_uploaded:
+//                //Pop out for help for upload page
+//                break;
+//        }
         //   fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.commit();
-
     }
 }

@@ -57,6 +57,13 @@ import retrofit2.Callback;
 
 public class HomeFragment extends Fragment
         implements View.OnClickListener, UserLocationClient.LocationListener {
+
+    public interface OnRoomEnterListener{
+        void roomEntered();
+    }
+
+    //Fragment View
+    private View fragView;
     //Variables
     private boolean creatingRoom;
     private boolean updateRoomList;
@@ -77,6 +84,8 @@ public class HomeFragment extends Fragment
     private String roomName;
     private StringBuilder expiration;
     private String passwordKey;
+    //Interface
+    OnRoomEnterListener onRoomEnterListener;
 
     public static HomeFragment newInstance() {
         HomeFragment fragment = new HomeFragment();
@@ -86,12 +95,21 @@ public class HomeFragment extends Fragment
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        //Make sure that the container activity has implemented
+        try{
+            onRoomEnterListener = (OnRoomEnterListener) context;
+        }catch(ClassCastException exception) {
+            throw new ClassCastException(context.toString()
+            +  " must implement OnRoomEnterListener");
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        fragView = inflater.inflate(R.layout.fragment_home, container, false);
+        return fragView;
     }
 
     @Override
@@ -107,9 +125,9 @@ public class HomeFragment extends Fragment
         expiration.setLength(0);
 
         //Initialize Views
-        fabCreateRoom = getActivity().findViewById(R.id.fab_create_room);
-        progressBar = getActivity().findViewById(R.id.progress_bar_home);
-        recyclerView = getActivity().findViewById(R.id.recycler_view_home);
+        fabCreateRoom = fragView.findViewById(R.id.fab_create_room);
+        progressBar = fragView.findViewById(R.id.progress_bar_home);
+        recyclerView = fragView.findViewById(R.id.recycler_view_home);
 
         //Set that the recycler view has a fixed size to increase performance
         recyclerView.setHasFixedSize(true);
@@ -370,6 +388,7 @@ public class HomeFragment extends Fragment
                                     alertDialog.show();
                                 } else{
                                     //Enter room
+
                                 }
                             }
                         });
@@ -458,8 +477,6 @@ public class HomeFragment extends Fragment
         astralRoom.setOwner(user.getName());//owner
         astralRoom.setName(roomName);//roomName
         astralRoom.setLocation(location);//location
-        astralRoom.setLongitude(longit);//long
-        astralRoom.setLatitude(lat);//lat
         astralRoom.setExpirationDate(expiration);//expiration
         RoomKey roomKey = new RoomKey(passwordKey);
         Gson gson = new Gson();
@@ -570,6 +587,7 @@ public class HomeFragment extends Fragment
                     UserNotification.displayToast(getActivity(), "Wrong Password", false);
                 } else {
                     //Let the user enter the room
+                    onRoomEnterListener.roomEntered();
                 }
             }
         });

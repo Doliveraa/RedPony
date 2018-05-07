@@ -65,7 +65,7 @@ public class DownloadedFilesFragment extends Fragment
 
         switch(v.getId()) {
             case R.id.back_button_downloaded:
-                fragmentTransaction.replace(R.id.main_activity_container, userFragment);
+//                fragmentTransaction.replace(R.id.main_activity_container, userFragment);
                 break;
             case R.id.help_button_downloaded:
                 //Pop out that displays a help message for the user
