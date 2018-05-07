@@ -66,4 +66,9 @@ interface AstralHttpInterface {
                  @Header("radius") radius: Int?,
                  @Header("token") token: String)
             : Call< List<AstralItem> >
+
+    @GET("files")
+    fun getFiles(@Header("appKey") appKey: String,
+                 @Header("token") token: String)
+            : Call< List<AstralItem> >
 }

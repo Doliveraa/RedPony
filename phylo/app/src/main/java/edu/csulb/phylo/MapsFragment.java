@@ -416,7 +416,7 @@ public class MapsFragment extends Fragment
      * @return the list of locations for the heatmap
      */
     private void readItems() {
-        //ArrayList<LatLng> list2 = new ArrayList<LatLng>();
+
         if (astralItemList != null){
             for (int i = 0; i < astralItemList.size(); i++){
                 AstralItem astralItem = astralItemList.get(i);
@@ -426,8 +426,6 @@ public class MapsFragment extends Fragment
         else{
             list.add(new LatLng(0,0));//Display some random coordinate
         }
-//        list.add(new LatLng(33.777192, -118.114765));//test Data
-//        list.add(new LatLng(33.7206914, -117.9826023));
         return;
     }
 

@@ -85,7 +85,6 @@ public class MainActivityContainer extends AppCompatActivity
             case R.id.home_lobby:
                 fragmentTransaction.replace(R.id.main_activity_container, homeFragment);
                 break;
-
             case R.id.user_account:
                 fragmentTransaction.replace(R.id.main_activity_container, userFragment);
                 break;

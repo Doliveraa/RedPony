@@ -19,6 +19,19 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.csulb.phylo.Astral.Astral;
+import edu.csulb.phylo.Astral.AstralFile;
+import edu.csulb.phylo.Astral.AstralHttpInterface;
+import edu.csulb.phylo.Astral.AstralItem;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+
 /**
  * Created by vietl on 3/28/2018.
  */
@@ -35,8 +48,9 @@ public class UploadedFilesFragment extends Fragment
     private User user;
     //Views
     private RecyclerView recyclerView;
-    private RoomAdapter adapter;
+    private FileAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private List <AstralItem> astralItemList;
 
     UserFragment userFragment;
 
@@ -66,6 +80,7 @@ public class UploadedFilesFragment extends Fragment
         userLocationClient = new UserLocationClient(getActivity());
         isRetrievingUserPermission = false;
         user = User.getInstance(getActivity());
+        astralItemList = new ArrayList<>();
 
         //Initiate Views
         ImageButton backButton = getActivity().findViewById(R.id.back_button_uploaded);
@@ -136,15 +151,57 @@ public class UploadedFilesFragment extends Fragment
     public void onClick(View v) {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
-//        switch(v.getId()) {
-//            case R.id.back_button_uploaded:
-//                fragmentTransaction.replace(R.id.main_activity_container, userFragment);
-//                break;
-//            case R.id.help_button_uploaded:
-//                //Pop out for help for upload page
-//                break;
-//        }
+        switch(v.getId()) {
+            case R.id.back_button_uploaded:
+                fragmentTransaction.replace(R.id.main_activity_container, userFragment);
+                break;
+            case R.id.help_button_uploaded:
+                //Pop out for help for upload page
+                break;
+        }
         //   fragmentTransaction.setTransition(android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.commit();
+    }
+
+    /**
+     * GET request for the user files
+     */
+    public void getUserFiles(){
+        //Start a GET request to retrieve all of the rooms in the area
+        final Astral astral = new Astral(getActivity().getString(R.string.astral_base_url));
+        //Add logging interceptor
+        astral.addLoggingInterceptor(HttpLoggingInterceptor.Level.BODY);
+        AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
+
+        //Create the GET request
+        Call<List<AstralItem>> request = astralHttpInterface.getFiles(
+                getString(R.string.astral_key),
+                user.getUserAstralTokens()
+        );
+
+        request.enqueue(new Callback<List<AstralItem>>() {
+            @Override
+            public void onResponse(Call<List<AstralItem>> call, retrofit2.Response<List<AstralItem>> response) {
+                if (response.code() == Astral.OK) {
+                    Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
+                        List<AstralItem> astralHolder;//holds items/files
+                        astralHolder = response.body();//add all the items/files to astralHolder
+                        for (int i = 0; i < astralHolder.size(); i++) {
+                            Gson gson = new Gson();
+                            String filePS = gson.toJson(astralHolder);
+                            if (astralHolder.get(i).getName().equals("room")) { //if the owner is room
+                                astralItemList.add(astralItemList.get(i)); //add it to the list of files
+                            }
+                        }
+                        adapter = new FileAdapter(astralItemList);
+                        recyclerView.setAdapter(adapter);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<AstralItem>> call, Throwable throwable) {
+                Log.w(TAG, "retrieveUserFiles-> onFailure");
+            }
+        });
+
     }
 }
