@@ -66,10 +66,6 @@ public class MainActivityContainer extends AppCompatActivity
                 fragmentTransaction.replace(R.id.main_activity_container, homeFragment);
                 break;
 
-            case R.id.website_user:
-                fragmentTransaction.replace(R.id.main_activity_container, pinnedFragment);
-                break;
-
             case R.id.user_account:
                 fragmentTransaction.replace(R.id.main_activity_container, userFragment);
                 break;

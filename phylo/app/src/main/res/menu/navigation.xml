@@ -7,19 +7,9 @@
         android:icon="@drawable/ic_map"/>
 
     <item
-        android:id="@+id/upload_files"
-        android:title="@string/upload_menu"
-        android:icon="@drawable/ic_upload"/>
-
-    <item
         android:id="@+id/home_lobby"
         android:title="@string/home_menu"
         android:icon="@drawable/ic_home"/>
-
-    <item
-        android:id="@+id/website_user"
-        android:title="@string/pinned_menu"
-        android:icon="@drawable/ic_action_pinned"/>
 
     <item
         android:id="@+id/user_account"
