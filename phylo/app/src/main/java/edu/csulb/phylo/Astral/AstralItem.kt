@@ -2,7 +2,7 @@ package edu.csulb.phylo.Astral
 
 import java.util.ArrayList
 
-class AstralRoom {
+class AstralItem {
     var owner: String? = null
     var name: String? = null
     var latitude: Double? = null

@@ -4,17 +4,13 @@ import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,25 +29,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralHttpInterface;
-import edu.csulb.phylo.Astral.AstralRoom;
-import okhttp3.HttpUrl;
+import edu.csulb.phylo.Astral.AstralItem;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -79,7 +66,7 @@ public class MapsFragment extends Fragment
     private Marker currMarker;
     private LatLng onRestartCurrLocation;
     private User user;
-    private List<AstralRoom> astralRoomList;
+    private List<AstralItem> astralItemList;
     private boolean heatmapActive;
     private TileOverlay mOverLay;
     private HeatmapTileProvider heatmapTileProvider;
@@ -141,7 +128,7 @@ public class MapsFragment extends Fragment
         isFirstTime = true;
         heatmapActive = false; //To see if the heatmap is active or not
         mOverLay = null;
-        astralRoomList = new ArrayList<>();
+        astralItemList = new ArrayList<>();
         heatmapTileProvider = null;
         list = new ArrayList<>();
 
@@ -379,7 +366,7 @@ public class MapsFragment extends Fragment
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
 
         //Create the GET request
-        Call<List<AstralRoom>> request = astralHttpInterface.getRooms(
+        Call<List<AstralItem>> request = astralHttpInterface.getRooms(
                 getString(R.string.astral_key),
                 currUserLocation.latitude,
                 currUserLocation.longitude,
@@ -387,20 +374,20 @@ public class MapsFragment extends Fragment
                 user.getUserAstralTokens()
         );
 
-        request.enqueue(new Callback<List<AstralRoom>>() {
+        request.enqueue(new Callback<List<AstralItem>>() {
             @Override
-            public void onResponse(Call<List<AstralRoom>> call, retrofit2.Response<List<AstralRoom>> response) {
+            public void onResponse(Call<List<AstralItem>> call, retrofit2.Response<List<AstralItem>> response) {
                 Log.d(TAG, "retrieveRooms-> onResponse: ");
                 if (response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
-                    astralRoomList = response.body();
+                    astralItemList = response.body();
                     //Progress bar must dissapear, we have loaded all the rooms
                     addHeatMap();
                 }
             }
 
             @Override
-            public void onFailure(Call<List<AstralRoom>> call, Throwable t) {
+            public void onFailure(Call<List<AstralItem>> call, Throwable t) {
                 Log.w(TAG, "retrieveRooms-> onFailure");
                 t.printStackTrace();
             }
@@ -430,10 +417,10 @@ public class MapsFragment extends Fragment
      */
     private void readItems() {
         //ArrayList<LatLng> list2 = new ArrayList<LatLng>();
-        if (astralRoomList != null){
-            for (int i = 0; i < astralRoomList.size(); i++){
-                AstralRoom astralRoom = astralRoomList.get(i);
-                list.add(new LatLng(astralRoom.getLocation().get(1),astralRoom.getLocation().get(0)));
+        if (astralItemList != null){
+            for (int i = 0; i < astralItemList.size(); i++){
+                AstralItem astralItem = astralItemList.get(i);
+                list.add(new LatLng(astralItem.getLocation().get(1), astralItem.getLocation().get(0)));
             }
         }
         else{

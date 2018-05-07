@@ -1,20 +1,15 @@
 package edu.csulb.phylo;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import java.util.List;
 
-import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralFile;
 
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {

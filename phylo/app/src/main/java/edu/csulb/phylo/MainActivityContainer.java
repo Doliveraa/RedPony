@@ -39,7 +39,6 @@ public class MainActivityContainer extends AppCompatActivity
     UploadedFilesFragment uploadedFilesFragment;
     DownloadedFilesFragment downloadedFilesFragment;
     SettingsFragment settingsFragment;
-    InsideRoomFragment insideRoomFragment;
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -118,7 +117,6 @@ public class MainActivityContainer extends AppCompatActivity
         mapsFragment = MapsFragment.newInstance();
         uploadFragment = UploadFragment.newInstance();
         userFragment = UserFragment.newInstance();
-        insideRoomFragment = InsideRoomFragment.newInstance();
     }
     /**
      * Creates the bottom navigation for the activity container. Sets the home screen as default.
@@ -136,11 +134,20 @@ public class MainActivityContainer extends AppCompatActivity
     }
 
     @Override
-    public void roomEntered() {
+    public void roomEntered(final String roomName, final double latitude, final double longitude) {
         Log.d(TAG, "roomEntered: Entering a Room");
+        //Instantiate Room Fragment
+        InsideRoomFragment insideRoomFragment = InsideRoomFragment.newInstance();
+        //Set bundle objects to send to Fragment
+        Bundle args = new Bundle();
+        args.putString("room_name", roomName);
+        args.putDouble("latitude", latitude);
+        args.putDouble("longitude", longitude);
+        insideRoomFragment.setArguments(args);
+
         //Begin Inside room fragment
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.main_activity_container, insideRoomFragment);
+        fragmentTransaction.replace(R.id.container, insideRoomFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }

@@ -1,18 +1,29 @@
 package edu.csulb.phylo;
 
 import android.Manifest;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.csulb.phylo.Astral.AstralItem;
+
+import static android.app.Activity.RESULT_OK;
 
 
 public class InsideRoomFragment extends Fragment
@@ -26,6 +37,7 @@ public class InsideRoomFragment extends Fragment
     private ProgressBar progressBar;
     //Variables
     private boolean hasReadPermission;
+    private UserLocationClient userLocationClient;
 
     //Instantiate an InsideRoomFragment object
     public static InsideRoomFragment newInstance() {
@@ -48,6 +60,7 @@ public class InsideRoomFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
         //Initialize variables
         hasReadPermission = UserPermission.checkUserPermission(getActivity(), UserPermission.Permission.READ_PERMISSION);
+        userLocationClient = new UserLocationClient(getActivity());
 
         //Initialize Views
         progressBar = (ProgressBar) fragView.findViewById(R.id.progress_bar_inside_room);
@@ -74,7 +87,7 @@ public class InsideRoomFragment extends Fragment
                     beginChooseFile();
                 } else {
                     //Permission Denied
-                    Toast.makeText(getActivity(), "Location Permission Denied", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -95,7 +108,7 @@ public class InsideRoomFragment extends Fragment
     private void beginAddFile() {
         if(!hasReadPermission) {
             //We do not have read permissions, ask for read permission from the user
-            this.requestPermissions(new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, UserPermission.PERM_CODE);
+            requestPermissions(new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, UserPermission.PERM_CODE);
         } else {
             //Begin logic to retrieve files
             beginChooseFile();
@@ -106,10 +119,52 @@ public class InsideRoomFragment extends Fragment
      * Let the user begin choosing the files
      */
     private void beginChooseFile() {
-        Intent chooseFileIntent = new Intent();
+        Intent chooseFileIntent = new Intent(Intent.ACTION_GET_CONTENT);
         //Allow the user to choose any type of file
-        chooseFileIntent.setType("*");
+        chooseFileIntent.setType("*/*");
         //Allow the user to select multiple files
         chooseFileIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        //Show chooser and start activity for result
+        startActivityForResult(
+                Intent.createChooser(chooseFileIntent, "Select Files"),
+                FileUtil.FILE_CHOOSE_REQUEST
+        );
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == FileUtil.FILE_CHOOSE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+            ArrayList<Uri> fileUris = new ArrayList<Uri>();
+            ClipData clipData = data.getClipData();
+            if(clipData == null) {
+                fileUris.add(data.getData());
+            }else{
+                for(int i =0; i < clipData.getItemCount(); i++ ){
+                    ClipData.Item item = clipData.getItemAt(i);
+                    fileUris.add(item.getUri());
+                }
+            }
+            uploadFiles(fileUris);
+        } else {
+            Log.d(TAG, "onActivityResult: no file has been selected");
+        }
+    }
+
+    private void uploadFiles(List<Uri> fileUriList) {
+        final String roomName = getArguments().getString("room_name");
+        final double latitude = getArguments().getDouble("latitude");
+        final double longitude = getArguments().getDouble("longitude");
+
+        ArrayList<Double> location = new ArrayList<>();
+        location.add(latitude);
+        location.add(longitude);
+
+        AstralItem astralItem = new AstralItem();
+        astralItem.setName("roomName");
+        astralItem.setLocation(location);
+        astralItem.setExpirationDate("2100-04-23T18:25:43.511Z");
     }
 }
