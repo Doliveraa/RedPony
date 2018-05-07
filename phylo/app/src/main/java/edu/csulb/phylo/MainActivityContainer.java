@@ -43,6 +43,7 @@ public class MainActivityContainer extends AppCompatActivity
 
     //Variables
     private User user;
+    private boolean firstTime;
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -89,7 +90,6 @@ public class MainActivityContainer extends AppCompatActivity
             case R.id.home_lobby:
                 fragmentTransaction.replace(R.id.main_activity_container, homeFragment);
                 break;
-
             case R.id.user_account:
                 fragmentTransaction.replace(R.id.main_activity_container, userFragment);
                 break;
@@ -112,6 +112,9 @@ public class MainActivityContainer extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_container);
+
+        //Variables
+        firstTime = true;
 
         //Instantiate user
         user = User.getInstance(this);

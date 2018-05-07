@@ -1,6 +1,5 @@
 package edu.csulb.phylo.Astral
 
-import com.google.gson.JsonObject
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -58,5 +57,10 @@ interface AstralHttpInterface {
                  @Header("longitude") longitude: Double?,
                  @Header("radius") radius: Int?,
                  @Header("token") token: String)
-            : Call< List<AstralRoom> >
+            : Call< List<AstralItem> >
+
+    @GET("files")
+    fun getFiles(@Header("appKey") appKey: String,
+                 @Header("token") token: String)
+            : Call< List<AstralItem> >
 }

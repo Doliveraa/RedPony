@@ -5,17 +5,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +36,7 @@ import java.util.regex.Pattern;
 
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralHttpInterface;
-import edu.csulb.phylo.Astral.AstralRoom;
+import edu.csulb.phylo.Astral.AstralItem;
 import edu.csulb.phylo.Astral.RoomKey;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -76,7 +72,7 @@ public class HomeFragment extends Fragment
     private RecyclerView recyclerView;
     private RoomAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private List<AstralRoom> astralRoomList;
+    private List<AstralItem> astralItemList;
     private AlertDialog alertDialog;
     //Location Permissions Variables
     private boolean hasLocationPermission;
@@ -325,8 +321,8 @@ public class HomeFragment extends Fragment
                             true);
                 } else {
                     //Check if the room name already exists
-                    for (AstralRoom astralRoom : astralRoomList) {
-                        if (astralRoom.getName().equals(roomName)) {
+                    for (AstralItem astralItem : astralItemList) {
+                        if (astralItem.getName().equals(roomName)) {
                             //Room with the same name exists nearby, display error message
                             UserNotification.displayToast(
                                     getActivity(),
@@ -363,7 +359,7 @@ public class HomeFragment extends Fragment
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
 
         //Create the GET request
-        Call<List<AstralRoom>> request = astralHttpInterface.getRooms(
+        Call<List<AstralItem>> request = astralHttpInterface.getRooms(
                 getString(R.string.astral_key),
                 currUserLocation.latitude,
                 currUserLocation.longitude,
@@ -371,16 +367,16 @@ public class HomeFragment extends Fragment
                 user.getUserAstralTokens()
         );
 
-        request.enqueue(new Callback<List<AstralRoom>>() {
+        request.enqueue(new Callback<List<AstralItem>>() {
             @Override
-            public void onResponse(Call<List<AstralRoom>> call, retrofit2.Response<List<AstralRoom>> response) {
+            public void onResponse(Call<List<AstralItem>> call, retrofit2.Response<List<AstralItem>> response) {
                 if (response.code() == Astral.OK) {
                     Log.d(TAG, "retrieveRooms-> onResponse: Success Code : " + response.code());
-                    astralRoomList = response.body();
+                    astralItemList = response.body();
                     //Progress bar must disappear, we have loaded all the rooms
                     if(!toUpdate) {
                         progressBar.setVisibility(View.GONE);
-                        adapter = new RoomAdapter(astralRoomList, new RoomAdapter.OnRoomClickedListener() {
+                        adapter = new RoomAdapter(astralItemList, new RoomAdapter.OnRoomClickedListener() {
                             @Override
                             public void onRoomClick(String roomPassword) {
                                 if(!roomPassword.isEmpty()) {
@@ -396,13 +392,13 @@ public class HomeFragment extends Fragment
                         updateRoomList = true;
                     } else {
                         //We are updating the set of rooms
-                        adapter.changeData(astralRoomList);
+                        adapter.changeData(astralItemList);
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<List<AstralRoom>> call, Throwable throwable) {
+            public void onFailure(Call<List<AstralItem>> call, Throwable throwable) {
                 Log.w(TAG, "retrieveRooms-> onFailure");
             }
         });
@@ -473,11 +469,11 @@ public class HomeFragment extends Fragment
         location.add(longit); //longit
 
         //Creating Astral Room to send
-        final AstralRoom astralRoom = new AstralRoom();
-        astralRoom.setOwner(user.getName());//owner
-        astralRoom.setName(roomName);//roomName
-        astralRoom.setLocation(location);//location
-        astralRoom.setExpirationDate(expiration);//expiration
+        final AstralItem astralItem = new AstralItem();
+        astralItem.setOwner(user.getName());//owner
+        astralItem.setName(roomName);//roomName
+        astralItem.setLocation(location);//location
+        astralItem.setExpirationDate(expiration);//expiration
         RoomKey roomKey = new RoomKey(passwordKey);
         Gson gson = new Gson();
         String roomString = gson.toJson(roomKey);
@@ -501,8 +497,8 @@ public class HomeFragment extends Fragment
         AstralHttpInterface astralHttpInterface = astral.getHttpInterface();
         Log.d(TAG, "Interface");
         //Create the POST request
-        Call<ResponseBody> request = astralHttpInterface.createRoom(astralRoom.getName(), astralRoom.getLatitude(),
-                astralRoom.getLongitude(), astralRoom.getExpirationDate(), roomString);
+        Call<ResponseBody> request = astralHttpInterface.createRoom(astralItem.getName(), astralItem.getLatitude(),
+                astralItem.getLongitude(), astralItem.getExpirationDate(), roomString);
         Log.d(TAG, "Create Post request");
 
         //Call the request asynchronously

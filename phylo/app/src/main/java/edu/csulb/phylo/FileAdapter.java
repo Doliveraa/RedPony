@@ -16,10 +16,11 @@ import java.util.List;
 
 import edu.csulb.phylo.Astral.Astral;
 import edu.csulb.phylo.Astral.AstralFile;
+import edu.csulb.phylo.Astral.AstralItem;
 
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
-    private List<AstralFile> astralFileList;
+    private List<AstralItem> astralItemList;
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         //Each data item is a Button
@@ -40,10 +41,10 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     /**
      * Constructor
-     * @param astralFileList list of files
+     * @param astralItemList list of files
      */
-    public FileAdapter(List<AstralFile> astralFileList) {
-        this.astralFileList = astralFileList;
+    public FileAdapter(List<AstralItem> astralItemList) {
+        this.astralItemList = astralItemList;
     }
 
     /**
@@ -53,7 +54,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String fileName = astralFileList.get(position).getName();
+        String fileName = astralItemList.get(position).getName();
         holder.textView.setText(fileName);
     }
 
@@ -77,16 +78,16 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return astralFileList.size();
+        return astralItemList.size();
     }
 
     /**
      * Changes the data to be displayed to the user
      *
-     * @param astralRoomList The list of files available
+     * @param astralItemList The list of files available
      */
-    public void changeData(List<AstralFile> astralRoomList) {
-        this.astralFileList = astralRoomList;
+    public void changeData(List<AstralItem> astralItemList) {
+        this.astralItemList = astralItemList;
         this.notifyDataSetChanged();
     }
 }
