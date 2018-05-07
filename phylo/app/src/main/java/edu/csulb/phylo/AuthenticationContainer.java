@@ -61,7 +61,7 @@ public class AuthenticationContainer extends Activity
 
             @Override
             public void onCreateAccountFinished() {
-                beginFragment(AuthFragmentType.VERIFY_CODE, true, true);
+                beginFragment(AuthFragmentType.VERIFY_CODE, true);
             }
 
         });
@@ -100,7 +100,7 @@ public class AuthenticationContainer extends Activity
         switch (action) {
             case START_LOGIN_ACTION: {
                 Log.d(TAG, "beginActivityFlow: Start login fragment");
-                beginFragment(AuthFragmentType.LOGIN, false, false);
+                beginFragment(AuthFragmentType.LOGIN, false);
             }
             break;
         }
@@ -117,7 +117,7 @@ public class AuthenticationContainer extends Activity
         switch (fragmentType) {
             case CREATE_ACCOUNT: {
                 Log.d(TAG, "buttonClicked: Start create account fragment");
-                beginFragment(AuthFragmentType.CREATE_ACCOUNT, true, true);
+                beginFragment(AuthFragmentType.CREATE_ACCOUNT,true);
             }
             break;
         }
@@ -127,10 +127,9 @@ public class AuthenticationContainer extends Activity
      * Helper method that replaces the current fragment with one that is specified
      *
      * @param fragmentType   The fragment that should now appear
-     * @param setTransition  If the fragment should be transitioned in to the viewer
      * @param addToBackStack If the fragment should be added to the activity's back-stack
      */
-    private void beginFragment(AuthFragmentType fragmentType, boolean setTransition, boolean addToBackStack) {
+    private void beginFragment(AuthFragmentType fragmentType, boolean addToBackStack) {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         switch (fragmentType) {
             case LOGIN: {
@@ -146,9 +145,6 @@ public class AuthenticationContainer extends Activity
                 fragmentTransaction.replace(R.id.user_authentication_container, verifyCodeFragment);
             }
             break;
-        }
-        if (setTransition) {
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         }
         if (addToBackStack) {
             fragmentTransaction.addToBackStack(null);

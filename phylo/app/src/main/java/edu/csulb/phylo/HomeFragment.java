@@ -180,6 +180,17 @@ public class HomeFragment extends Fragment
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        userLocationClient.stopUserLocationTracking();
+    }
+
     /**
      * Create an AlertDialog object to allow the user to create
      *
