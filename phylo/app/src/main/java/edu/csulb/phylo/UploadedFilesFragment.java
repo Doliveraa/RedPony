@@ -187,13 +187,9 @@ public class UploadedFilesFragment extends Fragment
                         List<AstralItem> astralHolder;//holds items/files
                         astralHolder = response.body();//add all the items/files to astralHolder
                         for (int i = 0; i < astralHolder.size(); i++) {
-                            //Checks to see if the room comes with an extension
-                            Gson converter = new Gson();
-
-
-                            final filePS filePS = converter.fromJson(astralItem.getData(), AstralFile.class);
-                            for (int i = 0)
-                            if (filePS instanceof AstralFile){ //if the room is an astral file
+                            Gson gson = new Gson();
+                            String filePS = gson.toJson(astralHolder);
+                            if (astralHolder.get(i).getName().equals("room")) { //if the owner is room
                                 astralItemList.add(astralItemList.get(i)); //add it to the list of files
                             }
                         }

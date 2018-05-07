@@ -90,6 +90,7 @@ public class UserLocationClient
      */
     public void stopUserLocationTracking() {
         SmartLocation.with(context).location().stop();
+        handler.removeCallbacksAndMessages(null);
     }
 
     /**

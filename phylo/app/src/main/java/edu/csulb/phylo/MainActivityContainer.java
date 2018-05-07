@@ -41,9 +41,6 @@ public class MainActivityContainer extends AppCompatActivity
     SettingsFragment settingsFragment;
     InsideRoomFragment insideRoomFragment;
 
-    //Variables
-    private User user;
-    private boolean firstTime;
     //Activity Constants
     private static final String TAG = "MainActivityContainer";
 
@@ -57,15 +54,15 @@ public class MainActivityContainer extends AppCompatActivity
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                     switch (item.getItemId()) {
                         case R.id.map:
-                            fragmentTransaction.replace(R.id.main_activity_container, mapsFragment);
+                            fragmentTransaction.replace(R.id.container, mapsFragment);
                             break;
                         case R.id.home_lobby:
-                            fragmentTransaction.replace(R.id.main_activity_container, homeFragment);
+                            fragmentTransaction.replace(R.id.container, homeFragment);
                             break;
 
                         case R.id.user_account:
                             //go to user account
-                            fragmentTransaction.replace(R.id.main_activity_container, userFragment);
+                            fragmentTransaction.replace(R.id.container, userFragment);
                             break;
 
                     }
@@ -112,12 +109,6 @@ public class MainActivityContainer extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_container);
-
-        //Variables
-        firstTime = true;
-
-        //Instantiate user
-        user = User.getInstance(this);
 
         //create bottom navigation bar
         createBottomNavigationView();
