@@ -36,8 +36,11 @@ public class MainActivityContainer extends AppCompatActivity
     MapsFragment mapsFragment;
     UploadFragment uploadFragment;
     UserFragment userFragment;
-
+    UploadedFilesFragment uploadedFilesFragment;
+    DownloadedFilesFragment downloadedFilesFragment;
+    SettingsFragment settingsFragment;
     InsideRoomFragment insideRoomFragment;
+
     //Variables
     private User user;
     //Activity Constants
@@ -71,6 +74,40 @@ public class MainActivityContainer extends AppCompatActivity
                 }
             };
 
+    /**
+     * Starts a fragment for the user
+     *
+     * @param fragmentId The id of the fragment that is going to start
+     * @return True if the fragment has started correctly
+     */
+    private boolean startFragment(int fragmentId) {
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        switch (fragmentId) {
+            case R.id.map:
+                fragmentTransaction.replace(R.id.main_activity_container, mapsFragment);
+                break;
+            case R.id.home_lobby:
+                fragmentTransaction.replace(R.id.main_activity_container, homeFragment);
+                break;
+
+            case R.id.user_account:
+                fragmentTransaction.replace(R.id.main_activity_container, userFragment);
+                break;
+            case R.id.user_files:
+                fragmentTransaction.replace(R.id.main_activity_container, uploadedFilesFragment);
+                break;
+            case R.id.downloaded_files:
+                fragmentTransaction.replace(R.id.main_activity_container, downloadedFilesFragment);
+                break;
+            case R.id.settings:
+                fragmentTransaction.replace(R.id.main_activity_container, settingsFragment);
+                break;
+
+        }
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+        return true;
+    }
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
